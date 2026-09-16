@@ -12,9 +12,17 @@ public class AttackState : IFighterState
 
     public void Enter(FighterController fighter)
     {
-        // Trava a movimentação para comprometer o lutador no golpe
+        // Se o lutador estava avançando em direção ao oponente, aplica um
+        // pequeno impulso forward para não parar bruscamente longe do alvo
         if (fighter.Movement != null)
         {
+            int moveDir = fighter.Movement.CurrentMoveDirection;
+            if (moveDir > 0) // avançando (em direção ao oponente)
+            {
+                // Impulso de 1.5 unidades na direção do oponente — dá sensação de lunge
+                Vector3 lunge = fighter.transform.forward * 1.5f;
+                fighter.Movement.ApplyImpulse(lunge);
+            }
             fighter.Movement.CanMove = false;
         }
         fighter.SetAttackRootMotion(true);
@@ -25,9 +33,12 @@ public class AttackState : IFighterState
 
         // Dispara a animação de ataque
         fighter.CrossFadeAnimation(fighter.CurrentAttackAnimHash, 0.05f);
-        fighter.SetAnimatorSpeed(fighter.CurrentAttackTiming.playbackSpeed);
-
-        // Ativa as Hitboxes das mãos para cobrir a sequência do soco
+        
+        // Ajusta a velocidade da animação respeitando a configuração do golpe
+        // (limitada entre 0.85f e 1.6f para garantir fluidez natural sem acelerar excessivamente)
+        FighterAttackTiming currentTiming = fighter.CurrentAttackTiming;
+        float targetSpeed = currentTiming != null && currentTiming.playbackSpeed > 0f ? currentTiming.playbackSpeed : 1f;
+        fighter.SetAnimatorSpeed(Mathf.Clamp(targetSpeed, 0.85f, 1.6f));
     }
 
     public void Update(FighterController fighter)
@@ -46,15 +57,19 @@ public class AttackState : IFighterState
             windowOpened = true;
         }
 
-        // Desativa as hitboxes após a janela ativa do golpe (aos 0.50s)
+        // Desativa as hitboxes após a janela ativa do golpe
         if (hitboxesEnabled && attackProgress >= timing.activeEndNormalized)
         {
             fighter.DisableAllHitboxes();
             hitboxesEnabled = false;
         }
 
-        // Retorna ao Neutro após o tempo total do ataque (ativação + recovery)
-        if (attackProgress >= timing.recoveryEndNormalized)
+        // Retorna ao Neutro ao atingir recoveryEndNormalized
+        // O timeout de segurança é dinâmico baseado na duração real do ataque (evitando cortar prematuramente)
+        float maxDuration = Mathf.Max(2.5f, fighter.CurrentAttackDuration + 0.5f);
+        bool recoveryDone = attackProgress >= timing.recoveryEndNormalized;
+        bool timedOut = elapsedTime > maxDuration;
+        if (recoveryDone || timedOut)
         {
             fighter.ChangeState(fighter.NeutralState);
         }

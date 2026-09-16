@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// Estado Neutro: Permite movimentação 3D livre via FighterMovement e escuta inputs de ataque.
@@ -34,7 +34,7 @@ public class NeutralState : IFighterState
         // Alimenta o parâmetro Speed do Animator com a magnitude do movimento
         if (fighter.Animator != null && fighter.Movement != null)
         {
-            float speed = fighter.Movement.CurrentMoveDirection > 0 && !fighter.Movement.IsCrouching
+            float speed = fighter.Movement.CurrentMoveDirection != 0 && !fighter.Movement.IsCrouching
                 ? fighter.Movement.CurrentSpeedMagnitude
                 : 0f;
             fighter.Animator.SetFloat(SpeedHash, speed);
@@ -50,3 +50,4 @@ public class NeutralState : IFighterState
         }
     }
 }
+

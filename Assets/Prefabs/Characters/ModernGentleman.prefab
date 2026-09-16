@@ -122,13 +122,17 @@ MonoBehaviour:
   isPlayerControlled: 0
   forwardSpeed: 4.5
   backwardSpeed: 3.5
-  sidestepSpeed: 4
   minDistanceToOpponent: 0.75
+  arenaHalfWidth: 9
   gravity: -20
   groundedGravity: -2
   jumpHeight: 2.2
   laneZ: 0
   laneDepth: 0.35
+  airControl: 0.62
+  crouchSpeedMultiplier: 0.58
+  impulseDrag: 9
+  maxAttackRootMotionSpeed: 8
   moveActionReference: {fileID: -1680190386980627800, guid: 052faaac586de48259a63d0c4782560b, type: 3}
 --- !u!114 &1884184652533001834
 MonoBehaviour:
@@ -155,16 +159,16 @@ MonoBehaviour:
   attackDuration: 0.85
   secondaryAttackDuration: 1
   primaryAttackTiming:
-    activeStartNormalized: 0.36
-    activeEndNormalized: 0.48
-    recoveryEndNormalized: 0.98
-    playbackSpeed: 3.06
-    hitboxLimb: 0
+    activeStartNormalized: 0.3
+    activeEndNormalized: 0.5
+    recoveryEndNormalized: 0.75
+    playbackSpeed: 1.1
+    hitboxLimb: 3
   secondaryAttackTiming:
     activeStartNormalized: 0.48
     activeEndNormalized: 0.63
-    recoveryEndNormalized: 0.98
-    playbackSpeed: 5.47
+    recoveryEndNormalized: 0.82
+    playbackSpeed: 1.1
     hitboxLimb: 2
   defaultHitStunDuration: 0.55
   defaultHitstopDuration: 0.08

@@ -31,9 +31,11 @@ public class Hitbox : MonoBehaviour
     private BoxCollider boxCol;
     private DamageData currentDamageData;
     private bool isActive;
+    private Transform followBone;
 
-    // Buffer pré-alocado para detecção de triggers sem alocação de GC
-    private static readonly Collider[] overlapResults = new Collider[16];
+    // Buffer pré-alocado por instância — NÃO pode ser estático: múltiplos Hitbox no mesmo
+    // frame sobrescreveriam o buffer um do outro, causando dano perdido silenciosamente
+    private readonly Collider[] overlapResults = new Collider[24];
 
     // Conjunto de lutadores já atingidos nesta janela ativa (Zero GC por frame)
     private readonly HashSet<FighterController> hitFighters = new HashSet<FighterController>();
@@ -44,16 +46,72 @@ public class Hitbox : MonoBehaviour
 
     private void Awake()
     {
-        col = GetComponent<Collider>();
-        col.isTrigger = true;
-        col.enabled = false;
+        EnsureComponents();
+    }
 
-        sphereCol = col as SphereCollider;
-        boxCol = col as BoxCollider;
+    private void Start()
+    {
+        EnsureComponents();
+        BindBone();
+    }
+
+    private void EnsureComponents()
+    {
+        if (col == null)
+        {
+            col = GetComponent<Collider>();
+            if (col != null)
+            {
+                col.isTrigger = true;
+                col.enabled = false;
+            }
+            sphereCol = col as SphereCollider;
+            boxCol = col as BoxCollider;
+        }
 
         if (owner == null)
         {
             owner = GetComponentInParent<FighterController>();
+        }
+    }
+
+    public void BindBone()
+    {
+        if (followBone != null) return;
+        EnsureComponents();
+        if (owner == null) return;
+
+        Animator anim = owner.Animator != null ? owner.Animator : owner.GetComponentInChildren<Animator>();
+        if (anim != null && anim.isHuman)
+        {
+            HumanBodyBones targetBone = limbType switch
+            {
+                HitboxLimb.RightHand => HumanBodyBones.RightHand,
+                HitboxLimb.LeftHand => HumanBodyBones.LeftHand,
+                HitboxLimb.RightFoot => HumanBodyBones.RightFoot,
+                HitboxLimb.LeftFoot => HumanBodyBones.LeftFoot,
+                HitboxLimb.Head => HumanBodyBones.Head,
+                _ => HumanBodyBones.LastBone
+            };
+
+            if (targetBone != HumanBodyBones.LastBone)
+            {
+                followBone = anim.GetBoneTransform(targetBone);
+            }
+        }
+    }
+
+    private void SyncBonePosition()
+    {
+        if (followBone == null)
+        {
+            BindBone();
+        }
+
+        if (followBone != null)
+        {
+            transform.position = followBone.position;
+            transform.rotation = followBone.rotation;
         }
     }
 
@@ -62,6 +120,7 @@ public class Hitbox : MonoBehaviour
     /// </summary>
     public void Activate(DamageData data)
     {
+        EnsureComponents();
         currentDamageData = data;
         if (currentDamageData.attacker == null)
         {
@@ -70,7 +129,10 @@ public class Hitbox : MonoBehaviour
 
         hitFighters.Clear();
         isActive = true;
-        col.enabled = true;
+        if (col != null) col.enabled = true;
+
+        // Atualiza a posição com o osso atual antes de checar sobreposição
+        SyncBonePosition();
 
         // Amostragem imediata no primeiro frame ativo
         CheckOverlaps();
@@ -82,7 +144,7 @@ public class Hitbox : MonoBehaviour
     public void Deactivate()
     {
         isActive = false;
-        col.enabled = false;
+        if (col != null) col.enabled = false;
         hitFighters.Clear();
     }
 
@@ -94,6 +156,12 @@ public class Hitbox : MonoBehaviour
         }
     }
 
+    private void LateUpdate()
+    {
+        // Garante que a hitbox siga a posição exata do osso após o Animator avaliar as poses
+        SyncBonePosition();
+    }
+
     /// <summary>
     /// Detecta sobreposição com Hurtboxes (suporta tanto triggers quanto non-triggers com QueryTriggerInteraction).
     /// </summary>
@@ -101,12 +169,15 @@ public class Hitbox : MonoBehaviour
     {
         if (!isActive) return;
 
+        SyncBonePosition();
+
         int count = 0;
 
         if (sphereCol != null)
         {
             Vector3 worldCenter = transform.TransformPoint(sphereCol.center);
-            float radius = sphereCol.radius * Mathf.Max(transform.lossyScale.x, transform.lossyScale.y, transform.lossyScale.z);
+            float baseRadius = sphereCol.radius * Mathf.Max(transform.lossyScale.x, transform.lossyScale.y, transform.lossyScale.z);
+            float radius = Mathf.Max(0.40f, baseRadius);
             count = Physics.OverlapSphereNonAlloc(worldCenter, radius, overlapResults, ~0, QueryTriggerInteraction.Collide);
         }
         else if (boxCol != null)

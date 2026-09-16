@@ -14,7 +14,7 @@ public class HealthSystem : MonoBehaviour
     [SerializeField, Min(1f)] private float maxHealth = 100f;
 
     [Header("Debug (Read Only)")]
-    [SerializeField] private float currentHealth;
+    [SerializeField] private float currentHealth = 100f;
     [SerializeField] private bool isDead;
 
     private FighterController controller;

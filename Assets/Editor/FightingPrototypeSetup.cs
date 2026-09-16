@@ -62,7 +62,7 @@ public static class FightingPrototypeSetup
             Attack1 = "Assets/Animations/Mixamo/X Bot@Surprise Uppercut.fbx",
             Material = "Assets/MeshyImports/Man in Black_20260902_155135/Material_1.mat",
             Attack2 = "Assets/Animations/Mixamo/X Bot@Headbutt.fbx",
-            Attack1Start = .44f, Attack1End = .54f, Attack1Limb = HitboxLimb.RightHand,
+            Attack1Start = .28f, Attack1End = .42f, Attack1Limb = HitboxLimb.RightHand,
             Attack2Start = .45f, Attack2End = .56f, Attack2Limb = HitboxLimb.Head
         },
         new CharacterDefinition
@@ -72,7 +72,7 @@ public static class FightingPrototypeSetup
             Attack1 = "Assets/Animations/Mixamo/X Bot@Martelo 2.fbx",
             Material = "Assets/MeshyImports/Modern Gentleman poised_20260902_201746/Material_1.mat",
             Attack2 = "Assets/Animations/Mixamo/X Bot@Macaco Side.fbx",
-            Attack1Start = .36f, Attack1End = .48f, Attack1Limb = HitboxLimb.RightHand,
+            Attack1Start = .30f, Attack1End = .50f, Attack1Limb = HitboxLimb.LeftFoot,
             Attack2Start = .48f, Attack2End = .63f, Attack2Limb = HitboxLimb.RightFoot
         },
         new CharacterDefinition
@@ -83,7 +83,7 @@ public static class FightingPrototypeSetup
             Material = "Assets/MeshyImports/Shadow Sentinel_20260902_201914/Material_1.mat",
             Attack2 = "Assets/Animations/Mixamo/X Bot@Surprise Uppercut (1).fbx",
             Attack1Start = .39f, Attack1End = .52f, Attack1Limb = HitboxLimb.RightFoot,
-            Attack2Start = .44f, Attack2End = .54f, Attack2Limb = HitboxLimb.RightHand
+            Attack2Start = .28f, Attack2End = .42f, Attack2Limb = HitboxLimb.RightHand
         },
         new CharacterDefinition
         {
@@ -103,7 +103,7 @@ public static class FightingPrototypeSetup
             Material = "Assets/MeshyImports/Vasco Jacket Avatar_20260902_201115/Material_1.mat",
             Attack2 = "Assets/Animations/Mixamo/X Bot@Martelo 2.fbx",
             Attack1Start = .31f, Attack1End = .43f, Attack1Limb = HitboxLimb.RightHand,
-            Attack2Start = .36f, Attack2End = .48f, Attack2Limb = HitboxLimb.RightHand
+            Attack2Start = .30f, Attack2End = .50f, Attack2Limb = HitboxLimb.LeftFoot
         }
     };
 
@@ -511,16 +511,18 @@ public static class FightingPrototypeSetup
     {
         property.FindPropertyRelative("activeStartNormalized").floatValue = start;
         property.FindPropertyRelative("activeEndNormalized").floatValue = end;
-        property.FindPropertyRelative("recoveryEndNormalized").floatValue = .98f;
+        float recovery = animationPath.Contains("Uppercut") ? .60f :
+                         animationPath.Contains("Martelo") ? .75f : .82f;
+        property.FindPropertyRelative("recoveryEndNormalized").floatValue = recovery;
         AnimationClip clip = LoadClip(animationPath);
         float targetDuration = animationPath.Contains("Macaco") ? 1.2f :
-                               animationPath.Contains("Uppercut") ? 1.15f :
+                               animationPath.Contains("Uppercut") ? 2.5f :
                                animationPath.Contains("Flying Kick") ? 1.1f :
                                animationPath.Contains("Kicking (1)") ? 1.1f :
                                animationPath.Contains("Kicking") ? 1.05f :
                                animationPath.Contains("Headbutt") ? .9f :
-                               animationPath.Contains("Martelo") ? .85f : .85f;
-        property.FindPropertyRelative("playbackSpeed").floatValue = clip != null ? Mathf.Max(1f, clip.length / targetDuration) : 1f;
+                               animationPath.Contains("Martelo") ? 1.1f : .85f;
+        property.FindPropertyRelative("playbackSpeed").floatValue = clip != null ? Mathf.Clamp(clip.length / targetDuration, 1f, 1.4f) : 1f;
         property.FindPropertyRelative("hitboxLimb").enumValueIndex = (int)limb;
     }
 

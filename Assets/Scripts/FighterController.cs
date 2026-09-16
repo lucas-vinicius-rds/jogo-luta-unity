@@ -17,7 +17,7 @@ public sealed class FighterAttackTiming
 {
     [Range(0f, 1f)] public float activeStartNormalized = 0.35f;
     [Range(0f, 1f)] public float activeEndNormalized = 0.5f;
-    [Range(0.1f, 1.25f)] public float recoveryEndNormalized = 0.98f;
+    [Range(0.1f, 1.25f)] public float recoveryEndNormalized = 0.82f;
     [Min(0.1f)] public float playbackSpeed = 1f;
     public HitboxLimb hitboxLimb = HitboxLimb.RightHand;
 }
@@ -111,10 +111,10 @@ public class FighterController : MonoBehaviour
     public int Turn180AnimHash { get; private set; }
 
     // Instâncias cacheadas dos estados FSM (Zero GC em transições)
-    public NeutralState NeutralState { get; private set; }
-    public AttackState AttackState { get; private set; }
-    public HitStunState HitStunState { get; private set; }
-    public KnockoutState KnockoutState { get; private set; }
+    public NeutralState NeutralState { get; private set; } = new NeutralState();
+    public AttackState AttackState { get; private set; } = new AttackState();
+    public HitStunState HitStunState { get; private set; } = new HitStunState();
+    public KnockoutState KnockoutState { get; private set; } = new KnockoutState();
 
     // Estado ativo
     public IFighterState CurrentState { get; private set; }
@@ -281,6 +281,8 @@ public class FighterController : MonoBehaviour
 
     public void TriggerSecondaryAttack()
     {
+        // playbackSpeed dos prefabs pode ser muito maior que 1 — sempre usa 1f para tempo natural
+        SetAnimatorSpeed(1f);
         TriggerAttack(FighterAttackType.Attack2);
     }
 
@@ -444,6 +446,9 @@ public class FighterController : MonoBehaviour
 
     public void ApplyDamage(DamageData data, Hitbox sourceHitbox)
     {
+        if (healthSystem == null) healthSystem = GetComponent<HealthSystem>();
+        if (movement == null) movement = GetComponent<FighterMovement>();
+
         float hitstopTime = data.hitstopDuration > 0f ? data.hitstopDuration : defaultHitstopDuration;
         ApplyHitstop(hitstopTime);
 
@@ -580,7 +585,9 @@ public class FighterController : MonoBehaviour
 
     private void OnGUI()
     {
+        // Só renderiza o painel no lutador controlado pelo jogador para evitar sobreposição dupla
         if (!showOnScreenControls) return;
+        if (movement == null || !movement.IsPlayerControlled) return;
 
         GUI.color = Color.white;
         var boxStyle = GUI.skin.box;
@@ -596,12 +603,14 @@ public class FighterController : MonoBehaviour
         float p1Hp = healthSystem != null ? healthSystem.CurrentHealth : 100f;
         float p1Max = healthSystem != null ? healthSystem.MaxHealth : 100f;
         string p1Status = healthSystem != null && healthSystem.IsDead ? "<color=red>K.O. (Dying)</color>" : $"{p1Hp:F0}/{p1Max:F0}";
-        GUILayout.Label($"P1 (Você - Blusa P/B): <b>{p1Status}</b> | Estado: <b><color=yellow>{CurrentState?.GetType().Name}</color></b>");
+        string p1Name = gameObject.name.Replace("Player_", string.Empty).Replace("(Clone)", string.Empty).Trim();
+        string p2Name = opponentController != null ? opponentController.gameObject.name.Replace("Opponent_", string.Empty).Replace("(Clone)", string.Empty).Trim() : "IA";
+        GUILayout.Label($"P1 (Você - {p1Name}): <b>{p1Status}</b> | Estado: <b><color=yellow>{CurrentState?.GetType().Name}</color></b>");
 
         float p2Hp = opHealth != null ? opHealth.CurrentHealth : 100f;
         float p2Max = opHealth != null ? opHealth.MaxHealth : 100f;
         string p2Status = opHealth != null && opHealth.IsDead ? "<color=red>K.O. (Dying)</color>" : $"{p2Hp:F0}/{p2Max:F0}";
-        GUILayout.Label($"P2 (IA Oponente): <b>{p2Status}</b> | Estado: <b><color=yellow>{(opponentController != null ? opponentController.CurrentState?.GetType().Name : "N/A")}</color></b>");
+        GUILayout.Label($"P2 (Oponente - {p2Name}): <b>{p2Status}</b> | Estado: <b><color=yellow>{(opponentController != null ? opponentController.CurrentState?.GetType().Name : "N/A")}</color></b>");
 
         string diffText = ai != null ? ai.Difficulty.ToString() : "N/A";
         string diffColor = diffText == "Easy" ? "lime" : (diffText == "Medium" ? "yellow" : "red");

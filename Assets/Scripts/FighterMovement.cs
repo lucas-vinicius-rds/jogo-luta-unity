@@ -171,6 +171,13 @@ public class FighterMovement : MonoBehaviour
         return Vector3.up * (verticalVelocity * Time.deltaTime);
     }
 
+    // Retorna o delta Y sem acumular velocidade (usado por ApplyAttackRootMotion
+    // para não duplicar o acréscimo já feito pelo Update no mesmo frame)
+    private float GetCurrentVerticalDelta()
+    {
+        return verticalVelocity * Time.deltaTime;
+    }
+
     public void ApplyImpulse(Vector3 velocity)
     {
         velocity.y = 0f;
@@ -180,11 +187,13 @@ public class FighterMovement : MonoBehaviour
 
     public void ApplyAttackRootMotion(Vector3 delta)
     {
-        delta.y = 0f;
+        delta.y = 0f; // Nunca permite que Root Motion eleve o personagem no ar
         delta.z = 0f;
         float maxDelta = maxAttackRootMotionSpeed * Time.deltaTime;
         if (Mathf.Abs(delta.x) > maxDelta) delta.x = Mathf.Sign(delta.x) * maxDelta;
-        MoveSafely(delta, true);
+        // Usa o delta Y atual (já acumulado no Update) para manter o personagem no chão
+        Vector3 withGravity = new Vector3(delta.x, GetCurrentVerticalDelta(), delta.z);
+        MoveSafely(withGravity, true);
     }
 
     public void ResetMotion()
@@ -199,8 +208,9 @@ public class FighterMovement : MonoBehaviour
         float desiredX = Mathf.Clamp(transform.position.x + delta.x, -arenaHalfWidth, arenaHalfWidth);
         if (respectOpponentSpacing && opponent != null)
         {
-            float side = Mathf.Sign(transform.position.x - opponent.position.x);
-            if (Mathf.Approximately(side, 0f)) side = transform.forward.x < 0f ? 1f : -1f;
+            float diff = transform.position.x - opponent.position.x;
+            // Usa epsilon para evitar side=0 quando personagens se sobrepõem exatamente
+            float side = Mathf.Abs(diff) > 0.01f ? Mathf.Sign(diff) : (transform.forward.x < 0f ? 1f : -1f);
             float boundary = opponent.position.x + side * minDistanceToOpponent;
             desiredX = side < 0f ? Mathf.Min(desiredX, boundary) : Mathf.Max(desiredX, boundary);
         }
