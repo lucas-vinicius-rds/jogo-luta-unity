@@ -488,7 +488,7 @@ Animator:
   m_GameObject: {fileID: 7189751183024914857}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: 0c959c1815b5fb445bbc3bb9447f5950, type: 3}
-  m_Controller: {fileID: 0}
+  m_Controller: {fileID: 22100000, guid: d6e29bd0b09fe114ca40256992eb54b8, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -588,7 +588,7 @@ MonoBehaviour:
   hitStunAnimName: HitStun
   knockoutAnimName: Dying
   turn180AnimName: Turn180
-  showOnScreenControls: 0
+  showOnScreenControls: 1
   currentStateDebug: 
 --- !u!114 &4381704864744847440
 MonoBehaviour:

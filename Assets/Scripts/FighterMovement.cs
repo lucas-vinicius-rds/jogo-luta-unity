@@ -11,7 +11,6 @@ public class FighterMovement : MonoBehaviour
     [SerializeField, Min(0f)] private float forwardSpeed = 4.5f;
     [SerializeField, Min(0f)] private float backwardSpeed = 3.5f;
     [SerializeField, Min(0.1f)] private float minDistanceToOpponent = 0.75f;
-    [SerializeField, Min(0.1f)] private float jumpOverClearance = 0.8f;
     [SerializeField, Min(1f)] private float arenaHalfWidth = 9f;
     [SerializeField] private float gravity = -20f;
     [SerializeField] private float groundedGravity = -2f;
@@ -29,7 +28,6 @@ public class FighterMovement : MonoBehaviour
     private InputAction runtimeMoveAction;
     private float verticalVelocity;
     private bool wasJumpHeld;
-    private bool wasAirborne;
     private float standingHeight;
     private Vector3 standingCenter;
     private Vector3 horizontalImpulse;
@@ -45,13 +43,6 @@ public class FighterMovement : MonoBehaviour
     public Vector2 ExternalInput { get; set; }
     public bool IsFacingAway => false;
     public bool IsCrouching { get; private set; }
-
-    public void ConfigureMovement(float forward, float backward, float jump)
-    {
-        forwardSpeed = Mathf.Max(0f, forward);
-        backwardSpeed = Mathf.Max(0f, backward);
-        jumpHeight = Mathf.Max(0f, jump);
-    }
 
     private void Awake()
     {
@@ -82,7 +73,7 @@ public class FighterMovement : MonoBehaviour
         CurrentInput = ReadMovementInput();
         HandleJumpAndCrouch(CurrentInput);
         UpdateMovementAnimation(CurrentInput);
-        FaceOpponentNow();
+        FaceOpponent();
 
         float moveSpeed = CurrentMoveDirection >= 0 ? forwardSpeed : backwardSpeed;
         if (!characterController.isGrounded) moveSpeed *= airControl;
@@ -91,9 +82,6 @@ public class FighterMovement : MonoBehaviour
         Vector3 impulseMovement = horizontalImpulse * Time.deltaTime;
         horizontalImpulse = Vector3.MoveTowards(horizontalImpulse, Vector3.zero, impulseDrag * Time.deltaTime);
         MoveSafely(locomotion + impulseMovement + CalculateVerticalMovement(), true);
-        if (wasAirborne && characterController.isGrounded && animator != null)
-            animator.Play("Idle", 0, 0f);
-        wasAirborne = !characterController.isGrounded;
     }
 
     private void InitializeInput()
@@ -123,10 +111,10 @@ public class FighterMovement : MonoBehaviour
         Vector2 input = Vector2.zero;
         if (Keyboard.current != null)
         {
-            if (Keyboard.current.aKey.isPressed) input.x -= 1f;
-            if (Keyboard.current.dKey.isPressed) input.x += 1f;
-            if (Keyboard.current.wKey.isPressed) input.y += 1f;
-            if (Keyboard.current.sKey.isPressed) input.y -= 1f;
+            if (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed) input.x -= 1f;
+            if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed) input.x += 1f;
+            if (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed) input.y += 1f;
+            if (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed) input.y -= 1f;
         }
         if (input.sqrMagnitude < 0.001f && runtimeMoveAction?.enabled == true)
             input = runtimeMoveAction.ReadValue<Vector2>();
@@ -146,7 +134,7 @@ public class FighterMovement : MonoBehaviour
             verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
             int jumpDirection = GetRelativeMoveDirection(input.x);
             if (HasParameter("JumpType")) animator.SetInteger("JumpType", jumpDirection > 0 ? 2 : jumpDirection < 0 ? 1 : 0);
-            if (animator != null) animator.Play("Jump", 0, 0f);
+            if (HasParameter("Jump")) animator.SetTrigger("Jump");
         }
         wasJumpHeld = jumpHeld;
     }
@@ -218,7 +206,7 @@ public class FighterMovement : MonoBehaviour
     {
         if (characterController == null) return;
         float desiredX = Mathf.Clamp(transform.position.x + delta.x, -arenaHalfWidth, arenaHalfWidth);
-        if (respectOpponentSpacing && opponent != null && !CanJumpOverOpponent())
+        if (respectOpponentSpacing && opponent != null)
         {
             float diff = transform.position.x - opponent.position.x;
             // Usa epsilon para evitar side=0 quando personagens se sobrepõem exatamente
@@ -233,15 +221,7 @@ public class FighterMovement : MonoBehaviour
         if ((flags & CollisionFlags.Below) != 0 && verticalVelocity < 0f) verticalVelocity = groundedGravity;
     }
 
-    private bool CanJumpOverOpponent()
-    {
-        if (characterController == null || characterController.isGrounded || opponent == null) return false;
-        CharacterController opponentController = opponent.GetComponent<CharacterController>();
-        float opponentTop = opponent.position.y + (opponentController != null ? opponentController.height : 1.6f);
-        return transform.position.y + jumpOverClearance >= opponentTop;
-    }
-
-    public void FaceOpponentNow()
+    private void FaceOpponent()
     {
         if (opponent == null) return;
         float direction = opponent.position.x >= transform.position.x ? 1f : -1f;

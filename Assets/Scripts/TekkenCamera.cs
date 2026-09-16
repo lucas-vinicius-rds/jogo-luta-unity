@@ -16,16 +16,16 @@ public class TekkenCamera : MonoBehaviour
 
     [Header("Framing Settings")]
     [Tooltip("Distância base da câmera em relação ao ponto médio.")]
-    [SerializeField] private float baseDistance = 3.55f;
+    [SerializeField] private float baseDistance = 5.0f;
 
     [Tooltip("Altura da câmera em relação ao chão.")]
-    [SerializeField] private float height = 2.15f;
+    [SerializeField] private float height = 1.6f;
 
     [Tooltip("Altura do ponto de foco (look-at) acima do chão.")]
-    [SerializeField] private float lookAtHeight = 1.75f;
+    [SerializeField] private float lookAtHeight = 1.1f;
 
     [Tooltip("Fator de recuo de zoom conforme os lutadores se distanciam.")]
-    [SerializeField] private float zoomFactor = 0.22f;
+    [SerializeField] private float zoomFactor = 0.6f;
 
     [Header("Damping")]
     [Tooltip("Suavização do movimento da câmera (valores menores = mais suave).")]
@@ -57,9 +57,7 @@ public class TekkenCamera : MonoBehaviour
         if (camera != null)
         {
             camera.orthographic = true;
-            // Personagens ocupam a maior parte do quadro, como na referencia,
-            // mas ainda ha area suficiente para salto e troca de lados.
-            camera.orthographicSize = Mathf.Clamp(1.65f + fighterDistance * 0.06f, 1.85f, 2.45f);
+            camera.orthographicSize = Mathf.Clamp(3.2f + fighterDistance * 0.22f, 3.2f, 6.5f);
         }
 
         // Interpolação suave de posição
