@@ -1,8 +1,6 @@
 using System.Collections;
-using System.IO;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -11,13 +9,16 @@ using UnityEditor;
 /// <summary>Fluxo UnDFight: menu principal, modo, seleção, VS e luta.</summary>
 public sealed class GameFlowController : MonoBehaviour
 {
-    private enum FlowScreen { Main, Mode, Select, VS, Fight, Victory }
+    private enum FlowScreen { Main, Mode, Select, VS, Fight, Victory, Options }
     private enum GameMode { Cpu, Local }
 
     [SerializeField] private GameObject[] characterPrefabs;
     [SerializeField] private string fightSceneName = "FightingPrototype";
     [SerializeField] private AnimationClip[] victoryClips;
     [SerializeField] private AnimationClip defeatedClip;
+    [Header("Build-safe menu assets")]
+    [SerializeField] private Texture2D menuBackground;
+    [SerializeField] private AudioClip menuMusic;
 
     private static GameFlowController instance;
     private static GameMode pendingMode;
@@ -26,6 +27,9 @@ public sealed class GameFlowController : MonoBehaviour
     private static bool pendingFight;
     private FlowScreen screen = FlowScreen.Main;
     private GameMode mode;
+    private AIDifficulty cpuDifficulty = AIDifficulty.Medium;
+    private int resolutionIndex;
+    private readonly Vector2Int[] supportedResolutions = { new Vector2Int(1280, 720), new Vector2Int(1600, 900), new Vector2Int(1920, 1080) };
     private int playerSelection;
     private int opponentSelection = 1;
     private int focusedSelection;
@@ -58,6 +62,9 @@ public sealed class GameFlowController : MonoBehaviour
     private RenderTexture[] cardPreviewTextures;
     private Texture2D backgroundTexture;
     private AudioSource musicSource;
+    private FightHud fightHud;
+    private ModernMenuPresenter modernMenu;
+    private bool fightPaused;
     private GUIStyle titleStyle;
     private GUIStyle subtitleStyle;
     private GUIStyle buttonStyle;
@@ -96,15 +103,56 @@ public sealed class GameFlowController : MonoBehaviour
 
     private static readonly string[] StatNames = { "FORCA", "VELOCIDADE", "DEFESA", "ALCANCE", "TECNICA" };
 
+    private struct FighterBalance
+    {
+        public float health, forward, backward, jump, primary, secondary, knockback;
+        public FighterBalance(float hp, float fwd, float back, float jmp, float p1, float p2, float kb)
+        { health = hp; forward = fwd; backward = back; jump = jmp; primary = p1; secondary = p2; knockback = kb; }
+    }
+
+    // Os números exibidos na seleção agora correspondem a diferenças jogáveis reais.
+    private static readonly FighterBalance[] FighterBalances =
+    {
+        new FighterBalance(105, 4.5f, 3.6f, 2.2f, 10, 15, 4.0f), // Tiago
+        new FighterBalance(88, 5.35f, 4.3f, 2.6f, 8, 12, 3.2f),  // Isaac
+        new FighterBalance(100, 4.25f, 3.4f, 2.15f, 11, 17, 4.5f), // Lucas
+        new FighterBalance(96, 4.2f, 3.8f, 2.25f, 10, 15, 3.8f), // Enomoto
+        new FighterBalance(92, 4.85f, 3.9f, 2.75f, 9, 14, 3.6f), // Jompi
+        new FighterBalance(125, 3.6f, 2.8f, 1.85f, 13, 20, 5.4f), // Gabutas
+        new FighterBalance(98, 4.7f, 3.7f, 2.4f, 10, 16, 4.1f)  // Ricardinho
+    };
+
+    public FighterController CurrentPlayer => currentPlayer;
+    public FighterController CurrentOpponent => currentOpponent;
+    public bool IsFightPaused => fightPaused;
+    public string CurrentMenuScreen => screen.ToString();
+    public bool IsModernMenuVisible => screen == FlowScreen.Main || screen == FlowScreen.Mode || screen == FlowScreen.Options;
+    public string CurrentCpuDifficulty => CpuDifficultyLabel();
+    public float MasterVolume => AudioListener.volume;
+    public bool IsFullscreen => Screen.fullScreen;
+    public Vector2Int CurrentResolution => supportedResolutions[resolutionIndex];
+    public Texture2D MenuBackground => menuBackground;
+
     private void Awake()
     {
         if (instance != null && instance != this) { Destroy(gameObject); return; }
         instance = this;
         DontDestroyOnLoad(gameObject);
+        Time.timeScale = 1f;
+        LoadOptions();
+        fightHud = GetComponent<FightHud>();
+        if (fightHud == null) fightHud = gameObject.AddComponent<FightHud>();
+        fightHud.Initialize(this);
+        modernMenu = GetComponent<ModernMenuPresenter>();
+        if (modernMenu == null) modernMenu = gameObject.AddComponent<ModernMenuPresenter>();
+        modernMenu.Initialize(this);
+        ArenaEnvironmentBuilder arena = GetComponent<ArenaEnvironmentBuilder>();
+        if (arena == null) arena = gameObject.AddComponent<ArenaEnvironmentBuilder>();
+        arena.Build();
         SceneManager.sceneLoaded += OnSceneLoaded;
         screen = pendingFight ? FlowScreen.VS : FlowScreen.Main;
         if (!pendingFight) RemoveSceneFighters();
-        StartCoroutine(LoadMenuAssets());
+        LoadMenuAssets();
     }
 
     private void OnDestroy()
@@ -117,31 +165,16 @@ public sealed class GameFlowController : MonoBehaviour
         DestroyPreview(ref victoryLoserObject, ref victoryLoserCamera, ref victoryLoserTexture);
     }
 
-    private IEnumerator LoadMenuAssets()
+    private void LoadMenuAssets()
     {
-        string imagePath = Path.Combine(Application.dataPath, "telaInicial.png");
-        if (File.Exists(imagePath))
+        backgroundTexture = menuBackground;
+        if (menuMusic != null)
         {
-            byte[] data = File.ReadAllBytes(imagePath);
-            backgroundTexture = new Texture2D(2, 2, TextureFormat.RGBA32, false);
-            backgroundTexture.LoadImage(data);
-        }
-
-        string musicPath = Path.Combine(Application.dataPath, "eltema.mp3");
-        if (File.Exists(musicPath))
-        {
-            using (UnityWebRequest request = UnityWebRequestMultimedia.GetAudioClip("file:///" + musicPath.Replace("\\", "/"), AudioType.MPEG))
-            {
-                yield return request.SendWebRequest();
-                if (request.result == UnityWebRequest.Result.Success)
-                {
-                    musicSource = gameObject.AddComponent<AudioSource>();
-                    musicSource.clip = DownloadHandlerAudioClip.GetContent(request);
-                    musicSource.loop = true;
-                    musicSource.volume = 0.35f;
-                    musicSource.Play();
-                }
-            }
+            musicSource = gameObject.AddComponent<AudioSource>();
+            musicSource.clip = menuMusic;
+            musicSource.loop = true;
+            musicSource.volume = .35f;
+            musicSource.Play();
         }
     }
 
@@ -156,6 +189,11 @@ public sealed class GameFlowController : MonoBehaviour
 
     private void Update()
     {
+        if (screen == FlowScreen.Fight && Input.GetKeyDown(KeyCode.Escape))
+        {
+            SetFightPaused(!fightPaused);
+            return;
+        }
         if (playerOneConfirmed) confirmationPulse += Time.unscaledDeltaTime;
         if (screen == FlowScreen.VS && Time.unscaledTime >= vsUntil) screen = FlowScreen.Fight;
         if (screen == FlowScreen.Victory)
@@ -185,12 +223,14 @@ public sealed class GameFlowController : MonoBehaviour
     private void OnGUI()
     {
         if (screen == FlowScreen.Fight) return;
+        if (IsModernMenuVisible && modernMenu != null && modernMenu.IsReady) return;
         BuildStyles();
         DrawBackdrop();
         if (screen == FlowScreen.Main) DrawMain();
         else if (screen == FlowScreen.Mode) DrawMode();
         else if (screen == FlowScreen.Select) DrawSelection();
         else if (screen == FlowScreen.Victory) DrawVictory();
+        else if (screen == FlowScreen.Options) DrawOptions();
         else DrawVS();
     }
 
@@ -219,17 +259,58 @@ public sealed class GameFlowController : MonoBehaviour
     {
         GUI.Label(new Rect(0, Screen.height * .18f, Screen.width, 80), "UnDFight", titleStyle);
         GUI.Label(new Rect(0, Screen.height * .18f + 78, Screen.width, 35), "THE FIGHT STARTS HERE", subtitleStyle);
-        if (GUI.Button(CenteredButton(340, (int)(Screen.height * .57f)), "VERSUS", buttonStyle)) screen = FlowScreen.Mode;
-        if (GUI.Button(CenteredButton(340, (int)(Screen.height * .57f) + 96), "SAIR", buttonStyle)) Application.Quit();
+        int y = (int)(Screen.height * .52f);
+        if (GUI.Button(CenteredButton(340, y), "VERSUS", buttonStyle)) screen = FlowScreen.Mode;
+        if (GUI.Button(CenteredButton(340, y + 96), "OPCOES", buttonStyle)) screen = FlowScreen.Options;
+        if (GUI.Button(CenteredButton(340, y + 192), "SAIR", buttonStyle)) Application.Quit();
     }
 
     private void DrawMode()
     {
         GUI.Label(new Rect(0, 95, Screen.width, 70), "VERSUS", titleStyle);
         int y = Mathf.Max(210, Screen.height / 3);
-        if (GUI.Button(CenteredButton(430, y), "PLAYER VS CPU", buttonStyle)) BeginSelection(GameMode.Cpu);
-        if (GUI.Button(CenteredButton(430, y + 96), "PLAYER VS PLAYER LOCAL", buttonStyle)) BeginSelection(GameMode.Local);
-        if (GUI.Button(CenteredButton(250, y + 200), "VOLTAR", buttonStyle)) screen = FlowScreen.Main;
+        if (GUI.Button(CenteredButton(430, y), "PLAYER VS CPU  [" + CpuDifficultyLabel() + "]", buttonStyle)) BeginSelection(GameMode.Cpu);
+        if (GUI.Button(CenteredButton(205, y + 96), "CPU -", buttonStyle)) CycleCpuDifficulty(-1);
+        if (GUI.Button(new Rect(Screen.width * .5f + 12, y + 96, 205, 78), "CPU +", buttonStyle)) CycleCpuDifficulty(1);
+        if (GUI.Button(CenteredButton(430, y + 192), "PLAYER VS PLAYER LOCAL", buttonStyle)) BeginSelection(GameMode.Local);
+        if (GUI.Button(CenteredButton(250, y + 292), "VOLTAR", buttonStyle)) screen = FlowScreen.Main;
+    }
+
+    private string CpuDifficultyLabel() => cpuDifficulty == AIDifficulty.Easy ? "FACIL" : cpuDifficulty == AIDifficulty.Hard ? "DIFICIL" : "MEDIO";
+
+    private void CycleCpuDifficulty(int direction)
+    {
+        int count = System.Enum.GetValues(typeof(AIDifficulty)).Length;
+        cpuDifficulty = (AIDifficulty)(((int)cpuDifficulty + direction + count) % count);
+    }
+
+    private void DrawOptions()
+    {
+        GUI.Label(new Rect(0, 95, Screen.width, 70), "OPCOES", titleStyle);
+        int y = Mathf.Max(210, Screen.height / 3);
+        GUI.Label(new Rect(0, y, Screen.width, 32), "VOLUME GERAL: " + Mathf.RoundToInt(AudioListener.volume * 100f) + "%", subtitleStyle);
+        float previousVolume = AudioListener.volume;
+        AudioListener.volume = GUI.HorizontalSlider(new Rect(Screen.width * .5f - 190f, y + 42, 380f, 24f), AudioListener.volume, 0f, 1f);
+        if (!Mathf.Approximately(previousVolume, AudioListener.volume))
+        {
+            if (musicSource != null) musicSource.volume = .35f;
+            SaveOptions();
+        }
+        if (GUI.Button(CenteredButton(430, y + 94), Screen.fullScreen ? "TELA CHEIA: ATIVA" : "TELA CHEIA: DESATIVADA", buttonStyle))
+        {
+            Screen.fullScreen = !Screen.fullScreen;
+            SaveOptions();
+        }
+        Vector2Int resolution = supportedResolutions[resolutionIndex];
+        if (GUI.Button(CenteredButton(430, y + 190), "RESOLUCAO: " + resolution.x + " x " + resolution.y, buttonStyle))
+        {
+            resolutionIndex = (resolutionIndex + 1) % supportedResolutions.Length;
+            resolution = supportedResolutions[resolutionIndex];
+            Screen.SetResolution(resolution.x, resolution.y, Screen.fullScreen);
+            SaveOptions();
+        }
+        GUI.Label(new Rect(0, y + 286, Screen.width, 28), "P1: WASD, ESPACO, CTRL e SHIFT   |   P2: SETAS, J, K e L", subtitleStyle);
+        if (GUI.Button(CenteredButton(250, y + 332), "VOLTAR", buttonStyle)) screen = FlowScreen.Main;
     }
 
     private void BeginSelection(GameMode selectedMode)
@@ -246,6 +327,30 @@ public sealed class GameFlowController : MonoBehaviour
         SetMainCameraPreviewVisibility(false);
         RefreshPreviews();
         CreateCardPreviews();
+    }
+
+    public void OpenVersusMode() => screen = FlowScreen.Mode;
+    public void OpenOptionsScreen() => screen = FlowScreen.Options;
+    public void OpenMainMenu() => screen = FlowScreen.Main;
+    public void BeginCpuSelection() => BeginSelection(GameMode.Cpu);
+    public void BeginLocalSelection() => BeginSelection(GameMode.Local);
+    public void ChangeCpuDifficulty(int direction) => CycleCpuDifficulty(direction);
+    public void SetMasterVolume(float value)
+    {
+        AudioListener.volume = Mathf.Clamp01(value);
+        SaveOptions();
+    }
+    public void ToggleFullscreenOption()
+    {
+        Screen.fullScreen = !Screen.fullScreen;
+        SaveOptions();
+    }
+    public void CycleResolutionOption()
+    {
+        resolutionIndex = (resolutionIndex + 1) % supportedResolutions.Length;
+        Vector2Int resolution = supportedResolutions[resolutionIndex];
+        Screen.SetResolution(resolution.x, resolution.y, Screen.fullScreen);
+        SaveOptions();
     }
 
     private void DrawSelection()
@@ -448,6 +553,7 @@ public sealed class GameFlowController : MonoBehaviour
 
     private void OnFighterKnockout()
     {
+        SetFightPaused(false);
         if (victoryShown) return;
         FighterController loser = currentPlayer != null && currentPlayer.HealthSystem != null && currentPlayer.HealthSystem.IsDead ? currentPlayer : currentOpponent;
         StartCoroutine(ShowVictoryAfterKnockout(loser));
@@ -613,8 +719,25 @@ public sealed class GameFlowController : MonoBehaviour
         preview.transform.SetPositionAndRotation(Vector3.zero, Quaternion.Euler(0f, 180f, 0f));
         foreach (Collider collider in preview.GetComponentsInChildren<Collider>(true)) collider.enabled = false;
         foreach (MonoBehaviour behaviour in preview.GetComponentsInChildren<MonoBehaviour>(true)) behaviour.enabled = false;
-        if (staticPose)
-            foreach (Animator animator in preview.GetComponentsInChildren<Animator>(true)) animator.enabled = false;
+        // Cartoes da grade sao fotos estaticas: A-pose, sem playback automatico.
+        // O preview grande usa Idle de combate para permanecer vivo e coerente
+        // com o que o jogador encontrara na arena.
+        RuntimeAnimatorController foundation = Resources.Load<RuntimeAnimatorController>("Animations/FighterFoundation");
+        foreach (Animator previewAnimator in preview.GetComponentsInChildren<Animator>(true))
+        {
+            previewAnimator.applyRootMotion = false;
+            if (staticPose)
+            {
+                previewAnimator.enabled = false;
+            }
+            else
+            {
+                if (foundation != null) previewAnimator.runtimeAnimatorController = foundation;
+                previewAnimator.enabled = true;
+                previewAnimator.Play("Idle", 0, 0f);
+                previewAnimator.Update(0f);
+            }
+        }
         foreach (Transform child in preview.GetComponentsInChildren<Transform>(true)) child.gameObject.layer = previewLayer;
         Renderer[] renderers = preview.GetComponentsInChildren<Renderer>(true);
         foreach (Renderer renderer in renderers) renderer.enabled = true;
@@ -638,14 +761,16 @@ public sealed class GameFlowController : MonoBehaviour
         }
         else if (hasBounds)
         {
-            target = bounds.center - Vector3.up * (bounds.size.y * .055f);
-            radius = bounds.extents.y * 1.12f;
+            // O quadro lateral prioriza o personagem: corta o vazio abaixo dos
+            // pes e aproxima sem amputar a cabeca durante o idle.
+            target = bounds.center + Vector3.up * (bounds.size.y * .08f);
+            radius = bounds.extents.y * .92f;
         }
         camera = new GameObject(label + "Camera").AddComponent<Camera>();
         camera.transform.SetPositionAndRotation(target + Vector3.back * 6f, Quaternion.identity);
         camera.transform.LookAt(target);
         camera.orthographic = true;
-        camera.orthographicSize = portrait ? radius : Mathf.Clamp(radius, 1f, 2.35f);
+        camera.orthographicSize = portrait ? radius : Mathf.Clamp(radius, .9f, 1.85f);
         camera.clearFlags = CameraClearFlags.SolidColor;
         camera.backgroundColor = new Color(.015f, .08f, .18f, 1f);
         camera.cullingMask = 1 << previewLayer;
@@ -663,7 +788,7 @@ public sealed class GameFlowController : MonoBehaviour
         cardPreviewCameras = new Camera[count];
         cardPreviewTextures = new RenderTexture[count];
         for (int i = 0; i < count; i++)
-            CreatePreview(i, ref cardPreviewObjects[i], ref cardPreviewCameras[i], ref cardPreviewTextures[i], "CardPreview" + i, true, 20 + i, true);
+            CreatePreview(i, ref cardPreviewObjects[i], ref cardPreviewCameras[i], ref cardPreviewTextures[i], "CardPreview" + i, false, 20 + i, true);
     }
 
     private void DestroyCardPreviews()
@@ -689,6 +814,7 @@ public sealed class GameFlowController : MonoBehaviour
         if (currentPlayer != null && currentPlayer.HealthSystem != null) currentPlayer.HealthSystem.OnKnockout -= OnFighterKnockout;
         if (currentOpponent != null && currentOpponent.HealthSystem != null) currentOpponent.HealthSystem.OnKnockout -= OnFighterKnockout;
         victoryShown = false;
+        SetFightPaused(false);
         foreach (FighterController fighter in FindObjectsByType<FighterController>(FindObjectsSortMode.None)) Destroy(fighter.gameObject);
         GameObject player = InstantiatePrefab(pendingPlayer);
         GameObject opponent = InstantiatePrefab(pendingOpponent);
@@ -708,15 +834,70 @@ public sealed class GameFlowController : MonoBehaviour
         FighterMovement om = opponent.GetComponent<FighterMovement>();
         currentPlayer = player.GetComponent<FighterController>();
         currentOpponent = opponent.GetComponent<FighterController>();
+        // A pose e os golpes agora sao conduzidos pelo controller comum, sem
+        // sobreposicao procedural que distorcia o rig e a sincronia dos clips.
+        ProceduralFighterAnimation playerProcedural = player.GetComponent<ProceduralFighterAnimation>();
+        ProceduralFighterAnimation opponentProcedural = opponent.GetComponent<ProceduralFighterAnimation>();
+        if (playerProcedural != null) playerProcedural.enabled = false;
+        if (opponentProcedural != null) opponentProcedural.enabled = false;
+        ApplyFighterBalance(currentPlayer, pendingPlayer);
+        ApplyFighterBalance(currentOpponent, pendingOpponent);
         if (currentPlayer != null && currentPlayer.HealthSystem != null) currentPlayer.HealthSystem.OnKnockout += OnFighterKnockout;
         if (currentOpponent != null && currentOpponent.HealthSystem != null) currentOpponent.HealthSystem.OnKnockout += OnFighterKnockout;
         pm.IsPlayerControlled = true; om.IsPlayerControlled = false;
+        if (currentPlayer != null) currentPlayer.SetDebugControlsVisible(false);
+        if (currentOpponent != null) currentOpponent.SetDebugControlsVisible(false);
         pm.Opponent = opponent.transform; om.Opponent = player.transform;
-        if (pendingMode == GameMode.Cpu) opponent.AddComponent<FighterSparringAI>().Difficulty = AIDifficulty.Easy;
+        if (pendingMode == GameMode.Cpu) opponent.AddComponent<FighterSparringAI>().Difficulty = cpuDifficulty;
         else opponent.AddComponent<LocalPlayerTwoInput>();
         TekkenCamera camera = FindFirstObjectByType<TekkenCamera>();
         if (camera != null) { camera.Fighter1 = player.transform; camera.Fighter2 = opponent.transform; }
         SetMainCameraPreviewVisibility(true);
+    }
+
+    private void ApplyFighterBalance(FighterController fighter, int index)
+    {
+        if (fighter == null || index < 0 || index >= FighterBalances.Length) return;
+        FighterBalance balance = FighterBalances[index];
+        fighter.ConfigureCombat(balance.primary, balance.secondary, balance.knockback);
+        fighter.Movement?.ConfigureMovement(balance.forward, balance.backward, balance.jump);
+        fighter.HealthSystem?.ConfigureMaxHealth(balance.health);
+    }
+
+    private void LoadOptions()
+    {
+        AudioListener.volume = PlayerPrefs.GetFloat("UnDFight.Volume", 1f);
+        resolutionIndex = Mathf.Clamp(PlayerPrefs.GetInt("UnDFight.Resolution", 0), 0, supportedResolutions.Length - 1);
+        Screen.fullScreen = PlayerPrefs.GetInt("UnDFight.Fullscreen", Screen.fullScreen ? 1 : 0) == 1;
+    }
+
+    private void SaveOptions()
+    {
+        PlayerPrefs.SetFloat("UnDFight.Volume", AudioListener.volume);
+        PlayerPrefs.SetInt("UnDFight.Resolution", resolutionIndex);
+        PlayerPrefs.SetInt("UnDFight.Fullscreen", Screen.fullScreen ? 1 : 0);
+        PlayerPrefs.Save();
+    }
+
+    public void SetFightPaused(bool paused)
+    {
+        if (screen != FlowScreen.Fight || victoryShown) { fightPaused = false; Time.timeScale = 1f; return; }
+        fightPaused = paused;
+        Time.timeScale = paused ? 0f : 1f;
+    }
+
+    public void RestartFight()
+    {
+        SetFightPaused(false);
+        SetupFight();
+        screen = FlowScreen.VS;
+        vsUntil = Time.unscaledTime + 1.5f;
+    }
+
+    public void ReturnToCharacterSelect()
+    {
+        SetFightPaused(false);
+        BeginSelection(pendingMode);
     }
 
     private void SetMainCameraPreviewVisibility(bool visible)

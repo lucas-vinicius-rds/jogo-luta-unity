@@ -23,6 +23,11 @@ public class NeutralState : IFighterState
 
     public void Update(FighterController fighter)
     {
+        if (fighter.Movement != null && fighter.Movement.IsPlayerControlled)
+        {
+            fighter.SetGuarding(fighter.ReadGuardCommand());
+        }
+
         // Monitora entrada de ataque para transicionar
         FighterAttackType attack = fighter.ReadAttackCommand();
         if (attack != FighterAttackType.None)

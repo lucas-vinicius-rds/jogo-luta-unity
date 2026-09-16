@@ -29,6 +29,17 @@ public class HealthSystem : MonoBehaviour
     public float HealthNormalized => maxHealth > 0f ? Mathf.Clamp01(currentHealth / maxHealth) : 0f;
     public bool IsDead => isDead;
 
+    public void ConfigureMaxHealth(float value, bool refill = true)
+    {
+        maxHealth = Mathf.Max(1f, value);
+        if (refill)
+        {
+            isDead = false;
+            currentHealth = maxHealth;
+            OnHealthChanged?.Invoke(currentHealth, maxHealth);
+        }
+    }
+
     private void Awake()
     {
         controller = GetComponent<FighterController>();

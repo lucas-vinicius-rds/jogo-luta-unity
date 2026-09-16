@@ -14411,6 +14411,8 @@ MonoBehaviour:
   - {fileID: -203655887218126122, guid: 6697cff7e5f12e148be703bd71338e17, type: 3}
   - {fileID: -203655887218126122, guid: c6fd2d343bd430449a2d88ae33a5e768, type: 3}
   defeatedClip: {fileID: -203655887218126122, guid: 6d3c35d6abfd27b478267ae3689554db, type: 3}
+  menuBackground: {fileID: 2800000, guid: 2e6b392b2127199439b2368de154b209, type: 3}
+  menuMusic: {fileID: 8300000, guid: 4ba13acc7b8e88545a471b00d43988e9, type: 3}
 --- !u!4 &1336410282
 Transform:
   m_ObjectHideFlags: 0

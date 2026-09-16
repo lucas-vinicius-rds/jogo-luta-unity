@@ -146,7 +146,7 @@ O vencedor usa o arquivo correspondente ao personagem selecionado.
 O derrotado usa:
 
 ```text
-X Bot@Surprise Uppercut (1).fbx
+X Bot@Dying.fbx
 ```
 
 O caminho dos arquivos foi corrigido para incluir a pasta `Mixamo`.
@@ -179,6 +179,16 @@ Ele lista as animações de idle, locomoção, agachamento, pulo, ataques, reaç
 - O estado final verificado apresentou zero erros de compilação.
 - Foram capturadas imagens do Game View para conferir a seleção, os previews e a tela de K.O.
 - O problema de referências inválidas de prefab foi corrigido usando instanciação não-genérica segura.
+
+## Atualizacoes posteriores
+
+- A luta usa HUD dedicada com barras de vida, estado de guarda, controles e pausa; o painel tecnico de debug foi desativado nos prefabs jogaveis.
+- P1 usa WASD, Espaco, Ctrl esquerdo e Shift; P2 usa setas, J, K e L. Nao ha mais teclas compartilhadas no versus local.
+- Os sete lutadores receberam configuracoes jogaveis proprias de vida, velocidade, salto, dano e knockback; os dados da selecao nao sao apenas visuais.
+- A CPU pode ser iniciada em dificuldade Facil, Medio ou Dificil. Ela tambem pode defender, mantendo a animacao neutra quando nao houver clip de guarda.
+- O menu possui volume persistente, tela cheia e troca de resolucao. A musica e o fundo sao referencias serializadas, seguras para builds, sem leitura direta por `Application.dataPath`.
+- O derrotado usa `Dying.fbx`; as animacoes de vitoria continuam especificas por personagem e em loop.
+- Apenas `FightingPrototype.unity` esta habilitada no build.
 
 ## Observações
 

@@ -124,6 +124,15 @@ public class FighterSparringAI : MonoBehaviour
             return;
         }
 
+        // A defesa não usa uma animação emprestada: preserva a pose neutra e reduz
+        // o impacto, tornando a ausência de um clip de guarda explícita.
+        float guardChance = difficulty == AIDifficulty.Hard ? .18f : difficulty == AIDifficulty.Medium ? .11f : .06f;
+        if (distanceToOpponent <= 2.35f && roll < attackChance + guardChance)
+        {
+            StartCoroutine(PerformGuardRoutine(Random.Range(.25f, .55f)));
+            return;
+        }
+
         // Decisão de movimentação tática
         Vector2 moveDir = Vector2.zero;
         float moveDuration = 0.6f;
@@ -184,6 +193,14 @@ public class FighterSparringAI : MonoBehaviour
         movement.ExternalInput = dir;
         yield return new WaitForSeconds(duration);
         movement.ExternalInput = Vector2.zero;
+    }
+
+    private IEnumerator PerformGuardRoutine(float duration)
+    {
+        movement.ExternalInput = Vector2.zero;
+        controller.SetGuarding(true);
+        yield return new WaitForSeconds(duration);
+        controller.SetGuarding(false);
     }
 
     /// <summary>

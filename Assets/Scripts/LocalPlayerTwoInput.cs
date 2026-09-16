@@ -22,10 +22,12 @@ public sealed class LocalPlayerTwoInput : MonoBehaviour
         movement.ExternalInput = new Vector2(x, y);
         if (Input.GetKeyDown(KeyCode.Keypad1) || Input.GetKeyDown(KeyCode.J)) fighter.TriggerAttack();
         if (Input.GetKeyDown(KeyCode.Keypad2) || Input.GetKeyDown(KeyCode.K)) fighter.TriggerSecondaryAttack();
+        fighter.SetGuarding(Input.GetKey(KeyCode.L) || Input.GetKey(KeyCode.Keypad0));
     }
 
     private void OnDisable()
     {
         if (movement != null) movement.ExternalInput = Vector2.zero;
+        if (fighter != null) fighter.SetGuarding(false);
     }
 }
