@@ -2,12 +2,13 @@
 
 Documento de acompanhamento contínuo das correções de bugs, refatorações pontuais e novas funcionalidades implementadas no jogo **UnDFight** (Unity 6 / C#).
 
-Este registro será atualizado a cada nova tarefa para garantir a rastreabilidade e a integridade da arquitetura do projeto.
+Este registro é atualizado a cada nova tarefa para garantir a rastreabilidade e a integridade da arquitetura do projeto.
 
 ---
 
 ## 📑 Índice de Ciclos
 1. [Ciclo 1 (28/09/2026) - Correções de Input e Limpeza de APIs Obsoletas](#-ciclo-1-28092026---correções-de-input-e-limpeza-de-apis-obsoletas)
+2. [Ciclo 2 (28/09/2026) - Correção de Hurtbox ao Agachar, Vínculo de Hitboxes a Ossos e Debug Gizmos](#-ciclo-2-28092026---correção-de-hurtbox-ao-agachar-vínculo-de-hitboxes-a-ossos-e-debug-gizmos)
 
 ---
 
@@ -20,68 +21,64 @@ Este registro será atualizado a cada nova tarefa para garantir a rastreabilidad
 4. Substituir APIs de busca de objetos depreciadas no Unity 6 (`CS0618`).
 5. Garantir compilação com zero erros no editor de código e no Unity.
 
+### 🛠 Alterações Realizadas
+- **Input Buffer no HitStun (Bug A):** Adicionado buffer de 0.15s em `FighterController.cs`, gerido por `HitStunState.cs` e consumido ao entrar em `NeutralState.cs`.
+- **Separação de Teclas P1/P2 (Bug B):** Criado `FighterInputConfig.cs`. `FighterMovement.cs` e `LocalPlayerTwoInput.cs` agora utilizam configurações exclusivas sem teclas hardcoded.
+- **Gamepad Sem Duplicidade (Bug C):** Separado `buttonSouth` para Soco e `buttonWest` para Ataque 2.
+- **APIs Obsoletas Unity 6:** Atualizados `FightingPrototypeSetup.cs` e `GameFlowController.cs` para `FindObjectsByType<T>()` e `FindAnyObjectByType<T>()`.
+
+---
+
+## 🛡 Ciclo 2: 28/09/2026 - Correção de Hurtbox ao Agachar, Vínculo de Hitboxes a Ossos e Debug Gizmos
+
+### 🎯 Objetivos do Ciclo
+1. **Hurtbox ao agachar (Bug A):** Fazer a cápsula de dano do corpo (`BodyHurtbox`) acompanhar dinamicamente a altura e o centro do `CharacterController` ao agachar e retornar ao normal ao levantar, usando exatamente os mesmos valores para ambos.
+2. **Hitboxes seguindo ossos (Bug B):** Ativar a flag `followAnimatedBone`, vinculando cada hitbox ao osso correspondente do Animator (mão direita/esquerda, pé direito/esquerdo, cabeça) com fallback na hierarquia e aviso explícito via `Debug.LogWarning` se algum osso não for encontrado.
+3. **Modo de Debug com Gizmos:** Adicionar modo visual na Scene View com toggles `[SerializeField] private bool showDebugGizmos = true` para validar graficamente o alinhamento da Hurtbox e o trajeto das Hitboxes ativas e inativas.
+
 ---
 
 ### 🛠 Alterações Realizadas
 
-#### 1. Input Buffer durante HitStun (Bug A)
-- **Problema:** Entradas de ataque feitas durante o estado de `HitStun` eram descartadas porque `ReadAttackCommand()` não rodava enquanto o lutador estivesse atordoado.
+#### 1. Sincronização Dinâmica da Hurtbox ao Agachar (Bug A)
+- **Problema:** Em `FighterMovement.cs`, `characterController.height` e `center` encolhiam para `62%` ao agachar, mas o `BodyHurtbox` mantinha sua altura fixa (`1.8f`) e centro inalterado, deixando o personagem vulnerável a golpes altos mesmo agachado.
 - **Solução:**
-  - Criado buffer de entrada de curta duração (`hitStunInputBufferDuration = 0.15s`, serializado no Inspector de [FighterController.cs](file:///D:/Programas%20SSD/Unity/Unity%20Projects/Teste%20antigravity/Assets/Scripts/FighterController.cs)).
-  - [HitStunState.cs](file:///D:/Programas%20SSD/Unity/Unity%20Projects/Teste%20antigravity/Assets/Scripts/HitStunState.cs) agora escuta e armazena comandos no buffer a cada frame do `Update` via `fighter.BufferAttackInput()`, mantendo o tempo integral do atordoamento sem permitir cancelá-lo.
-  - Ao sair do atordoamento e entrar em [NeutralState.cs](file:///D:/Programas%20SSD/Unity/Unity%20Projects/Teste%20antigravity/Assets/Scripts/NeutralState.cs), se houver comando no buffer não expirado, o ataque é consumido e disparado imediatamente no primeiro frame livre.
-  - O buffer é automaticamente limpo ao expirar, ao reiniciar o round ou caso o personagem seja nocauteado ([KnockoutState.cs](file:///D:/Programas%20SSD/Unity/Unity%20Projects/Teste%20antigravity/Assets/Scripts/KnockoutState.cs)).
+  - Em [Hurtbox.cs](file:///D:/Programas%20SSD/Unity/Unity%20Projects/Teste%20antigravity/Assets/Scripts/Hurtbox.cs), implementado o método `SetBounds(float targetHeight, Vector3 targetCenter)` que recalcula a altura da cápsula e o deslocamento vertical local.
+  - Em [FighterMovement.cs](file:///D:/Programas%20SSD/Unity/Unity%20Projects/Teste%20antigravity/Assets/Scripts/FighterMovement.cs), no método `HandleJumpAndCrouch`, a Hurtbox agora é redimensionada em tempo real com **exatamente os mesmos valores** aplicados ao `CharacterController` (`standingHeight * 0.62f` e `standingCenter.y * 0.62f`).
+  - No `ResetMotion()`, tanto o `CharacterController` quanto a `Hurtbox` são restaurados para as dimensões em pé.
+  - Em [FightingPrototypeSetup.cs](file:///D:/Programas%20SSD/Unity/Unity%20Projects/Teste%20antigravity/Assets/Editor/FightingPrototypeSetup.cs), o método `CreateHurtbox` foi alinhado para criar a cápsula com altura `2.0f` e raio `0.42f`, idêntico ao `CharacterController`.
 
-#### 2. Separação de Controles P1 e P2 (Bug B)
-- **Problema:** [FighterMovement.cs](file:///D:/Programas%20SSD/Unity/Unity%20Projects/Teste%20antigravity/Assets/Scripts/FighterMovement.cs) lia tanto `WASD` quanto as `Setas` de forma hardcoded, e [LocalPlayerTwoInput.cs](file:///D:/Programas%20SSD/Unity/Unity%20Projects/Teste%20antigravity/Assets/Scripts/LocalPlayerTwoInput.cs) usava `J` e `K` no P2 enquanto o P1 também escutava `J` e `K`.
+#### 2. Vínculo de Hitboxes a Ossos Animados com LogWarning (Bug B)
+- **Problema:** A flag `followAnimatedBone` vinha desligada por padrão (`false`) em `Hitbox.cs` e não era ativada em `FightingPrototypeSetup.cs`. Além disso, se o osso falhasse na busca do Humanoid, o script falhava em silêncio.
 - **Solução:**
-  - Criada a classe serializável [FighterInputConfig.cs](file:///D:/Programas%20SSD/Unity/Unity%20Projects/Teste%20antigravity/Assets/Scripts/FighterInputConfig.cs) que centraliza e desacopla o mapeamento de teclas e controle por jogador.
-  - Removidas todas as teclas hardcoded de `FighterMovement.cs`, `FighterController.cs` e `LocalPlayerTwoInput.cs`. Cada lutador agora consulta exclusivamente seu próprio `InputConfig`.
-  - [LocalPlayerTwoInput.cs](file:///D:/Programas%20SSD/Unity/Unity%20Projects/Teste%20antigravity/Assets/Scripts/LocalPlayerTwoInput.cs) inicializa o lutador com o preset de Player 2 (`CreatePlayerTwo()`) e ativa `IsPlayerControlled = true`.
+  - Em [Hitbox.cs](file:///D:/Programas%20SSD/Unity/Unity%20Projects/Teste%20antigravity/Assets/Scripts/Hitbox.cs), `followAnimatedBone` agora é `true` por padrão.
+  - O método `BindBone()` tenta obter o Transform do osso via `Animator.GetBoneTransform(targetBone)`. Caso falhe (ou se o rig não for humanoid), executa uma busca na hierarquia (`FindBoneInHierarchy`) pelo nome padrão do membro (`RightHand`, `LeftFoot`, etc.).
+  - Se mesmo assim o osso não for encontrado, emite um log claro:
+    `Debug.LogWarning($"[Hitbox] O osso correspondente ao membro '{limbType}' não foi encontrado no modelo do lutador '{owner.gameObject.name}'. A hitbox permanecerá na posição relativa padrão.");`
+  - Em [FightingPrototypeSetup.cs](file:///D:/Programas%20SSD/Unity/Unity%20Projects/Teste%20antigravity/Assets/Editor/FightingPrototypeSetup.cs), `CreateHitbox` agora serializa `followAnimatedBone = true` explicitamente.
 
-#### 3. Eliminação de Sobreposição no Gamepad (Bug C)
-- **Problema:** Em `InitializeAttackInput()`, `runtimeAttackAction` registrava tanto `buttonSouth` quanto `buttonWest`, enquanto `runtimeAttack2Action` também registrava `buttonWest`.
-- **Solução:**
-  - `runtimeAttackAction` (Soco) agora utiliza exclusivamente `buttonSouth`.
-  - `runtimeAttack2Action` (Ataque 2) agora utiliza exclusivamente `buttonWest`.
-
-#### 4. Resolução de APIs Obsoletas Unity 6 (CS0618)
-- Em [FightingPrototypeSetup.cs](file:///D:/Programas%20SSD/Unity/Unity%20Projects/Teste%20antigravity/Assets/Editor/FightingPrototypeSetup.cs) e [GameFlowController.cs](file:///D:/Programas%20SSD/Unity/Unity%20Projects/Teste%20antigravity/Assets/Scripts/GameFlowController.cs):
-  - `FindObjectsByType<T>(FindObjectsSortMode.None)` ➔ `FindObjectsByType<T>()`.
-  - `FindFirstObjectByType<T>()` ➔ `FindAnyObjectByType<T>()` onde a ordem não é relevante.
-  - `FindObjectsByType<T>(FindObjectsInactive.Include, FindObjectsSortMode.None)` ➔ `FindObjectsByType<T>(FindObjectsInactive.Include)`.
+#### 3. Modo de Debug Visual (Gizmos)
+- **Hurtbox Gizmos ([Hurtbox.cs](file:///D:/Programas%20SSD/Unity/Unity%20Projects/Teste%20antigravity/Assets/Scripts/Hurtbox.cs)):**
+  - Toggle `showDebugGizmos` inspecionável.
+  - Desenha a cápsula completa na Scene View em verde aramado com polos e geratrizes cilíndricas, permitindo visualizar o encolhimento no agachamento.
+- **Hitbox Gizmos ([Hitbox.cs](file:///D:/Programas%20SSD/Unity/Unity%20Projects/Teste%20antigravity/Assets/Scripts/Hitbox.cs)):**
+  - Toggle `showDebugGizmos` inspecionável.
+  - Quando **Inativa**: desenha aramado em laranja suave acompanhando o osso em cada pose/animação.
+  - Quando **Ativa**: desenha volume preenchido vermelho translúcido com borda sólida durante os frames de impacto do golpe.
 
 ---
 
-### 🎮 Tabela Consolidada de Controles
-
-| Ação | Player 1 (Teclado) | Player 1 (Gamepad 1) | Player 2 (Teclado) | Player 2 (Gamepad 2 / Alt) |
-|---|---|---|---|---|
-| **Mover Esquerda** | `A` | Analógico Esq. / D-Pad | `Seta Esquerda` | Analógico Esq. / D-Pad |
-| **Mover Direita** | `D` | Analógico Esq. / D-Pad | `Seta Direita` | Analógico Esq. / D-Pad |
-| **Pular** | `W` | Analógico Esq. (Cima) | `Seta Cima` | Analógico Esq. (Cima) |
-| **Agachar** | `S` | Analógico Esq. (Baixo) | `Seta Baixo` | Analógico Esq. (Baixo) |
-| **Soco (Punch)** | `F` *(ou `Espaço`)* | `buttonSouth` (Xbox: `A` / PS: `✕`) | `Keypad 1` *(ou `J`)* | `buttonSouth` (Xbox: `A` / PS: `✕`) |
-| **Ataque 2 (Kick)** | `G` | `buttonWest` (Xbox: `X` / PS: `□`) | `Keypad 2` *(ou `K`)* | `buttonWest` (Xbox: `X` / PS: `□`) |
-
----
-
-### 📂 Arquivos Afetados no Ciclo 1
+### 📂 Arquivos Afetados no Ciclo 2
 
 | Arquivo | Tipo de Alteração | Descrição |
 |---|---|---|
-| `Assets/Scripts/FighterInputConfig.cs` | **Novo** | Configuração centralizada de mapeamento por jogador. |
-| `Assets/Scripts/FighterMovement.cs` | Modificado | Leitura via `inputConfig`, remoção de teclas hardcoded. |
-| `Assets/Scripts/FighterController.cs` | Modificado | Input buffer no HitStun, leitura via `inputConfig`, correção de bindings no gamepad. |
-| `Assets/Scripts/LocalPlayerTwoInput.cs` | Modificado | Configuração automática do preset de P2 sem leituras legadas. |
-| `Assets/Scripts/HitStunState.cs` | Modificado | Gravação contínua no buffer durante o atordoamento. |
-| `Assets/Scripts/NeutralState.cs` | Modificado | Execução do ataque em buffer na transição de saída do HitStun. |
-| `Assets/Scripts/KnockoutState.cs` | Modificado | Limpeza do buffer de ataque ao sofrer nocaute. |
-| `Assets/Editor/FightingPrototypeSetup.cs` | Modificado | Atualização de métodos de busca para Unity 6 (`FindAnyObjectByType`). |
-| `Assets/Scripts/GameFlowController.cs` | Modificado | Atualização de métodos de busca para Unity 6 (`FindAnyObjectByType`). |
+| `Assets/Scripts/Hurtbox.cs` | Modificado | Adicionado método `SetBounds()`, suporte a crouch dinâmico e Gizmos com fio de cápsula. |
+| `Assets/Scripts/FighterMovement.cs` | Modificado | Cache da `BodyHurtbox`, sincronização com `targetHeight`/`targetCenter` no crouch e restauração no `ResetMotion()`. |
+| `Assets/Scripts/Hitbox.cs` | Modificado | `followAnimatedBone = true` por padrão, fallback de hierarquia, `LogWarning` em osso ausente e Gizmos de estado ativo/inativo. |
+| `Assets/Editor/FightingPrototypeSetup.cs` | Modificado | Dimensões de `CreateHurtbox` iguais ao `CharacterController` e ativação de `followAnimatedBone = true` no `CreateHitbox`. |
 
 ---
 
-### 🧪 Verificação e Status de Compilação
+### 🧪 Status de Compilação
 - **dotnet build:** `0 Erros, 0 Avisos CS0618`.
 - **Unity Console:** Compilação limpa (`0 erros`).

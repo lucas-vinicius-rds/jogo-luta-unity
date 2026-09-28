@@ -825,7 +825,8 @@ public static class FightingPrototypeSetup
         go.transform.localPosition = new Vector3(0f, 1f, 0f);
         CapsuleCollider collider = go.AddComponent<CapsuleCollider>();
         collider.isTrigger = true;
-        collider.height = 1.8f;
+        collider.center = Vector3.zero;
+        collider.height = 2f;
         collider.radius = 0.42f;
         Hurtbox hurtbox = go.AddComponent<Hurtbox>();
         SerializedObject so = new SerializedObject(hurtbox);
@@ -848,6 +849,7 @@ public static class FightingPrototypeSetup
         SerializedObject so = new SerializedObject(hitbox);
         so.FindProperty("limbType").enumValueIndex = (int)limb;
         so.FindProperty("owner").objectReferenceValue = owner;
+        so.FindProperty("followAnimatedBone").boolValue = true;
         so.ApplyModifiedPropertiesWithoutUndo();
         return hitbox;
     }

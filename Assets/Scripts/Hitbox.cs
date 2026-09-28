@@ -14,6 +14,7 @@ public enum HitboxLimb
 /// Emissor de dano (Hitbox). Anexado aos membros de ataque (mãos e pés).
 /// Controla frames ativos, previne múltiplos hits no mesmo oponente por golpe
 /// e utiliza triggers com amostragem contínua para zero tunnel-clipping.
+/// Acompanha os ossos animados do Animator em tempo real.
 /// </summary>
 [RequireComponent(typeof(Collider))]
 [DisallowMultipleComponent]
@@ -26,8 +27,12 @@ public class Hitbox : MonoBehaviour
     [Tooltip("Lutador dono desta hitbox.")]
     [SerializeField] private FighterController owner;
 
-    [Tooltip("Use apenas em rigs com ossos consistentes. Por padrão a hitbox usa o volume local configurado à frente do lutador.")]
-    [SerializeField] private bool followAnimatedBone = false;
+    [Tooltip("Quando ativado, vincula a hitbox ao osso do esqueleto do Animator correspondente ao membro.")]
+    [SerializeField] private bool followAnimatedBone = true;
+
+    [Header("Debug")]
+    [Tooltip("Ativa a visualização da Hitbox na Scene View via Gizmos.")]
+    [SerializeField] private bool showDebugGizmos = true;
 
     private Collider col;
     private SphereCollider sphereCol;
@@ -48,6 +53,8 @@ public class Hitbox : MonoBehaviour
     public HitboxLimb LimbType => limbType;
     public FighterController Owner { get => owner; set => owner = value; }
     public bool IsActive => isActive;
+    public bool FollowAnimatedBone { get => followAnimatedBone; set => followAnimatedBone = value; }
+    public bool ShowDebugGizmos { get => showDebugGizmos; set => showDebugGizmos = value; }
 
     private void Awake()
     {
@@ -80,6 +87,10 @@ public class Hitbox : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Vincula a hitbox ao Transform do osso correspondente no Animator do lutador.
+    /// Se o osso não for encontrado, emite um aviso claro via LogWarning em vez de falhar em silêncio.
+    /// </summary>
     public void BindBone()
     {
         if (!followAnimatedBone) return;
@@ -105,8 +116,49 @@ public class Hitbox : MonoBehaviour
                 followBone = anim.GetBoneTransform(targetBone);
             }
         }
+
+        // Fallback: se não for Humanoid ou GetBoneTransform retornar null, busca na hierarquia
+        if (followBone == null)
+        {
+            string expectedBoneName = limbType switch
+            {
+                HitboxLimb.RightHand => "RightHand",
+                HitboxLimb.LeftHand => "LeftHand",
+                HitboxLimb.RightFoot => "RightFoot",
+                HitboxLimb.LeftFoot => "LeftFoot",
+                HitboxLimb.Head => "Head",
+                _ => string.Empty
+            };
+
+            if (!string.IsNullOrEmpty(expectedBoneName))
+            {
+                followBone = FindBoneInHierarchy(owner.transform, expectedBoneName);
+            }
+        }
+
+        // Se mesmo assim o osso não for encontrado, emite aviso explícito no console
+        if (followBone == null)
+        {
+            Debug.LogWarning($"[Hitbox] O osso correspondente ao membro '{limbType}' não foi encontrado no modelo do lutador '{owner.gameObject.name}'. A hitbox permanecerá na posição relativa padrão.");
+        }
     }
 
+    private Transform FindBoneInHierarchy(Transform root, string boneName)
+    {
+        foreach (Transform child in root.GetComponentsInChildren<Transform>(true))
+        {
+            string cleanName = child.name.Replace("mixamorig:", string.Empty).Replace("_", string.Empty);
+            if (cleanName.IndexOf(boneName, System.StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return child;
+            }
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// Sincroniza a posição e rotação da hitbox com a pose atual do osso animado.
+    /// </summary>
     private void SyncBonePosition()
     {
         if (!followAnimatedBone) return;
@@ -178,7 +230,7 @@ public class Hitbox : MonoBehaviour
 
     private void LateUpdate()
     {
-        // Garante que a hitbox siga a posição exata do osso após o Animator avaliar as poses
+        // Garante que a hitbox acompanhe a pose final calculada pelo Animator
         SyncBonePosition();
     }
 
@@ -201,10 +253,8 @@ public class Hitbox : MonoBehaviour
                 ProcessHit(overlapResults[i]);
             }
 
-            // Golpes de K, principalmente chutes voadores, deslocam o pé muito
-            // entre dois Updates. A esfera isolada podia passar pelo corpo do
-            // alvo sem nunca registrar uma sobreposição. Varremos o segmento
-            // entre as duas poses do osso para manter a hitbox contínua.
+            // Golpes rápidos (ex: chutes) podem deslocar o pé muito entre dois frames.
+            // Varremos o segmento entre as duas poses do osso para manter a hitbox contínua.
             if (hasPreviousOverlapCenter && (worldCenter - previousOverlapCenter).sqrMagnitude > 0.0001f)
             {
                 count = Physics.OverlapCapsuleNonAlloc(
@@ -281,20 +331,41 @@ public class Hitbox : MonoBehaviour
 #if UNITY_EDITOR
     private void OnDrawGizmos()
     {
-        if (!isActive) return;
+        if (!showDebugGizmos) return;
         if (col == null) col = GetComponent<Collider>();
         if (col == null) return;
 
-        Gizmos.color = new Color(1f, 0.15f, 0.15f, 0.55f);
         Gizmos.matrix = transform.localToWorldMatrix;
 
-        if (col is SphereCollider sphere)
+        // Hitbox ativa: Vermelho vivo translúcido com contorno sólido
+        if (isActive)
         {
-            Gizmos.DrawSphere(sphere.center, sphere.radius);
+            Gizmos.color = new Color(1f, 0.15f, 0.15f, 0.65f);
+            if (col is SphereCollider sphere)
+            {
+                Gizmos.DrawSphere(sphere.center, sphere.radius);
+                Gizmos.color = Color.red;
+                Gizmos.DrawWireSphere(sphere.center, sphere.radius);
+            }
+            else if (col is BoxCollider box)
+            {
+                Gizmos.DrawCube(box.center, box.size);
+                Gizmos.color = Color.red;
+                Gizmos.DrawWireCube(box.center, box.size);
+            }
         }
-        else if (col is BoxCollider box)
+        // Hitbox inativa: Laranja aramado na Scene View para validar o vínculo com o osso
+        else
         {
-            Gizmos.DrawCube(box.center, box.size);
+            Gizmos.color = new Color(1f, 0.55f, 0.1f, 0.45f);
+            if (col is SphereCollider sphere)
+            {
+                Gizmos.DrawWireSphere(sphere.center, sphere.radius);
+            }
+            else if (col is BoxCollider box)
+            {
+                Gizmos.DrawWireCube(box.center, box.size);
+            }
         }
     }
 #endif

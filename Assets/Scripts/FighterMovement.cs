@@ -28,6 +28,7 @@ public class FighterMovement : MonoBehaviour
 
     private CharacterController characterController;
     private Animator animator;
+    private Hurtbox bodyHurtbox;
     private InputAction runtimeMoveAction;
     private float verticalVelocity;
     private bool wasJumpHeld;
@@ -42,6 +43,7 @@ public class FighterMovement : MonoBehaviour
     public Transform Opponent { get => opponent; set => opponent = value; }
     public bool IsPlayerControlled { get => isPlayerControlled; set => isPlayerControlled = value; }
     public FighterInputConfig InputConfig { get => inputConfig; set => inputConfig = value; }
+    public Hurtbox BodyHurtbox { get => bodyHurtbox; set => bodyHurtbox = value; }
     public bool CanMove { get; set; } = true;
     public bool IsGrounded => characterController != null && characterController.isGrounded;
     public CharacterController CharacterController => characterController;
@@ -56,6 +58,7 @@ public class FighterMovement : MonoBehaviour
     {
         characterController = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
+        bodyHurtbox = GetComponentInChildren<Hurtbox>();
         standingHeight = characterController.height;
         standingCenter = characterController.center;
         wasGroundedLastFrame = characterController.isGrounded;
@@ -145,10 +148,13 @@ public class FighterMovement : MonoBehaviour
     private void HandleJumpAndCrouch(Vector2 input)
     {
         IsCrouching = input.y < -0.5f && characterController.isGrounded;
-        characterController.height = IsCrouching ? standingHeight * 0.62f : standingHeight;
-        characterController.center = IsCrouching
+        float targetHeight = IsCrouching ? standingHeight * 0.62f : standingHeight;
+        characterController.height = targetHeight;
+        Vector3 targetCenter = IsCrouching
             ? new Vector3(standingCenter.x, standingCenter.y * 0.62f, standingCenter.z)
             : standingCenter;
+        characterController.center = targetCenter;
+        if (bodyHurtbox != null) bodyHurtbox.SetBounds(targetHeight, targetCenter);
         bool jumpHeld = input.y > 0.5f;
         if (jumpHeld && !wasJumpHeld && characterController.isGrounded)
         {
@@ -221,6 +227,16 @@ public class FighterMovement : MonoBehaviour
     {
         horizontalImpulse = Vector3.zero;
         verticalVelocity = groundedGravity;
+        IsCrouching = false;
+        if (characterController != null)
+        {
+            characterController.height = standingHeight;
+            characterController.center = standingCenter;
+        }
+        if (bodyHurtbox != null)
+        {
+            bodyHurtbox.SetBounds(standingHeight, standingCenter);
+        }
     }
 
     private void MoveSafely(Vector3 delta, bool respectOpponentSpacing)
