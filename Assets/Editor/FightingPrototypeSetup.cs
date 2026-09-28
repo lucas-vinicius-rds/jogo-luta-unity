@@ -840,7 +840,12 @@ public static class FightingPrototypeSetup
         go.transform.SetParent(owner.transform, false);
         bool isFoot = limb == HitboxLimb.RightFoot || limb == HitboxLimb.LeftFoot;
         bool isRight = limb == HitboxLimb.RightHand || limb == HitboxLimb.RightFoot;
-        go.transform.localPosition = new Vector3(isRight ? 0.22f : -0.22f, isFoot ? 0.55f : 1.2f, isFoot ? 0.78f : 0.68f);
+        // Offsets autorados no espaço do lutador. Hitbox os converte uma única
+        // vez para o espaço do osso ao iniciar, preservando-os em ataques,
+        // Turn180 e demais poses animadas.
+        go.transform.localPosition = limb == HitboxLimb.Head
+            ? new Vector3(0f, 1.65f, 0.18f)
+            : new Vector3(isRight ? 0.22f : -0.22f, isFoot ? 0.55f : 1.2f, isFoot ? 0.78f : 0.68f);
         SphereCollider collider = go.AddComponent<SphereCollider>();
         collider.isTrigger = true;
         collider.enabled = false;

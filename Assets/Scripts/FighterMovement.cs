@@ -26,15 +26,21 @@ public class FighterMovement : MonoBehaviour
     [Tooltip("Configuração centralizada de mapeamento de entrada para este lutador.")]
     [SerializeField] private FighterInputConfig inputConfig;
 
+    [Header("Turn / Direction")]
+    [Tooltip("Velocidade de rotação suave em graus por segundo ao virar para o oponente.")]
+    [SerializeField, Min(180f)] private float turnSpeed = 720f;
+
     private CharacterController characterController;
     private Animator animator;
     private Hurtbox bodyHurtbox;
+    private FighterController fighterController;
     private InputAction runtimeMoveAction;
     private float verticalVelocity;
     private bool wasJumpHeld;
     private float standingHeight;
     private Vector3 standingCenter;
     private Vector3 horizontalImpulse;
+    private float lastFacingDirection = 1f;
     // Enquanto estiver no ar, o lutador não deve girar ao cruzar o oponente.
     // Além de ficar visualmente estranho, a troca de direção no meio do salto
     // fazia o Animator cair na locomoção antes do pouso.
@@ -53,6 +59,7 @@ public class FighterMovement : MonoBehaviour
     public Vector2 ExternalInput { get; set; }
     public bool IsFacingAway => false;
     public bool IsCrouching { get; private set; }
+    public float TurnSpeed { get => turnSpeed; set => turnSpeed = value; }
 
     private void Awake()
     {
@@ -62,6 +69,8 @@ public class FighterMovement : MonoBehaviour
         standingHeight = characterController.height;
         standingCenter = characterController.center;
         wasGroundedLastFrame = characterController.isGrounded;
+        fighterController = GetComponent<FighterController>();
+        lastFacingDirection = transform.forward.x >= 0f ? 1f : -1f;
         // Inicializa configuração padrão para Player 1 caso não atribuída
         if (inputConfig == null)
         {
@@ -237,6 +246,7 @@ public class FighterMovement : MonoBehaviour
         {
             bodyHurtbox.SetBounds(standingHeight, standingCenter);
         }
+        lastFacingDirection = transform.forward.x >= 0f ? 1f : -1f;
     }
 
     private void MoveSafely(Vector3 delta, bool respectOpponentSpacing)
@@ -264,7 +274,27 @@ public class FighterMovement : MonoBehaviour
     private void FaceOpponent()
     {
         if (opponent == null) return;
-        float direction = opponent.position.x >= transform.position.x ? 1f : -1f;
-        transform.rotation = Quaternion.Euler(0f, direction > 0f ? 90f : -90f, 0f);
+
+        // Ignora virada durante ataque, reação a golpe (hitstun) ou nocaute
+        if (fighterController != null && fighterController.IsInAttackOrHitStun) return;
+
+        // Ignora virada enquanto estiver no ar
+        if (characterController != null && !characterController.isGrounded) return;
+
+        float desiredDirection = opponent.position.x >= transform.position.x ? 1f : -1f;
+
+        // Dispara TriggerTurn180 uma única vez quando o oponente cruzar para o lado oposto
+        if (desiredDirection != lastFacingDirection)
+        {
+            lastFacingDirection = desiredDirection;
+            if (fighterController != null)
+            {
+                fighterController.TriggerTurn180();
+            }
+        }
+
+        // Rotação suave em direção ao oponente para evitar virada instantânea
+        Quaternion targetRotation = Quaternion.Euler(0f, desiredDirection > 0f ? 90f : -90f, 0f);
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, turnSpeed * Time.deltaTime);
     }
 }

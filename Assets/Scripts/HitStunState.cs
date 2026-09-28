@@ -34,7 +34,11 @@ public class HitStunState : IFighterState
 
     public void Update(FighterController fighter)
     {
-        elapsedTime += Time.deltaTime;
+        // O timer do HitStun só decai quando o hitstop NÃO estiver ativo
+        if (fighter == null || !fighter.IsInHitstop)
+        {
+            elapsedTime += Time.deltaTime;
+        }
 
         // Guarda comandos de ataque recebidos durante o HitStun no buffer (sem cancelar o estado)
         fighter.BufferAttackInput();

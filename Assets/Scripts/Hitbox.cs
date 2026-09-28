@@ -40,6 +40,12 @@ public class Hitbox : MonoBehaviour
     private DamageData currentDamageData;
     private bool isActive;
     private Transform followBone;
+    // O setup armazena a posição de projeto no espaço do lutador. Ao vincular o
+    // osso, ela é convertida uma vez para o espaço local daquele osso; assim a
+    // esfera mantém o deslocamento desejado durante animações e giros.
+    private Vector3 fighterSpaceOffset;
+    private Vector3 boneLocalOffset;
+    private bool hasBoneLocalOffset;
     private Vector3 previousOverlapCenter;
     private bool hasPreviousOverlapCenter;
 
@@ -58,6 +64,7 @@ public class Hitbox : MonoBehaviour
 
     private void Awake()
     {
+        fighterSpaceOffset = transform.localPosition;
         EnsureComponents();
     }
 
@@ -140,7 +147,24 @@ public class Hitbox : MonoBehaviour
         if (followBone == null)
         {
             Debug.LogWarning($"[Hitbox] O osso correspondente ao membro '{limbType}' não foi encontrado no modelo do lutador '{owner.gameObject.name}'. A hitbox permanecerá na posição relativa padrão.");
+            return;
         }
+
+        ConvertFighterSpaceOffsetToBoneSpace();
+    }
+
+    /// <summary>
+    /// Converte o offset autorado no prefab (espaço do lutador) para o espaço
+    /// local do osso. Mantém a mesma posição na pose de vínculo e passa a
+    /// acompanhá-la corretamente quando o osso, o root ou Turn180 se movem.
+    /// </summary>
+    private void ConvertFighterSpaceOffsetToBoneSpace()
+    {
+        if (owner == null || followBone == null) return;
+
+        Vector3 designWorldPosition = owner.transform.TransformPoint(fighterSpaceOffset);
+        boneLocalOffset = followBone.InverseTransformPoint(designWorldPosition);
+        hasBoneLocalOffset = true;
     }
 
     private Transform FindBoneInHierarchy(Transform root, string boneName)
@@ -169,7 +193,8 @@ public class Hitbox : MonoBehaviour
 
         if (followBone != null)
         {
-            transform.position = followBone.position;
+            if (!hasBoneLocalOffset) ConvertFighterSpaceOffsetToBoneSpace();
+            transform.position = followBone.TransformPoint(boneLocalOffset);
             transform.rotation = followBone.rotation;
         }
     }
@@ -367,6 +392,10 @@ public class Hitbox : MonoBehaviour
                 Gizmos.DrawWireCube(box.center, box.size);
             }
         }
+
+        string attackName = owner != null ? owner.GetAttackDebugName(limbType) : "Sem dono";
+        string state = isActive ? "ATIVA" : "inativa";
+        UnityEditor.Handles.Label(transform.position, $"{attackName} · {limbType}\n{state}");
     }
 #endif
 }

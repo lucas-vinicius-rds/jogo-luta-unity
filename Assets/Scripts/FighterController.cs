@@ -135,6 +135,16 @@ public class FighterController : MonoBehaviour
     // Estado ativo
     public IFighterState CurrentState { get; private set; }
 
+    /// <summary>
+    /// Indica se o congelamento de quadros (hitstop) está ativo no momento.
+    /// </summary>
+    public bool IsInHitstop => hitstopCoroutine != null;
+
+    /// <summary>
+    /// Indica se o lutador está em estado de ataque, reação a golpe ou nocaute (ações que travam a virada).
+    /// </summary>
+    public bool IsInAttackOrHitStun => CurrentState is AttackState || CurrentState is HitStunState || CurrentState is KnockoutState;
+
     // Getters públicos
     public FighterMovement Movement => movement;
     public FighterInputConfig InputConfig { get => inputConfig; set => inputConfig = value; }
@@ -154,6 +164,18 @@ public class FighterController : MonoBehaviour
     public FighterAttackTiming CurrentAttackTiming => ActiveAttackType == FighterAttackType.Attack2
         ? secondaryAttackTiming
         : primaryAttackTiming;
+
+    /// <summary>Nome do golpe configurado para a hitbox, usado somente no Gizmo.</summary>
+    public string GetAttackDebugName(HitboxLimb limb)
+    {
+        bool primaryUsesLimb = primaryAttackTiming != null && primaryAttackTiming.hitboxLimb == limb;
+        bool secondaryUsesLimb = secondaryAttackTiming != null && secondaryAttackTiming.hitboxLimb == limb;
+
+        if (primaryUsesLimb && secondaryUsesLimb) return $"{attackAnimName} / {attack2AnimName}";
+        if (primaryUsesLimb) return attackAnimName;
+        if (secondaryUsesLimb) return attack2AnimName;
+        return "Sem golpe";
+    }
     public int CurrentAttackAnimHash => ActiveAttackType == FighterAttackType.Attack2 ? Attack2AnimHash : AttackAnimHash;
     public FighterAttackType ActiveAttackType { get; private set; } = FighterAttackType.Punch;
     public float DefaultHitStunDuration => defaultHitStunDuration;
