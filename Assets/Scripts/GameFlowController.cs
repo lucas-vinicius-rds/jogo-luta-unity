@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 using UnityEditor;
 #endif
 
-/// <summary>Fluxo UnDFight: menu principal, modo, seleção, VS e luta.</summary>
+/// <summary>Fluxo UnDFight: menu principal, modo, seleÃ§Ã£o, VS e luta.</summary>
 public sealed class GameFlowController : MonoBehaviour
 {
     private enum FlowScreen { Main, Mode, Select, VS, Fight, Victory }
@@ -22,8 +22,14 @@ public sealed class GameFlowController : MonoBehaviour
     public GameObject[] CharacterPrefabs => characterPrefabs;
     public static string[] CharacterDisplayNames => DisplayNames;
     public static GameFlowController Instance => instance;
+    public bool HasInitialTransforms => hasInitialTransforms;
 
     private static GameFlowController instance;
+    private Vector3 initialPlayerPosition;
+    private Quaternion initialPlayerRotation;
+    private Vector3 initialOpponentPosition;
+    private Quaternion initialOpponentRotation;
+    private bool hasInitialTransforms;
     private static GameMode pendingMode;
     private static int pendingPlayer;
     private static int pendingOpponent;
@@ -174,7 +180,11 @@ public sealed class GameFlowController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             if (choosingOpponent) choosingOpponent = false;
-            else screen = FlowScreen.Mode;
+            else
+            {
+                SetMainCameraPreviewVisibility(false);
+                screen = FlowScreen.Mode;
+            }
         }
 
         if (Input.GetKeyDown(KeyCode.LeftArrow)) MoveFocus(-1, 0);
@@ -247,7 +257,8 @@ public sealed class GameFlowController : MonoBehaviour
         confirmationPulse = 0f;
         previewPlayer = previewOpponent = -1;
         screen = FlowScreen.Select;
-        SetMainCameraPreviewVisibility(false);
+        // Habilita as camadas de preview na cÃ¢mera apenas durante a tela de seleÃ§Ã£o
+        SetMainCameraPreviewVisibility(true);
         RefreshPreviews();
         CreateCardPreviews();
     }
@@ -315,7 +326,12 @@ public sealed class GameFlowController : MonoBehaviour
         GUI.backgroundColor = Color.white;
         if (GUI.Button(new Rect(52, 781, 190, 54), "ESC   VOLTAR", bottomButtonStyle))
         {
-            if (choosingOpponent) choosingOpponent = false; else screen = FlowScreen.Mode;
+            if (choosingOpponent) choosingOpponent = false;
+            else
+            {
+                SetMainCameraPreviewVisibility(false);
+                screen = FlowScreen.Mode;
+            }
         }
         if (GUI.Button(new Rect(270, 781, 218, 54), "R   ALEATORIO", bottomButtonStyle)) SelectRandomFighter();
         GUIStyle navigationStyle = new GUIStyle(subtitleStyle) { fontSize = 17 };
@@ -413,7 +429,7 @@ public sealed class GameFlowController : MonoBehaviour
         GUI.Label(new Rect(0, Screen.height * .28f, Screen.width, 90), DisplayNames[pendingPlayer], titleStyle);
         GUIStyle vsStyle = new GUIStyle(titleStyle) { fontSize = Mathf.RoundToInt(titleStyle.fontSize * 1.8f), normal = { textColor = new Color(.35f, .78f, 1f) } };
         GUI.Label(new Rect(0, Screen.height * .44f, Screen.width, 120), "VS", vsStyle);
-        GUI.Label(new Rect(0, Screen.height * .62f, Screen.width, 90), DisplayNames[pendingOpponent] + (pendingMode == GameMode.Cpu ? "  • CPU" : "  • PLAYER 2"), titleStyle);
+        GUI.Label(new Rect(0, Screen.height * .62f, Screen.width, 90), DisplayNames[pendingOpponent] + (pendingMode == GameMode.Cpu ? "  â€¢ CPU" : "  â€¢ PLAYER 2"), titleStyle);
     }
 
     private void DrawVictory()
@@ -543,10 +559,7 @@ public sealed class GameFlowController : MonoBehaviour
     {
         if (victoryOption == 0)
         {
-            victoryShown = false;
-            SetupFight();
-            screen = FlowScreen.VS;
-            vsUntil = Time.unscaledTime + 1.5f;
+            Rematch();
         }
         else if (victoryOption == 1)
         {
@@ -558,6 +571,7 @@ public sealed class GameFlowController : MonoBehaviour
             victoryShown = false;
             RemoveSceneFighters();
             screen = FlowScreen.Main;
+            SetMainCameraPreviewVisibility(false);
         }
     }
 
@@ -700,7 +714,7 @@ public sealed class GameFlowController : MonoBehaviour
         {
             if (player != null) Destroy(player);
             if (opponent != null) Destroy(opponent);
-            Debug.LogError("UnDFight: não foi possível instanciar os prefabs dos lutadores selecionados.");
+            Debug.LogError("UnDFight: nÃ£o foi possÃ­vel instanciar os prefabs dos lutadores selecionados.");
             screen = FlowScreen.Select;
             return;
         }
@@ -708,10 +722,20 @@ public sealed class GameFlowController : MonoBehaviour
         opponent.name = (pendingMode == GameMode.Cpu ? "CPU_" : "Player2_") + DisplayNames[pendingOpponent];
         player.transform.SetPositionAndRotation(new Vector3(-2.5f, 0f, 0f), Quaternion.Euler(0f, 90f, 0f));
         opponent.transform.SetPositionAndRotation(new Vector3(2.5f, 0f, 0f), Quaternion.Euler(0f, -90f, 0f));
+
+        // Guarda posições e rotações iniciais dos lutadores (Bug A)
+        initialPlayerPosition = player.transform.position;
+        initialPlayerRotation = player.transform.rotation;
+        initialOpponentPosition = opponent.transform.position;
+        initialOpponentRotation = opponent.transform.rotation;
+        hasInitialTransforms = true;
+
         FighterMovement pm = player.GetComponent<FighterMovement>();
         FighterMovement om = opponent.GetComponent<FighterMovement>();
         currentPlayer = player.GetComponent<FighterController>();
         currentOpponent = opponent.GetComponent<FighterController>();
+        if (currentPlayer != null && currentPlayer.HealthSystem != null) currentPlayer.HealthSystem.OnKnockout -= OnFighterKnockout;
+        if (currentOpponent != null && currentOpponent.HealthSystem != null) currentOpponent.HealthSystem.OnKnockout -= OnFighterKnockout;
         if (currentPlayer != null && currentPlayer.HealthSystem != null) currentPlayer.HealthSystem.OnKnockout += OnFighterKnockout;
         if (currentOpponent != null && currentOpponent.HealthSystem != null) currentOpponent.HealthSystem.OnKnockout += OnFighterKnockout;
         pm.IsPlayerControlled = true; om.IsPlayerControlled = false;
@@ -720,30 +744,125 @@ public sealed class GameFlowController : MonoBehaviour
         else opponent.AddComponent<LocalPlayerTwoInput>();
         TekkenCamera camera = FindAnyObjectByType<TekkenCamera>();
         if (camera != null) { camera.Fighter1 = player.transform; camera.Fighter2 = opponent.transform; }
-        SetMainCameraPreviewVisibility(true);
+
+        // Remove as camadas de preview da câmera de gameplay durante o combate (Bug B)
+        SetMainCameraPreviewVisibility(false);
     }
 
+    /// <summary>
+    /// Reinicia a partida atual mantendo os lutadores, resetando saúde, estado e posições.
+    /// </summary>
+    public void Rematch()
+    {
+        victoryShown = false;
+        ResetRound();
+        screen = FlowScreen.Fight;
+    }
+
+    /// <summary>
+    /// Reseta as posições, rotações, física e estados dos lutadores para o início do round.
+    /// </summary>
+    public void ResetRound()
+    {
+        if (currentPlayer != null && hasInitialTransforms)
+        {
+            ResetFighterPhysicsAndState(currentPlayer, initialPlayerPosition, initialPlayerRotation);
+        }
+
+        if (currentOpponent != null && hasInitialTransforms)
+        {
+            ResetFighterPhysicsAndState(currentOpponent, initialOpponentPosition, initialOpponentRotation);
+        }
+
+        // Garante que as camadas de preview continuem desativadas na câmera de combate
+        SetMainCameraPreviewVisibility(false);
+    }
+
+    /// <summary>
+    /// Restaura o transform (posição e rotação), zera velocidades físicas e reseta estados de um lutador.
+    /// </summary>
+    public static void ResetFighterPhysicsAndState(FighterController fighter, Vector3 initialPosition, Quaternion initialRotation)
+    {
+        if (fighter == null) return;
+
+        // Desativa temporariamente o CharacterController para mover o Transform sem conflito de colisão
+        CharacterController cc = fighter.GetComponent<CharacterController>();
+        if (cc != null) cc.enabled = false;
+
+        fighter.transform.SetPositionAndRotation(initialPosition, initialRotation);
+
+        if (cc != null) cc.enabled = true;
+
+        // Zera velocidade e rotação de Rigidbody, se houver
+        Rigidbody rb = fighter.GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
+
+        // Reseta movimento e física customizada
+        FighterMovement movement = fighter.GetComponent<FighterMovement>();
+        if (movement != null)
+        {
+            movement.ResetMotion();
+            movement.CanMove = true;
+        }
+
+        // Reseta saúde e estado de combate
+        if (fighter.HealthSystem != null)
+        {
+            fighter.HealthSystem.ResetHealth();
+        }
+
+        fighter.DisableAllHitboxes();
+        fighter.ClearAttackBuffer();
+        fighter.ChangeState(fighter.NeutralState);
+    }
+
+    /// <summary>
+    /// Controla a visibilidade das camadas de preview (layers 20 a 30) na câmera principal/gameplay.
+    /// Garante que fiquem visíveis apenas na tela de seleção e nunca vazem durante o combate.
+    /// </summary>
     private void SetMainCameraPreviewVisibility(bool visible)
     {
-        Camera mainCamera = Camera.main;
-        if (mainCamera == null) return;
-        int previewLayers = 0;
-        for (int layer = 20; layer <= 30; layer++) previewLayers |= 1 << layer;
-        mainCamera.cullingMask = visible ? mainCamera.cullingMask | previewLayers : mainCamera.cullingMask & ~previewLayers;
+        Camera targetCamera = Camera.main;
+        if (targetCamera == null)
+        {
+            TekkenCamera tc = FindAnyObjectByType<TekkenCamera>();
+            if (tc != null) targetCamera = tc.GetComponent<Camera>();
+        }
+
+        if (targetCamera == null) return;
+
+        int previewMask = 0;
+        for (int layer = 20; layer <= 30; layer++)
+        {
+            previewMask |= (1 << layer);
+        }
+
+        if (visible)
+        {
+            targetCamera.cullingMask |= previewMask;
+        }
+        else
+        {
+            targetCamera.cullingMask &= ~previewMask;
+        }
     }
 
     private GameObject InstantiatePrefab(int index)
     {
         if (characterPrefabs == null || index < 0 || index >= characterPrefabs.Length)
         {
-            Debug.LogError("UnDFight: índice de personagem inválido: " + index);
+            Debug.LogError("UnDFight: Ã­ndice de personagem invÃ¡lido: " + index);
             return null;
         }
 
         UnityEngine.Object source = characterPrefabs[index];
         if (source == null)
         {
-            Debug.LogError("UnDFight: prefab vazio no índice " + index);
+            Debug.LogError("UnDFight: prefab vazio no Ã­ndice " + index);
             return null;
         }
 

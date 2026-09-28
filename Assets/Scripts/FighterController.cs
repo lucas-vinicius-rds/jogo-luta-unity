@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -770,6 +770,12 @@ public class FighterController : MonoBehaviour
 
     public void ResetMatch()
     {
+        // Se o fluxo da partida estiver ativo, reseta posições, rotações e estados via GameFlowController (Bug A)
+        if (GameFlowController.Instance != null && GameFlowController.Instance.HasInitialTransforms)
+        {
+            GameFlowController.Instance.ResetRound();
+            return;
+        }
         ClearAttackBuffer();
         if (healthSystem != null) healthSystem.ResetHealth();
         if (movement != null) movement.ResetMotion();
