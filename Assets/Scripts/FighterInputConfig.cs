@@ -29,6 +29,11 @@ public class FighterInputConfig
     [Tooltip("Índice do controle (0 para primeiro gamepad, 1 para segundo gamepad).")]
     [SerializeField] private int gamepadIndex = 0;
 
+    [Header("Injeção / Simulação de Entradas (Harness de Teste / IA)")]
+    private Vector2 simulatedMovement;
+    private bool simulatedPunch;
+    private bool simulatedAttack2;
+
     public int PlayerIndex => playerIndex;
     public Key MoveUp => moveUp;
     public Key MoveDown => moveDown;
@@ -40,11 +45,21 @@ public class FighterInputConfig
     public Key Attack2KeyAlt => attack2KeyAlt;
     public int GamepadIndex => gamepadIndex;
 
+    public Vector2 SimulatedMovement { get => simulatedMovement; set => simulatedMovement = value; }
+    public bool SimulatedPunch { get => simulatedPunch; set => simulatedPunch = value; }
+    public bool SimulatedAttack2 { get => simulatedAttack2; set => simulatedAttack2 = value; }
+
     /// <summary>
     /// Lê a entrada de movimentação combinando teclado e gamepad atribuído.
     /// </summary>
     public Vector2 ReadMovement()
     {
+        // 0. Injeção de movimento simulado (harness de teste / IA)
+        if (simulatedMovement.sqrMagnitude > 0.001f)
+        {
+            return Vector2.ClampMagnitude(simulatedMovement, 1f);
+        }
+
         Vector2 input = Vector2.zero;
 
         // Leitura de teclado
@@ -78,6 +93,31 @@ public class FighterInputConfig
     public FighterAttackType ReadAttack(ref bool wasPunchHeld, ref bool wasAttack2Held, out string detectedInput)
     {
         detectedInput = "Nenhum";
+
+        // 0. Leitura de ataques simulados (harness de teste) com edge-detection idêntico ao hardware
+        if (simulatedPunch || simulatedAttack2)
+        {
+            bool punchDown = simulatedPunch;
+            bool attack2Down = simulatedAttack2;
+
+            bool punchTriggered = punchDown && !wasPunchHeld;
+            bool attack2Triggered = attack2Down && !wasAttack2Held;
+
+            wasPunchHeld = punchDown;
+            wasAttack2Held = attack2Down;
+
+            if (attack2Triggered)
+            {
+                detectedInput = $"P{playerIndex} Simulated Attack2";
+                return FighterAttackType.Attack2;
+            }
+
+            if (punchTriggered)
+            {
+                detectedInput = $"P{playerIndex} Simulated Punch";
+                return FighterAttackType.Punch;
+            }
+        }
 
         // 1. Leitura no teclado
         if (Keyboard.current != null)

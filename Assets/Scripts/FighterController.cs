@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -151,6 +151,9 @@ public class FighterController : MonoBehaviour
     public HealthSystem HealthSystem => healthSystem;
     public Animator Animator => animator;
     public float AttackDuration => attackDuration;
+    public float SecondaryAttackDuration => secondaryAttackDuration;
+    public FighterAttackTiming PrimaryAttackTiming => primaryAttackTiming;
+    public FighterAttackTiming SecondaryAttackTiming => secondaryAttackTiming;
     public float CurrentAttackDuration
     {
         get

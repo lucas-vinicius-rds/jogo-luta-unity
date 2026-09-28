@@ -11,6 +11,7 @@ Este registro é atualizado a cada nova tarefa para garantir a rastreabilidade e
 2. [Ciclo 2 (28/09/2026) - Correção de Hurtbox ao Agachar, Vínculo de Hitboxes a Ossos e Debug Gizmos](#-ciclo-2-28092026---correção-de-hurtbox-ao-agachar-vínculo-de-hitboxes-a-ossos-e-debug-gizmos)
 3. [Ciclo 3 (28/09/2026) - Timing de HitStun no Hitstop e Transição Suave de Virada (Turn180)](#-ciclo-3-28092026---timing-de-hitstun-no-hitstop-e-transição-suave-de-virada-turn180)
 4. [Ciclo 4 (28/09/2026) - Offsets de Hitbox no Espaço do Osso](#-ciclo-4-28092026---offsets-de-hitbox-no-espaço-do-osso)
+5. [Ciclo 5 (28/09/2026) - Harness de Teste Automático de Combate (AutoFightTester - FASE 1)](#-ciclo-5-28092026---harness-de-teste-automático-de-combate-autofighttester---fase-1)
 
 ---
 
@@ -52,82 +53,57 @@ Este registro é atualizado a cada nova tarefa para garantir a rastreabilidade e
 2. **Turn180 e Virada Suave (Bug B):** O método `TriggerTurn180()` existia no controller mas nunca era chamado, enquanto `FaceOpponent()` em `FighterMovement.cs` girava o lutador instantaneamente (snap abrupto de 180°). Fazer `FaceOpponent()` detectar quando o oponente cruza de lado, disparar `TriggerTurn180()` sem entrar em loop e rotacionar o personagem de forma suave com `Quaternion.RotateTowards`, ignorando a virada durante ataques, atordoamento ou saltos.
 3. **Validação do Animator:** Verificar a existência do estado e de triggers no `BaseFighter.controller`.
 
----
-
 ### 🛠 Alterações Realizadas
-
-#### 1. Pausa do Temporizador de HitStun durante Hitstop (Bug A)
-- **Problema:** Em `HitStunState.cs`, `elapsedTime += Time.deltaTime` era somado incondicionalmente a cada frame, consumindo a janela de atordoamento enquanto os lutadores estavam congelados no impacto.
-- **Solução:**
-  - Em [FighterController.cs](file:///D:/Programas%20SSD/Unity/Unity%20Projects/Teste%20antigravity/Assets/Scripts/FighterController.cs), exposta a propriedade booleana:
-    ```csharp
-    public bool IsInHitstop => hitstopCoroutine != null;
-    ```
-    Como o hitstop é gerido por `hitstopCoroutine = StartCoroutine(HitstopRoutine(duration))`, essa propriedade reflete exatamente o período de congelamento sem interferir no tempo global (`Time.timeScale`).
-  - Em [HitStunState.cs](file:///D:/Programas%20SSD/Unity/Unity%20Projects/Teste%20antigravity/Assets/Scripts/HitStunState.cs), a contagem do tempo decorrido foi condicionada:
-    ```csharp
-    if (fighter == null || !fighter.IsInHitstop)
-    {
-        elapsedTime += Time.deltaTime;
-    }
-    ```
-    Desta forma, todo o tempo de hitstop é preservado e a vítima cumpre integralmente a duração de `stunDuration` após o término do congelamento.
-
-#### 2. Detecção de Cruzamento de Lado e Rotação Suave com Turn180 (Bug B)
-- **Problema:** `FaceOpponent()` aplicava rotação instantânea (`transform.rotation = Quaternion.Euler(...)`) a cada frame, causando estalos visuais. Além disso, `TriggerTurn180()` não era acionado e o personagem podia girar no meio de um soco ou golpe.
-- **Solução:**
-  - Em [FighterController.cs](file:///D:/Programas%20SSD/Unity/Unity%20Projects/Teste%20antigravity/Assets/Scripts/FighterController.cs), criada a propriedade auxiliar:
-    ```csharp
-    public bool IsInAttackOrHitStun => CurrentState is AttackState || CurrentState is HitStunState || CurrentState is KnockoutState;
-    ```
-  - Em [FighterMovement.cs](file:///D:/Programas%20SSD/Unity/Unity%20Projects/Teste%20antigravity/Assets/Scripts/FighterMovement.cs):
-    - Adicionado campo configurável `turnSpeed` (padrão `720°/s`, realizando a rotação de 180° em ~0.25s) e rastreamento de direção `lastFacingDirection`.
-    - No método `FaceOpponent()`:
-      1. Ignora virada se o lutador estiver no ar (`!characterController.isGrounded`).
-      2. Ignora virada se estiver atacando, em hitstun ou nocauteado (`fighterController.IsInAttackOrHitStun`).
-      3. Quando o oponente cruza para o outro lado (`desiredDirection != lastFacingDirection`), atualiza `lastFacingDirection` e invoca `fighterController.TriggerTurn180()` **uma única vez** (prevenindo loops contínuos de animação).
-      4. Aplica rotação progressiva e fluida via `Quaternion.RotateTowards(transform.rotation, targetRotation, turnSpeed * Time.deltaTime)`.
-    - No `ResetMotion()`, `lastFacingDirection` é sincronizado com a rotação atual.
-
----
+- **Pausa do Temporizador de HitStun durante Hitstop (Bug A):** Propriedade `IsInHitstop => hitstopCoroutine != null` em `FighterController.cs` e avanço condicionado de `elapsedTime` em `HitStunState.cs`.
+- **Virada Suave e Turn180 (Bug B):** Adicionado `turnSpeed = 720°/s`, bloqueio durante ataque/hitstun/ar e acionamento único de `TriggerTurn180()` em `FighterMovement.FaceOpponent()`.
 
 ### ⚠️ Nota Técnica sobre o Animator (BaseFighter.controller)
-
-> [!IMPORTANT]
-> **Existência do Estado vs Parâmetro Trigger no Animator:**
-> - O **Estado** `Turn180` **EXISTE** na camada base do Animator Controller (`BaseFighter.controller`), configurado com a animação de virada e uma transição de saída automática por tempo (`ExitTime: 0.9`) de volta para `Locomotion`.
-> - O **Parâmetro Trigger** com o nome `Turn180` **NÃO EXISTE** na lista de parâmetros do controller (apenas `Punch`, `Attack2`, `Hit`, `Jump`, etc.).
-> - **Como foi resolvido corretamente:** Em conformidade com a arquitetura do projeto, `FighterController.TriggerTurn180()` utiliza `CrossFadeAnimation(Turn180AnimHash, 0.1f)` (`animator.CrossFadeInFixedTime`), acessando o estado diretamente pelo hash numérico. Dessa forma, a animação de virada é disparada com máxima eficiência sem gerar erros de parâmetro inexistente no Unity.
+- O **Estado** `Turn180` **EXISTE** na camada base do Animator Controller (`BaseFighter.controller`), com clipe de virada e transição de saída com Exit Time (0.9) para `Locomotion`.
+- O **Parâmetro Trigger** `Turn180` **NÃO EXISTE**. O controller executa `CrossFadeAnimation(Turn180AnimHash)` diretamente pelo hash numérico do estado.
 
 ---
 
-### 📂 Arquivos Afetados no Ciclo 3
+## 🦴 Ciclo 4: 28/09/2026 - Offsets de Hitbox no Espaço do Osso
 
-| Arquivo | Tipo de Alteração | Descrição |
-|---|---|---|
-| `Assets/Scripts/FighterController.cs` | Modificado | Adicionadas propriedades públicas `IsInHitstop` e `IsInAttackOrHitStun`. |
-| `Assets/Scripts/HitStunState.cs` | Modificado | Pausa do avanço de `elapsedTime` enquanto `fighter.IsInHitstop` for verdadeiro. |
-| `Assets/Scripts/FighterMovement.cs` | Modificado | Rotação suave com `turnSpeed`, bloqueio de virada durante ataque/hitstun e acionamento único de `TriggerTurn180()` na troca de lado. |
-| `REGISTRO_DE_ALTERACOES.md` | Modificado | Atualização do documento com o Ciclo 3 e documentação do Animator. |
-
----
-
-### 🧪 Status de Compilação
-- **dotnet build:** `0 Erros, 0 Avisos de código`.
-- **Unity Editor MCP:** Compilação limpa (`0 erros`).
-
----
-
-## Ciclo 4: 28/09/2026 - Offsets de Hitbox no Espaço do Osso
-
-### Alterações realizadas
+### 🎯 Alterações Realizadas
 - A posição de projeto das hitboxes, criada no espaço do lutador, agora é convertida uma vez para o espaço local do osso em `Hitbox.BindBone()`. A sincronização usa esse offset convertido, em vez de substituir a posição pela origem do osso.
 - O fallback de `HeadHitbox` foi corrigido para um ponto central à frente da cabeça, em vez de reutilizar o offset da mão esquerda.
 - Os Gizmos agora mostram, para cada hitbox, o golpe configurado, o membro e o estado `ATIVA`/`inativa`.
 - O prefab ativo do Player 2 (`EmeraldStrength`) foi alinhado: `BodyHurtbox.height = 2`, igual ao `CharacterController` e ao setup.
 
-### Como testar no Unity
-1. Abra `FightingPrototype`, habilite Gizmos e selecione P1 ou P2.
-2. Execute Attack e Attack2 dos dois lados da arena; as esferas devem ficar deslocadas a partir do membro, não presas na origem do osso.
-3. Cruze os lutadores para disparar Turn180 e repita Attack2; o deslocamento deve acompanhar a nova orientação.
-4. Agache, levante e execute os ataques; a cápsula verde deve coincidir com o `CharacterController` do P2 e retornar à altura normal ao levantar.
+---
+
+## 🤖 Ciclo 5: 28/09/2026 - Harness de Teste Automático de Combate (AutoFightTester - FASE 1)
+
+### 🎯 Objetivos do Ciclo
+1. Criar um harness de testes roteirizados e automatizados (`AutoFightTester.cs`) protegido por `#if UNITY_EDITOR || DEVELOPMENT_BUILD` que execute cenários de combate completos em Play Mode sem intervenção manual.
+2. Injetar inputs nos lutadores pelo caminho real do `FighterController` e `FighterMovement` (através de `FighterInputConfig`), preservando edge-detection e regras de input buffer de HitStun.
+3. Cobrir cenários essenciais:
+   - Locomoção (andar, recuar, agachar e pular).
+   - Cruzamento de lado e acionamento suave de `Turn180`.
+   - Golpes primários e secundários que erram (*Whiff*).
+   - Golpes primários e secundários que acertam (*Hit* com *Hitstop* e *HitStun*).
+   - Golpes agachados e no ar.
+   - Golpes desferidos pelo Player 2.
+   - Rematch e reset de posições/estados.
+4. Coletar e exportar telemetria quadro a quadro em `Logs/AutoFight_Telemetry.csv` e `Logs/AutoFight_Telemetry.json`.
+5. Salvar screenshots dos momentos de Início, Meio e Fim dos golpes em `Logs/Screenshots/` com visualização 3D de cápsula verde translúcida (Hurtbox), esferas laranja (Hitboxes inativas) e esferas vermelho vivo (Hitbox ativa no impacto).
+
+### 🛠 Alterações Realizadas
+- **FighterInputConfig.cs:** Adicionadas propriedades de injeção de input simulado (`SimulatedMovement`, `SimulatedPunch`, `SimulatedAttack2`) com edge-detection idêntico ao hardware físico, sem pular nenhuma verificação lógica do `FighterController`.
+- **GameFlowController.cs:** Adicionado método `StartDirectFightForTesting()` para permitir início instantâneo da luta em modo local/teste, evitando travamento na tela de menu ou destruição indevida dos lutadores da cena.
+- **Assets/Scripts/Debug/AutoFightTester.cs:** Implementado o script completo de automação com 9 cenários de teste, gravação de telemetria completa (FSM, Animator, parâmetros, posições, hitboxes e hurtboxes), captura automática de PNGs e renderização visual in-camera das caixas de colisão.
+
+### 📂 Arquivos Afetados no Ciclo 5
+| Arquivo | Tipo de Alteração | Descrição |
+|---|---|---|
+| `Assets/Scripts/FighterInputConfig.cs` | Modificado | Suporte a injeção de comandos simulados com edge-detection. |
+| `Assets/Scripts/GameFlowController.cs` | Modificado | Adicionado método `StartDirectFightForTesting()`. |
+| `Assets/Scripts/Debug/AutoFightTester.cs` | Criado | Script do harness de testes automatizados com telemetria e screenshots. |
+| `REGISTRO_DE_ALTERACOES.md` | Modificado | Documentação do Ciclo 5. |
+
+### 🧪 Status de Compilação e Execução
+- **Compilação Unity MCP:** `0 Erros, 0 Avisos`.
+- **Execução do Harness:** Bateria de testes concluída com sucesso:
+  - **2343 frames** de telemetria gravados em CSV e JSON dentro de `Logs/`.
+  - **21 screenshots** salvas em `Logs/Screenshots/` com caixas de colisão 3D claramente visíveis.

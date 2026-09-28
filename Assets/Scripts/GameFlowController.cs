@@ -19,6 +19,10 @@ public sealed class GameFlowController : MonoBehaviour
     [SerializeField] private AnimationClip[] victoryClips;
     [SerializeField] private AnimationClip defeatedClip;
 
+    public GameObject[] CharacterPrefabs => characterPrefabs;
+    public static string[] CharacterDisplayNames => DisplayNames;
+    public static GameFlowController Instance => instance;
+
     private static GameFlowController instance;
     private static GameMode pendingMode;
     private static int pendingPlayer;
@@ -750,5 +754,25 @@ public sealed class GameFlowController : MonoBehaviour
     {
         foreach (FighterController fighter in FindObjectsByType<FighterController>(FindObjectsInactive.Include))
             Destroy(fighter.gameObject);
+    }
+
+    /// <summary>
+    /// Inicia uma luta imediatamente com os lutadores especificados para o harness de teste automatizado.
+    /// </summary>
+    public static void StartDirectFightForTesting(int p1Index = 0, int p2Index = 1)
+    {
+        pendingMode = GameMode.Local;
+        pendingPlayer = p1Index;
+        pendingOpponent = p2Index;
+        pendingFight = true;
+
+        if (instance != null)
+        {
+            instance.DestroyPreview(ref instance.previewPlayerObject, ref instance.previewPlayerCamera, ref instance.previewPlayerTexture);
+            instance.DestroyPreview(ref instance.previewOpponentObject, ref instance.previewOpponentCamera, ref instance.previewOpponentTexture);
+            instance.DestroyCardPreviews();
+            instance.SetupFight();
+            instance.screen = FlowScreen.Fight;
+        }
     }
 }
