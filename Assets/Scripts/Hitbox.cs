@@ -26,12 +26,17 @@ public class Hitbox : MonoBehaviour
     [Tooltip("Lutador dono desta hitbox.")]
     [SerializeField] private FighterController owner;
 
+    [Tooltip("Use apenas em rigs com ossos consistentes. Por padrão a hitbox usa o volume local configurado à frente do lutador.")]
+    [SerializeField] private bool followAnimatedBone = false;
+
     private Collider col;
     private SphereCollider sphereCol;
     private BoxCollider boxCol;
     private DamageData currentDamageData;
     private bool isActive;
     private Transform followBone;
+    private Vector3 previousOverlapCenter;
+    private bool hasPreviousOverlapCenter;
 
     // Buffer pré-alocado por instância — NÃO pode ser estático: múltiplos Hitbox no mesmo
     // frame sobrescreveriam o buffer um do outro, causando dano perdido silenciosamente
@@ -52,7 +57,7 @@ public class Hitbox : MonoBehaviour
     private void Start()
     {
         EnsureComponents();
-        BindBone();
+        if (followAnimatedBone) BindBone();
     }
 
     private void EnsureComponents()
@@ -77,6 +82,7 @@ public class Hitbox : MonoBehaviour
 
     public void BindBone()
     {
+        if (!followAnimatedBone) return;
         if (followBone != null) return;
         EnsureComponents();
         if (owner == null) return;
@@ -103,6 +109,7 @@ public class Hitbox : MonoBehaviour
 
     private void SyncBonePosition()
     {
+        if (!followAnimatedBone) return;
         if (followBone == null)
         {
             BindBone();
@@ -134,6 +141,18 @@ public class Hitbox : MonoBehaviour
         // Atualiza a posição com o osso atual antes de checar sobreposição
         SyncBonePosition();
 
+        // Guarda a primeira posição para que os frames seguintes possam testar
+        // todo o trajeto do membro, e não apenas sua posição no fim do frame.
+        if (TryGetSphereWorld(out Vector3 center, out _))
+        {
+            previousOverlapCenter = center;
+            hasPreviousOverlapCenter = true;
+        }
+        else
+        {
+            hasPreviousOverlapCenter = false;
+        }
+
         // Amostragem imediata no primeiro frame ativo
         CheckOverlaps();
     }
@@ -146,6 +165,7 @@ public class Hitbox : MonoBehaviour
         isActive = false;
         if (col != null) col.enabled = false;
         hitFighters.Clear();
+        hasPreviousOverlapCenter = false;
     }
 
     private void Update()
@@ -173,24 +193,61 @@ public class Hitbox : MonoBehaviour
 
         int count = 0;
 
-        if (sphereCol != null)
+        if (TryGetSphereWorld(out Vector3 worldCenter, out float radius))
         {
-            Vector3 worldCenter = transform.TransformPoint(sphereCol.center);
-            float baseRadius = sphereCol.radius * Mathf.Max(transform.lossyScale.x, transform.lossyScale.y, transform.lossyScale.z);
-            float radius = Mathf.Max(0.40f, baseRadius);
             count = Physics.OverlapSphereNonAlloc(worldCenter, radius, overlapResults, ~0, QueryTriggerInteraction.Collide);
+            for (int i = 0; i < count; i++)
+            {
+                ProcessHit(overlapResults[i]);
+            }
+
+            // Golpes de K, principalmente chutes voadores, deslocam o pé muito
+            // entre dois Updates. A esfera isolada podia passar pelo corpo do
+            // alvo sem nunca registrar uma sobreposição. Varremos o segmento
+            // entre as duas poses do osso para manter a hitbox contínua.
+            if (hasPreviousOverlapCenter && (worldCenter - previousOverlapCenter).sqrMagnitude > 0.0001f)
+            {
+                count = Physics.OverlapCapsuleNonAlloc(
+                    previousOverlapCenter,
+                    worldCenter,
+                    radius,
+                    overlapResults,
+                    ~0,
+                    QueryTriggerInteraction.Collide);
+                for (int i = 0; i < count; i++)
+                {
+                    ProcessHit(overlapResults[i]);
+                }
+            }
+
+            previousOverlapCenter = worldCenter;
+            hasPreviousOverlapCenter = true;
+            return;
         }
-        else if (boxCol != null)
+
+        if (boxCol != null)
         {
-            Vector3 worldCenter = transform.TransformPoint(boxCol.center);
+            Vector3 boxCenter = transform.TransformPoint(boxCol.center);
             Vector3 halfExtents = Vector3.Scale(boxCol.size * 0.5f, transform.lossyScale);
-            count = Physics.OverlapBoxNonAlloc(worldCenter, halfExtents, overlapResults, transform.rotation, ~0, QueryTriggerInteraction.Collide);
+            count = Physics.OverlapBoxNonAlloc(boxCenter, halfExtents, overlapResults, transform.rotation, ~0, QueryTriggerInteraction.Collide);
         }
 
         for (int i = 0; i < count; i++)
         {
             ProcessHit(overlapResults[i]);
         }
+    }
+
+    private bool TryGetSphereWorld(out Vector3 worldCenter, out float radius)
+    {
+        worldCenter = default;
+        radius = 0f;
+        if (sphereCol == null) return false;
+
+        worldCenter = transform.TransformPoint(sphereCol.center);
+        float baseRadius = sphereCol.radius * Mathf.Max(transform.lossyScale.x, transform.lossyScale.y, transform.lossyScale.z);
+        radius = Mathf.Max(0.40f, baseRadius);
+        return true;
     }
 
     private void OnTriggerEnter(Collider other)

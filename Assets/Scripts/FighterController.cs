@@ -74,6 +74,14 @@ public class FighterController : MonoBehaviour
     [Tooltip("Ação de ataque do novo Input System. Opcional: cria fallback automático se nulo.")]
     [SerializeField] private InputActionReference attackActionReference;
 
+    [Header("Input Configuration")]
+    [Tooltip("Configuração centralizada de mapeamento de entrada para este lutador.")]
+    [SerializeField] private FighterInputConfig inputConfig;
+
+    [Header("Input Buffer")]
+    [Tooltip("Janela de tolerância para armazenar comando de ataque durante HitStun (em segundos).")]
+    [SerializeField, Min(0.01f)] private float hitStunInputBufferDuration = 0.15f;
+
     [Header("Animation State / Trigger Names")]
     [SerializeField] private string neutralAnimName = "Idle";
     [SerializeField] private string attackAnimName = "Attack";
@@ -93,6 +101,14 @@ public class FighterController : MonoBehaviour
     private InputAction runtimeAttack2Action;
     private Coroutine hitstopCoroutine;
     private readonly Dictionary<HitboxLimb, Hitbox> hitboxMap = new Dictionary<HitboxLimb, Hitbox>();
+
+    // Input buffer para registrar comandos durante HitStun
+    private FighterAttackType bufferedAttackCommand = FighterAttackType.None;
+    private float bufferedAttackTimestamp = -1f;
+
+    // Edge-detection para inputs
+    private bool wasPunchHeld;
+    private bool wasAttack2Held;
 
     // Edge-detection para inputs de hardware
     private bool wasSpaceHeld;
@@ -121,6 +137,7 @@ public class FighterController : MonoBehaviour
 
     // Getters públicos
     public FighterMovement Movement => movement;
+    public FighterInputConfig InputConfig { get => inputConfig; set => inputConfig = value; }
     public HealthSystem HealthSystem => healthSystem;
     public Animator Animator => animator;
     public float AttackDuration => attackDuration;
@@ -157,6 +174,14 @@ public class FighterController : MonoBehaviour
         }
 
         RefreshHitboxCache();
+
+        // Sincroniza configuração de entrada com o FighterMovement
+        if (inputConfig == null)
+        {
+            inputConfig = movement != null && movement.InputConfig != null
+                ? movement.InputConfig
+                : FighterInputConfig.CreatePlayerOne();
+        }
 
         NeutralAnimHash = Animator.StringToHash(neutralAnimName);
         AttackAnimHash = Animator.StringToHash(attackAnimName);
@@ -297,6 +322,62 @@ public class FighterController : MonoBehaviour
                 : FighterAttackType.Punch;
             ChangeState(AttackState);
         }
+    }
+
+    /// <summary>
+    /// Guarda o último comando de ataque pressionado durante o HitStun no buffer.
+    /// Não cancela o HitStun.
+    /// </summary>
+    public void BufferAttackInput()
+    {
+        FighterAttackType attack = ReadAttackCommand();
+        if (attack != FighterAttackType.None)
+        {
+            bufferedAttackCommand = attack;
+            bufferedAttackTimestamp = Time.time;
+        }
+    }
+
+    /// <summary>
+    /// Verifica se há um comando de ataque no buffer que ainda não expirou.
+    /// </summary>
+    public bool HasBufferedAttack()
+    {
+        if (bufferedAttackCommand == FighterAttackType.None) return false;
+
+        if (Time.time - bufferedAttackTimestamp <= hitStunInputBufferDuration)
+        {
+            return true;
+        }
+
+        // Buffer expirou
+        ClearAttackBuffer();
+        return false;
+    }
+
+    /// <summary>
+    /// Consome e retorna o comando de ataque armazenado no buffer, limpando-o em seguida.
+    /// </summary>
+    public FighterAttackType ConsumeBufferedAttack()
+    {
+        if (HasBufferedAttack())
+        {
+            FighterAttackType attack = bufferedAttackCommand;
+            ClearAttackBuffer();
+            return attack;
+        }
+
+        ClearAttackBuffer();
+        return FighterAttackType.None;
+    }
+
+    /// <summary>
+    /// Limpa o buffer de ataque.
+    /// </summary>
+    public void ClearAttackBuffer()
+    {
+        bufferedAttackCommand = FighterAttackType.None;
+        bufferedAttackTimestamp = -1f;
     }
 
     public void EnableCurrentAttackHitboxes()
@@ -487,34 +568,24 @@ public class FighterController : MonoBehaviour
         if (healthSystem != null && healthSystem.IsDead) return FighterAttackType.None;
         if (movement != null && !movement.IsPlayerControlled) return FighterAttackType.None;
 
-        if (Keyboard.current != null)
+        // Garante sincronia com o InputConfig do Movement
+        if (movement != null && movement.InputConfig != null && inputConfig != movement.InputConfig)
         {
-            bool isSpace = Keyboard.current.spaceKey.isPressed;
-            bool isJ = Keyboard.current.jKey.isPressed;
-            bool isK = Keyboard.current.kKey.isPressed;
-            bool isEnter = Keyboard.current.enterKey.isPressed;
-            bool punchTriggered = (isSpace && !wasSpaceHeld) || (isJ && !wasJHeld) || (isEnter && !wasEnterHeld);
-            bool attack2Triggered = isK && !wasKHeld;
+            inputConfig = movement.InputConfig;
+        }
 
-            wasSpaceHeld = isSpace;
-            wasJHeld = isJ;
-            wasKHeld = isK;
-            wasEnterHeld = isEnter;
-
-            if (attack2Triggered)
+        // Lê comandos de ataque da configuração centralizada do jogador (sem teclas hardcoded nem conflito P1/P2)
+        if (inputConfig != null)
+        {
+            FighterAttackType attack = inputConfig.ReadAttack(ref wasPunchHeld, ref wasAttack2Held, out string detected);
+            if (attack != FighterAttackType.None)
             {
-                lastDetectedInput = "K";
-                return FighterAttackType.Attack2;
-            }
-
-            if (punchTriggered)
-            {
-                lastDetectedInput = isJ ? "J" : (isSpace ? "Espaco" : "Enter");
-                return FighterAttackType.Punch;
+                lastDetectedInput = detected;
+                return attack;
             }
         }
 
-        if (Mouse.current != null)
+        if (Mouse.current != null && (inputConfig == null || inputConfig.PlayerIndex == 1))
         {
             bool isMouse = Mouse.current.leftButton.isPressed;
             bool triggered = isMouse && !wasMouseHeld;
@@ -538,20 +609,6 @@ public class FighterController : MonoBehaviour
             return FighterAttackType.Punch;
         }
 
-        if (Gamepad.current != null)
-        {
-            if (Gamepad.current.buttonWest.wasPressedThisFrame)
-            {
-                lastDetectedInput = "Gamepad Attack2";
-                return FighterAttackType.Attack2;
-            }
-            if (Gamepad.current.buttonSouth.wasPressedThisFrame)
-            {
-                lastDetectedInput = "Gamepad Punch";
-                return FighterAttackType.Punch;
-            }
-        }
-
         return FighterAttackType.None;
     }
 
@@ -568,26 +625,23 @@ public class FighterController : MonoBehaviour
         else
         {
             runtimeAttackAction = new InputAction(name: "Attack", type: InputActionType.Button);
-            runtimeAttackAction.AddBinding("<Keyboard>/space");
-            runtimeAttackAction.AddBinding("<Keyboard>/j");
-            runtimeAttackAction.AddBinding("<Keyboard>/enter");
-            runtimeAttackAction.AddBinding("<Mouse>/leftButton");
+            // Bug C corrigido: buttonSouth exclusivo para Punch (A / Cruz)
             runtimeAttackAction.AddBinding("<Gamepad>/buttonSouth");
-            runtimeAttackAction.AddBinding("<Gamepad>/buttonWest");
             runtimeAttackAction.Enable();
         }
 
         runtimeAttack2Action = new InputAction(name: "Attack2", type: InputActionType.Button);
-        runtimeAttack2Action.AddBinding("<Keyboard>/k");
+        // Bug C corrigido: buttonWest exclusivo para Attack2 (X / Quadrado)
         runtimeAttack2Action.AddBinding("<Gamepad>/buttonWest");
         runtimeAttack2Action.Enable();
     }
 
     private void OnGUI()
     {
-        // Só renderiza o painel no lutador controlado pelo jogador para evitar sobreposição dupla
+        // Só renderiza o painel no lutador controlado pelo jogador 1 para evitar sobreposição dupla
         if (!showOnScreenControls) return;
         if (movement == null || !movement.IsPlayerControlled) return;
+        if (inputConfig != null && inputConfig.PlayerIndex != 1) return;
 
         GUI.color = Color.white;
         var boxStyle = GUI.skin.box;
@@ -691,6 +745,7 @@ public class FighterController : MonoBehaviour
 
     public void ResetMatch()
     {
+        ClearAttackBuffer();
         if (healthSystem != null) healthSystem.ResetHealth();
         if (movement != null) movement.ResetMotion();
         ChangeState(NeutralState);
@@ -702,6 +757,7 @@ public class FighterController : MonoBehaviour
             {
                 if (op.HealthSystem != null) op.HealthSystem.ResetHealth();
                 if (op.Movement != null) op.Movement.ResetMotion();
+                op.ClearAttackBuffer();
                 op.ChangeState(op.NeutralState);
             }
         }

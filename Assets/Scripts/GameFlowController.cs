@@ -689,7 +689,7 @@ public sealed class GameFlowController : MonoBehaviour
         if (currentPlayer != null && currentPlayer.HealthSystem != null) currentPlayer.HealthSystem.OnKnockout -= OnFighterKnockout;
         if (currentOpponent != null && currentOpponent.HealthSystem != null) currentOpponent.HealthSystem.OnKnockout -= OnFighterKnockout;
         victoryShown = false;
-        foreach (FighterController fighter in FindObjectsByType<FighterController>(FindObjectsSortMode.None)) Destroy(fighter.gameObject);
+        foreach (FighterController fighter in FindObjectsByType<FighterController>()) Destroy(fighter.gameObject);
         GameObject player = InstantiatePrefab(pendingPlayer);
         GameObject opponent = InstantiatePrefab(pendingOpponent);
         if (player == null || opponent == null)
@@ -714,7 +714,7 @@ public sealed class GameFlowController : MonoBehaviour
         pm.Opponent = opponent.transform; om.Opponent = player.transform;
         if (pendingMode == GameMode.Cpu) opponent.AddComponent<FighterSparringAI>().Difficulty = AIDifficulty.Easy;
         else opponent.AddComponent<LocalPlayerTwoInput>();
-        TekkenCamera camera = FindFirstObjectByType<TekkenCamera>();
+        TekkenCamera camera = FindAnyObjectByType<TekkenCamera>();
         if (camera != null) { camera.Fighter1 = player.transform; camera.Fighter2 = opponent.transform; }
         SetMainCameraPreviewVisibility(true);
     }
@@ -748,7 +748,7 @@ public sealed class GameFlowController : MonoBehaviour
 
     private void RemoveSceneFighters()
     {
-        foreach (FighterController fighter in FindObjectsByType<FighterController>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+        foreach (FighterController fighter in FindObjectsByType<FighterController>(FindObjectsInactive.Include))
             Destroy(fighter.gameObject);
     }
 }

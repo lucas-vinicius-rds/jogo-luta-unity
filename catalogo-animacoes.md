@@ -11,10 +11,13 @@ atualize também esta tabela.
 | `Fighter_Idle.anim` | Idle base do lutador parado. |
 | `X Bot@Bouncing Fight Idle.fbx` | Idle de luta alternativo, com balanço constante. |
 | `X Bot@Walking.fbx` | Caminhada/locomoção para frente. |
+| `X Bot@Running Backward.fbx` | Recuo / locomoção para trás. |
+| `X Bot@Standing To Crouched.fbx` | Transição de em pé para agachado (ao pressionar S). |
+| `X Bot@Crouched To Standing.fbx` | Transição de agachado para em pé (ao soltar S). |
 | `X Bot@Crouch Walk Forward.fbx` | Deslocamento agachado para frente. |
 | `X Bot@Crouch Walk Back.fbx` | Deslocamento agachado para trás. |
-| `X Bot@Kneeling Down.fbx` | Agachamento parado; entrada/pose de agachar. |
-| `X Bot@Jumping.fbx` | Pulo parado, sem deslocamento horizontal. |
+| `X Bot@Crouching Idle.fbx` | Agachamento parado / postura agachada contínua (ao segurar S). |
+| `X Bot@Jumping1.fbx` | Pulo parado (`jumping1`), sem deslocamento horizontal. |
 | `X Bot@Jump.fbx` | Pulo para trás. |
 | `Pulo pra frente.fbx` | Pulo para frente. |
 | `X Bot@Punching.fbx` | Soco principal atual (`Punch` / ataque primário). |
@@ -42,6 +45,10 @@ atualize também esta tabela.
 | `X Bot@Getting Up.fbx` | Levantar após queda ou recuperação. |
 | `X Bot@Reaction.fbx` | Reação genérica; pode servir para impacto leve ou defesa. |
 | `X Bot@Walking Turn 180.fbx` | Virada de 180 graus durante caminhada. |
+| `X Bot@Kneeling Down.fbx` | Postura de agachamento alternativa (anterior). |
+| `X Bot@Jumping.fbx` | Pulo original parado alternativo (anterior). |
+| `X Bot@Step Backward.fbx` | Passo para trás / recuo curto (disponível para troca). |
+| `X Bot@Walk Backwards.fbx` | Caminhada alternativa para trás (disponível para troca). |
 | `X Bot@Silly Dancing.fbx` | Animação de vitória, menu ou provocação. |
 
 > Observação: o arquivo real se chama `X Bot@Getting Up.fbx`.

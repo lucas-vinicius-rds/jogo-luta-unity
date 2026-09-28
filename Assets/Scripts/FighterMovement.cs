@@ -22,6 +22,9 @@ public class FighterMovement : MonoBehaviour
     [SerializeField, Min(0f)] private float impulseDrag = 9f;
     [SerializeField, Min(1f)] private float maxAttackRootMotionSpeed = 8f;
     [SerializeField] private InputActionReference moveActionReference;
+    [Header("Input Configuration")]
+    [Tooltip("Configuração centralizada de mapeamento de entrada para este lutador.")]
+    [SerializeField] private FighterInputConfig inputConfig;
 
     private CharacterController characterController;
     private Animator animator;
@@ -31,9 +34,14 @@ public class FighterMovement : MonoBehaviour
     private float standingHeight;
     private Vector3 standingCenter;
     private Vector3 horizontalImpulse;
+    // Enquanto estiver no ar, o lutador não deve girar ao cruzar o oponente.
+    // Além de ficar visualmente estranho, a troca de direção no meio do salto
+    // fazia o Animator cair na locomoção antes do pouso.
+    private bool wasGroundedLastFrame;
 
     public Transform Opponent { get => opponent; set => opponent = value; }
     public bool IsPlayerControlled { get => isPlayerControlled; set => isPlayerControlled = value; }
+    public FighterInputConfig InputConfig { get => inputConfig; set => inputConfig = value; }
     public bool CanMove { get; set; } = true;
     public bool IsGrounded => characterController != null && characterController.isGrounded;
     public CharacterController CharacterController => characterController;
@@ -50,6 +58,12 @@ public class FighterMovement : MonoBehaviour
         animator = GetComponent<Animator>();
         standingHeight = characterController.height;
         standingCenter = characterController.center;
+        wasGroundedLastFrame = characterController.isGrounded;
+        // Inicializa configuração padrão para Player 1 caso não atribuída
+        if (inputConfig == null)
+        {
+            inputConfig = FighterInputConfig.CreatePlayerOne();
+        }
         if (isPlayerControlled) InitializeInput();
     }
 
@@ -73,7 +87,12 @@ public class FighterMovement : MonoBehaviour
         CurrentInput = ReadMovementInput();
         HandleJumpAndCrouch(CurrentInput);
         UpdateMovementAnimation(CurrentInput);
-        FaceOpponent();
+        // Mantém a orientação do início do salto. A orientação é atualizada
+        // novamente assim que o CharacterController detectar o pouso.
+        if (characterController.isGrounded || wasGroundedLastFrame)
+        {
+            FaceOpponent();
+        }
 
         float moveSpeed = CurrentMoveDirection >= 0 ? forwardSpeed : backwardSpeed;
         if (!characterController.isGrounded) moveSpeed *= airControl;
@@ -82,6 +101,7 @@ public class FighterMovement : MonoBehaviour
         Vector3 impulseMovement = horizontalImpulse * Time.deltaTime;
         horizontalImpulse = Vector3.MoveTowards(horizontalImpulse, Vector3.zero, impulseDrag * Time.deltaTime);
         MoveSafely(locomotion + impulseMovement + CalculateVerticalMovement(), true);
+        wasGroundedLastFrame = characterController.isGrounded;
     }
 
     private void InitializeInput()
@@ -109,13 +129,14 @@ public class FighterMovement : MonoBehaviour
         if (!isPlayerControlled) return Vector2.zero;
 
         Vector2 input = Vector2.zero;
-        if (Keyboard.current != null)
-        {
-            if (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed) input.x -= 1f;
+        if (inputConfig != null) input = inputConfig.ReadMovement();
+
+        /*
+            if (Keyboard.current.aKey.isPressed) input.x -= 1f;
             if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed) input.x += 1f;
             if (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed) input.y += 1f;
             if (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed) input.y -= 1f;
-        }
+        */
         if (input.sqrMagnitude < 0.001f && runtimeMoveAction?.enabled == true)
             input = runtimeMoveAction.ReadValue<Vector2>();
         return Vector2.ClampMagnitude(input, 1f);
@@ -206,7 +227,10 @@ public class FighterMovement : MonoBehaviour
     {
         if (characterController == null) return;
         float desiredX = Mathf.Clamp(transform.position.x + delta.x, -arenaHalfWidth, arenaHalfWidth);
-        if (respectOpponentSpacing && opponent != null)
+        // A distância mínima é uma regra de combate no chão. Aplicá-la no ar
+        // impedia atravessar o oponente durante um salto e deixava o estado de
+        // animação preso na caminhada ao trocar de lado.
+        if (respectOpponentSpacing && opponent != null && characterController.isGrounded)
         {
             float diff = transform.position.x - opponent.position.x;
             // Usa epsilon para evitar side=0 quando personagens se sobrepõem exatamente

@@ -15,8 +15,9 @@ public class KnockoutState : IFighterState
             fighter.Movement.CanMove = false;
         }
 
-        // 2. Desativa quaisquer hitboxes ativas
+        // 2. Desativa quaisquer hitboxes ativas e limpa buffer
         fighter.DisableAllHitboxes();
+        fighter.ClearAttackBuffer();
 
         // 3. Executa a animação "Dying" de morte/queda no chão
         fighter.CrossFadeAnimation(fighter.KnockoutAnimHash, 0.1f);

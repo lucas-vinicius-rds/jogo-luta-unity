@@ -23,6 +23,9 @@ public class HitStunState : IFighterState
         }
         fighter.DisableAllHitboxes();
 
+        // Limpa comandos anteriores ao iniciar um novo atordoamento
+        fighter.ClearAttackBuffer();
+
         elapsedTime = 0f;
 
         // Dispara a animação "Hit To Body"
@@ -32,6 +35,9 @@ public class HitStunState : IFighterState
     public void Update(FighterController fighter)
     {
         elapsedTime += Time.deltaTime;
+
+        // Guarda comandos de ataque recebidos durante o HitStun no buffer (sem cancelar o estado)
+        fighter.BufferAttackInput();
 
         // Ao completar a janela de atordoamento, retorna ao Neutro
         if (elapsedTime >= stunDuration)

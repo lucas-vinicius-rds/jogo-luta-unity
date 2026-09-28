@@ -205,8 +205,10 @@ public static class FightingPrototypeSetup
             bool isVictory = lower == "tigas" || lower == "isaac" || lower == "lusca" ||
                              lower == "enomoto" || lower == "jompis" || lower == "gabutas" ||
                              lower == "ricardin";
-            bool shouldLoop = lower.Contains("idle") || lower.EndsWith("@walking") ||
-                              lower.Contains("crouch") || lower.Contains("kneeling down") || isVictory;
+            bool isCrouchTransition = lower.Contains("standing to crouched") || lower.Contains("crouched to standing");
+            bool shouldLoop = (lower.Contains("idle") || lower.EndsWith("@walking") ||
+                              lower.Contains("crouch") || lower.Contains("kneeling down") ||
+                              lower.Contains("backward") || isVictory) && !isCrouchTransition;
             bool isAttack = Characters.Any(character => character.Attack1 == path || character.Attack2 == path);
             bool preserveRootMotion = isAttack || lower.Contains("jump") || lower.Contains("pulo");
             foreach (ModelImporterClipAnimation clip in clips)
@@ -269,13 +271,17 @@ public static class FightingPrototypeSetup
         AnimationClip attack2Clip = LoadClip("Assets/Animations/Mixamo/X Bot@Flying Kick.fbx");
         AnimationClip crouchForwardClip = LoadClip("Assets/Animations/Mixamo/X Bot@Crouch Walk Forward.fbx");
         AnimationClip crouchBackClip = LoadClip("Assets/Animations/Mixamo/X Bot@Crouch Walk Back.fbx");
-        AnimationClip crouchIdleClip = LoadClip("Assets/Animations/Mixamo/X Bot@Kneeling Down.fbx");
-        AnimationClip jumpIdleClip = LoadClip("Assets/Animations/Mixamo/X Bot@Jumping.fbx");
+        AnimationClip crouchIdleClip = LoadClip("Assets/Animations/Mixamo/X Bot@Crouching Idle.fbx");
+        AnimationClip standingToCrouchedClip = LoadClip("Assets/Animations/Mixamo/X Bot@Standing To Crouched.fbx");
+        AnimationClip crouchedToStandingClip = LoadClip("Assets/Animations/Mixamo/X Bot@Crouched To Standing.fbx");
+        AnimationClip walkBackClip = LoadClip("Assets/Animations/Mixamo/X Bot@Running Backward.fbx");
+        AnimationClip jumpIdleClip = LoadClip("Assets/Animations/Mixamo/X Bot@Jumping1.fbx");
         AnimationClip jumpBackClip = LoadClip("Assets/Animations/Mixamo/X Bot@Jump.fbx");
         AnimationClip jumpForwardClip = LoadClip("Assets/Animations/Mixamo/Pulo pra frente.fbx");
 
         AnimatorState idle = AddState(machine, "Idle", idleClip, 1f, new Vector3(220, 30));
         AnimatorState walk = AddState(machine, "Walk", walkClip, 1.35f, new Vector3(430, 30));
+        AnimatorState walkBack = AddState(machine, "WalkBack", walkBackClip, 1.15f, new Vector3(430, -50));
         AnimatorState punch = AddState(machine, "Attack", punchClip, 1f, new Vector3(320, 140));
         AnimatorState attack2 = AddState(machine, "Attack2", attack2Clip, 1f, new Vector3(500, 140));
         AnimatorState hit = AddState(machine, "HitStun", hitClip, hitClip != null ? Mathf.Max(1f, hitClip.length / .55f) : 1f, new Vector3(230, 250));
@@ -284,6 +290,8 @@ public static class FightingPrototypeSetup
         AnimatorState crouchForward = AddState(machine, "CrouchForward", crouchForwardClip, 1.25f, new Vector3(650, 140));
         AnimatorState crouchBack = AddState(machine, "CrouchBack", crouchBackClip, 1.25f, new Vector3(650, 220));
         AnimatorState crouchIdle = AddState(machine, "CrouchIdle", crouchIdleClip, 1f, new Vector3(650, 300));
+        AnimatorState standingToCrouched = AddState(machine, "StandingToCrouched", standingToCrouchedClip, 1.35f, new Vector3(480, 220));
+        AnimatorState crouchedToStanding = AddState(machine, "CrouchedToStanding", crouchedToStandingClip, 1.35f, new Vector3(480, 300));
         const float physicalAirTime = .94f;
         AnimatorState jumpIdle = AddState(machine, "Jumping", jumpIdleClip, jumpIdleClip != null ? jumpIdleClip.length / physicalAirTime : 1f, new Vector3(820, 30));
         AnimatorState jumpBack = AddState(machine, "JumpBack", jumpBackClip, jumpBackClip != null ? jumpBackClip.length / physicalAirTime : 1f, new Vector3(820, 110));
@@ -292,34 +300,124 @@ public static class FightingPrototypeSetup
 
         AddConditionTransition(idle, walk, "Speed", AnimatorConditionMode.Greater, 0.1f, false);
         AddConditionTransition(walk, idle, "Speed", AnimatorConditionMode.Less, 0.1f, false);
+
+        // WalkBack transitions
+        AnimatorStateTransition idleToWalkBack = idle.AddTransition(walkBack);
+        ConfigureTransition(idleToWalkBack, false, 0f, 0.08f);
+        idleToWalkBack.AddCondition(AnimatorConditionMode.Greater, 0.1f, "Speed");
+        idleToWalkBack.AddCondition(AnimatorConditionMode.Less, 0f, "MoveDirection");
+
+        AnimatorStateTransition walkBackToIdle = walkBack.AddTransition(idle);
+        ConfigureTransition(walkBackToIdle, false, 0f, 0.08f);
+        walkBackToIdle.AddCondition(AnimatorConditionMode.Less, 0.1f, "Speed");
+
+        AnimatorStateTransition walkToWalkBack = walk.AddTransition(walkBack);
+        ConfigureTransition(walkToWalkBack, false, 0f, 0.08f);
+        walkToWalkBack.AddCondition(AnimatorConditionMode.Greater, 0.1f, "Speed");
+        walkToWalkBack.AddCondition(AnimatorConditionMode.Less, 0f, "MoveDirection");
+
+        AnimatorStateTransition walkBackToWalk = walkBack.AddTransition(walk);
+        ConfigureTransition(walkBackToWalk, false, 0f, 0.08f);
+        walkBackToWalk.AddCondition(AnimatorConditionMode.Greater, 0.1f, "Speed");
+        walkBackToWalk.AddCondition(AnimatorConditionMode.Greater, 0f, "MoveDirection");
+
         AddConditionTransition(idle, punch, "Punch", AnimatorConditionMode.If, 0f, false);
         AddConditionTransition(walk, punch, "Punch", AnimatorConditionMode.If, 0f, false);
+        AddConditionTransition(walkBack, punch, "Punch", AnimatorConditionMode.If, 0f, false);
         AddConditionTransition(idle, attack2, "Attack2", AnimatorConditionMode.If, 0f, false);
         AddConditionTransition(walk, attack2, "Attack2", AnimatorConditionMode.If, 0f, false);
+        AddConditionTransition(walkBack, attack2, "Attack2", AnimatorConditionMode.If, 0f, false);
         AddExitTransition(punch, idle, 0.9f);
         AddExitTransition(attack2, idle, 0.9f);
         AddExitTransition(turn, idle, 0.9f);
-        AddCrouchTransition(idle, crouchIdle, AnimatorConditionMode.Equals, 0f);
-        AddCrouchTransition(walk, crouchIdle, AnimatorConditionMode.Equals, 0f);
-        AddCrouchTransition(idle, crouchForward, AnimatorConditionMode.Greater, 0f);
-        AddCrouchTransition(walk, crouchForward, AnimatorConditionMode.Greater, 0f);
-        AddCrouchTransition(idle, crouchBack, AnimatorConditionMode.Less, 0f);
-        AddCrouchTransition(walk, crouchBack, AnimatorConditionMode.Less, 0f);
+
+        // Entering crouch: Idle, Walk, WalkBack -> StandingToCrouched
+        AddConditionTransition(idle, standingToCrouched, "Crouch", AnimatorConditionMode.If, 0f, false);
+        AddConditionTransition(walk, standingToCrouched, "Crouch", AnimatorConditionMode.If, 0f, false);
+        AddConditionTransition(walkBack, standingToCrouched, "Crouch", AnimatorConditionMode.If, 0f, false);
+
+        // StandingToCrouched finishes -> Crouch states
+        AnimatorStateTransition stcToIdle = standingToCrouched.AddTransition(crouchIdle);
+        ConfigureTransition(stcToIdle, true, 0.85f, 0.08f);
+        stcToIdle.AddCondition(AnimatorConditionMode.If, 0f, "Crouch");
+        stcToIdle.AddCondition(AnimatorConditionMode.Equals, 0f, "CrouchDirection");
+
+        AnimatorStateTransition stcToFwd = standingToCrouched.AddTransition(crouchForward);
+        ConfigureTransition(stcToFwd, true, 0.85f, 0.08f);
+        stcToFwd.AddCondition(AnimatorConditionMode.If, 0f, "Crouch");
+        stcToFwd.AddCondition(AnimatorConditionMode.Greater, 0f, "CrouchDirection");
+
+        AnimatorStateTransition stcToBck = standingToCrouched.AddTransition(crouchBack);
+        ConfigureTransition(stcToBck, true, 0.85f, 0.08f);
+        stcToBck.AddCondition(AnimatorConditionMode.If, 0f, "Crouch");
+        stcToBck.AddCondition(AnimatorConditionMode.Less, 0f, "CrouchDirection");
+
+        // Early release during StandingToCrouched
+        AnimatorStateTransition stcToCts = standingToCrouched.AddTransition(crouchedToStanding);
+        ConfigureTransition(stcToCts, false, 0f, 0.08f);
+        stcToCts.AddCondition(AnimatorConditionMode.IfNot, 0f, "Crouch");
+
+        AddConditionTransition(standingToCrouched, punch, "Punch", AnimatorConditionMode.If, 0f, false);
+        AddConditionTransition(standingToCrouched, attack2, "Attack2", AnimatorConditionMode.If, 0f, false);
+
+        // Crouch direction locomotion transitions
         AddCrouchDirectionTransition(crouchIdle, crouchForward, AnimatorConditionMode.Greater, 0f);
         AddCrouchDirectionTransition(crouchIdle, crouchBack, AnimatorConditionMode.Less, 0f);
         AddCrouchDirectionTransition(crouchForward, crouchIdle, AnimatorConditionMode.Equals, 0f);
         AddCrouchDirectionTransition(crouchBack, crouchIdle, AnimatorConditionMode.Equals, 0f);
         AddCrouchDirectionTransition(crouchForward, crouchBack, AnimatorConditionMode.Less, 0f);
         AddCrouchDirectionTransition(crouchBack, crouchForward, AnimatorConditionMode.Greater, 0f);
-        AddConditionTransition(crouchIdle, idle, "Crouch", AnimatorConditionMode.IfNot, 0f, false);
-        AddConditionTransition(crouchForward, idle, "Crouch", AnimatorConditionMode.IfNot, 0f, false);
-        AddConditionTransition(crouchBack, idle, "Crouch", AnimatorConditionMode.IfNot, 0f, false);
+
+        // Exiting crouch: Crouch states -> CrouchedToStanding when Crouch == false
+        AddConditionTransition(crouchIdle, crouchedToStanding, "Crouch", AnimatorConditionMode.IfNot, 0f, false);
+        AddConditionTransition(crouchForward, crouchedToStanding, "Crouch", AnimatorConditionMode.IfNot, 0f, false);
+        AddConditionTransition(crouchBack, crouchedToStanding, "Crouch", AnimatorConditionMode.IfNot, 0f, false);
+
+        // CrouchedToStanding finishes -> Walk / WalkBack / Idle
+        AnimatorStateTransition ctsToWalk = crouchedToStanding.AddTransition(walk);
+        ConfigureTransition(ctsToWalk, true, 0.85f, 0.08f);
+        ctsToWalk.AddCondition(AnimatorConditionMode.Greater, 0.1f, "Speed");
+        ctsToWalk.AddCondition(AnimatorConditionMode.Greater, 0f, "MoveDirection");
+
+        AnimatorStateTransition ctsToWalkBack = crouchedToStanding.AddTransition(walkBack);
+        ConfigureTransition(ctsToWalkBack, true, 0.85f, 0.08f);
+        ctsToWalkBack.AddCondition(AnimatorConditionMode.Greater, 0.1f, "Speed");
+        ctsToWalkBack.AddCondition(AnimatorConditionMode.Less, 0f, "MoveDirection");
+
+        AnimatorStateTransition ctsToIdle = crouchedToStanding.AddTransition(idle);
+        ConfigureTransition(ctsToIdle, true, 0.85f, 0.08f);
+        ctsToIdle.AddCondition(AnimatorConditionMode.Less, 0.1f, "Speed");
+
+        AnimatorStateTransition ctsToIdleFallback = crouchedToStanding.AddTransition(idle);
+        ConfigureTransition(ctsToIdleFallback, true, 0.95f, 0.08f);
+
+        // Early re-crouch during CrouchedToStanding
+        AnimatorStateTransition ctsToStc = crouchedToStanding.AddTransition(standingToCrouched);
+        ConfigureTransition(ctsToStc, false, 0f, 0.08f);
+        ctsToStc.AddCondition(AnimatorConditionMode.If, 0f, "Crouch");
+
+        AddConditionTransition(crouchedToStanding, punch, "Punch", AnimatorConditionMode.If, 0f, false);
+        AddConditionTransition(crouchedToStanding, attack2, "Attack2", AnimatorConditionMode.If, 0f, false);
+
         AddJumpTransition(idle, jumpIdle, 0f);
         AddJumpTransition(idle, jumpBack, 1f);
         AddJumpTransition(idle, jumpForward, 2f);
         AddJumpTransition(walk, jumpIdle, 0f);
         AddJumpTransition(walk, jumpBack, 1f);
         AddJumpTransition(walk, jumpForward, 2f);
+        AddJumpTransition(walkBack, jumpIdle, 0f);
+        AddJumpTransition(walkBack, jumpBack, 1f);
+        AddJumpTransition(walkBack, jumpForward, 2f);
+        AddJumpTransition(crouchIdle, jumpIdle, 0f);
+        AddJumpTransition(crouchIdle, jumpBack, 1f);
+        AddJumpTransition(crouchIdle, jumpForward, 2f);
+        AddJumpTransition(standingToCrouched, jumpIdle, 0f);
+        AddJumpTransition(standingToCrouched, jumpBack, 1f);
+        AddJumpTransition(standingToCrouched, jumpForward, 2f);
+        AddJumpTransition(crouchedToStanding, jumpIdle, 0f);
+        AddJumpTransition(crouchedToStanding, jumpBack, 1f);
+        AddJumpTransition(crouchedToStanding, jumpForward, 2f);
+
         AddExitTransition(jumpIdle, idle, 1f);
         AddExitTransition(jumpBack, idle, 1f);
         AddExitTransition(jumpForward, idle, 1f);
@@ -335,6 +433,153 @@ public static class FightingPrototypeSetup
 
         EditorUtility.SetDirty(controller);
         return controller;
+    }
+
+    [MenuItem("Tools/Fighting Prototype/Update Crouch Transitions")]
+    public static void UpdateCrouchTransitions()
+    {
+        AnimatorController controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(BaseControllerPath);
+        if (controller == null)
+        {
+            Debug.LogError("[FightingPrototypeSetup] BaseController not found at " + BaseControllerPath);
+            return;
+        }
+
+        AnimatorStateMachine machine = controller.layers[0].stateMachine;
+
+        AnimationClip standingToCrouchedClip = LoadClip("Assets/Animations/Mixamo/X Bot@Standing To Crouched.fbx");
+        AnimationClip crouchedToStandingClip = LoadClip("Assets/Animations/Mixamo/X Bot@Crouched To Standing.fbx");
+
+        if (standingToCrouchedClip == null || crouchedToStandingClip == null)
+        {
+            Debug.LogError("[FightingPrototypeSetup] Missing crouch transition clips!");
+            return;
+        }
+
+        AnimatorState idle = machine.states.FirstOrDefault(s => s.state.name == "Idle").state;
+        AnimatorState walk = machine.states.FirstOrDefault(s => s.state.name == "Walk").state;
+        AnimatorState walkBack = machine.states.FirstOrDefault(s => s.state.name == "WalkBack").state;
+        AnimatorState crouchIdle = machine.states.FirstOrDefault(s => s.state.name == "CrouchIdle").state;
+        AnimatorState crouchForward = machine.states.FirstOrDefault(s => s.state.name == "CrouchForward").state;
+        AnimatorState crouchBack = machine.states.FirstOrDefault(s => s.state.name == "CrouchBack").state;
+        AnimatorState punch = machine.states.FirstOrDefault(s => s.state.name == "Attack").state;
+        AnimatorState attack2 = machine.states.FirstOrDefault(s => s.state.name == "Attack2").state;
+        AnimatorState jumpIdle = machine.states.FirstOrDefault(s => s.state.name == "Jumping").state;
+        AnimatorState jumpBack = machine.states.FirstOrDefault(s => s.state.name == "JumpBack").state;
+        AnimatorState jumpForward = machine.states.FirstOrDefault(s => s.state.name == "JumpForward").state;
+
+        AnimatorState standingToCrouched = machine.states.FirstOrDefault(s => s.state.name == "StandingToCrouched").state;
+        if (standingToCrouched == null)
+        {
+            standingToCrouched = AddState(machine, "StandingToCrouched", standingToCrouchedClip, 1.35f, new Vector3(480, 220));
+        }
+        else
+        {
+            standingToCrouched.motion = standingToCrouchedClip;
+            standingToCrouched.speed = 1.35f;
+        }
+
+        AnimatorState crouchedToStanding = machine.states.FirstOrDefault(s => s.state.name == "CrouchedToStanding").state;
+        if (crouchedToStanding == null)
+        {
+            crouchedToStanding = AddState(machine, "CrouchedToStanding", crouchedToStandingClip, 1.35f, new Vector3(480, 300));
+        }
+        else
+        {
+            crouchedToStanding.motion = crouchedToStandingClip;
+            crouchedToStanding.speed = 1.35f;
+        }
+
+        void RemoveTransitionsTo(AnimatorState source, params AnimatorState[] targets)
+        {
+            if (source == null) return;
+            var list = source.transitions.Where(t => targets.Contains(t.destinationState)).ToList();
+            foreach (var t in list) source.RemoveTransition(t);
+        }
+
+        RemoveTransitionsTo(idle, crouchIdle, crouchForward, crouchBack, standingToCrouched);
+        RemoveTransitionsTo(walk, crouchIdle, crouchForward, crouchBack, standingToCrouched);
+        if (walkBack != null) RemoveTransitionsTo(walkBack, crouchIdle, crouchForward, crouchBack, standingToCrouched);
+
+        AddConditionTransition(idle, standingToCrouched, "Crouch", AnimatorConditionMode.If, 0f, false);
+        AddConditionTransition(walk, standingToCrouched, "Crouch", AnimatorConditionMode.If, 0f, false);
+        if (walkBack != null) AddConditionTransition(walkBack, standingToCrouched, "Crouch", AnimatorConditionMode.If, 0f, false);
+
+        foreach (var t in standingToCrouched.transitions.ToArray()) standingToCrouched.RemoveTransition(t);
+
+        AnimatorStateTransition stcToIdle = standingToCrouched.AddTransition(crouchIdle);
+        ConfigureTransition(stcToIdle, true, 0.85f, 0.08f);
+        stcToIdle.AddCondition(AnimatorConditionMode.If, 0f, "Crouch");
+        stcToIdle.AddCondition(AnimatorConditionMode.Equals, 0f, "CrouchDirection");
+
+        AnimatorStateTransition stcToFwd = standingToCrouched.AddTransition(crouchForward);
+        ConfigureTransition(stcToFwd, true, 0.85f, 0.08f);
+        stcToFwd.AddCondition(AnimatorConditionMode.If, 0f, "Crouch");
+        stcToFwd.AddCondition(AnimatorConditionMode.Greater, 0f, "CrouchDirection");
+
+        AnimatorStateTransition stcToBck = standingToCrouched.AddTransition(crouchBack);
+        ConfigureTransition(stcToBck, true, 0.85f, 0.08f);
+        stcToBck.AddCondition(AnimatorConditionMode.If, 0f, "Crouch");
+        stcToBck.AddCondition(AnimatorConditionMode.Less, 0f, "CrouchDirection");
+
+        AnimatorStateTransition stcToCts = standingToCrouched.AddTransition(crouchedToStanding);
+        ConfigureTransition(stcToCts, false, 0f, 0.08f);
+        stcToCts.AddCondition(AnimatorConditionMode.IfNot, 0f, "Crouch");
+
+        if (punch != null) AddConditionTransition(standingToCrouched, punch, "Punch", AnimatorConditionMode.If, 0f, false);
+        if (attack2 != null) AddConditionTransition(standingToCrouched, attack2, "Attack2", AnimatorConditionMode.If, 0f, false);
+        if (jumpIdle != null) AddJumpTransition(standingToCrouched, jumpIdle, 0f);
+        if (jumpBack != null) AddJumpTransition(standingToCrouched, jumpBack, 1f);
+        if (jumpForward != null) AddJumpTransition(standingToCrouched, jumpForward, 2f);
+
+        RemoveTransitionsTo(crouchIdle, idle, crouchedToStanding);
+        RemoveTransitionsTo(crouchForward, idle, crouchedToStanding);
+        RemoveTransitionsTo(crouchBack, idle, crouchedToStanding);
+
+        AddConditionTransition(crouchIdle, crouchedToStanding, "Crouch", AnimatorConditionMode.IfNot, 0f, false);
+        AddConditionTransition(crouchForward, crouchedToStanding, "Crouch", AnimatorConditionMode.IfNot, 0f, false);
+        AddConditionTransition(crouchBack, crouchedToStanding, "Crouch", AnimatorConditionMode.IfNot, 0f, false);
+
+        if (jumpIdle != null) AddJumpTransition(crouchIdle, jumpIdle, 0f);
+        if (jumpBack != null) AddJumpTransition(crouchIdle, jumpBack, 1f);
+        if (jumpForward != null) AddJumpTransition(crouchIdle, jumpForward, 2f);
+
+        foreach (var t in crouchedToStanding.transitions.ToArray()) crouchedToStanding.RemoveTransition(t);
+
+        if (walk != null)
+        {
+            AnimatorStateTransition ctsToWalk = crouchedToStanding.AddTransition(walk);
+            ConfigureTransition(ctsToWalk, true, 0.85f, 0.08f);
+            ctsToWalk.AddCondition(AnimatorConditionMode.Greater, 0.1f, "Speed");
+            ctsToWalk.AddCondition(AnimatorConditionMode.Greater, 0f, "MoveDirection");
+        }
+        if (walkBack != null)
+        {
+            AnimatorStateTransition ctsToWalkBack = crouchedToStanding.AddTransition(walkBack);
+            ConfigureTransition(ctsToWalkBack, true, 0.85f, 0.08f);
+            ctsToWalkBack.AddCondition(AnimatorConditionMode.Greater, 0.1f, "Speed");
+            ctsToWalkBack.AddCondition(AnimatorConditionMode.Less, 0f, "MoveDirection");
+        }
+        AnimatorStateTransition ctsToIdle = crouchedToStanding.AddTransition(idle);
+        ConfigureTransition(ctsToIdle, true, 0.85f, 0.08f);
+        ctsToIdle.AddCondition(AnimatorConditionMode.Less, 0.1f, "Speed");
+
+        AnimatorStateTransition ctsToIdleFallback = crouchedToStanding.AddTransition(idle);
+        ConfigureTransition(ctsToIdleFallback, true, 0.95f, 0.08f);
+
+        AnimatorStateTransition ctsToStc = crouchedToStanding.AddTransition(standingToCrouched);
+        ConfigureTransition(ctsToStc, false, 0f, 0.08f);
+        ctsToStc.AddCondition(AnimatorConditionMode.If, 0f, "Crouch");
+
+        if (punch != null) AddConditionTransition(crouchedToStanding, punch, "Punch", AnimatorConditionMode.If, 0f, false);
+        if (attack2 != null) AddConditionTransition(crouchedToStanding, attack2, "Attack2", AnimatorConditionMode.If, 0f, false);
+        if (jumpIdle != null) AddJumpTransition(crouchedToStanding, jumpIdle, 0f);
+        if (jumpBack != null) AddJumpTransition(crouchedToStanding, jumpBack, 1f);
+        if (jumpForward != null) AddJumpTransition(crouchedToStanding, jumpForward, 2f);
+
+        EditorUtility.SetDirty(controller);
+        AssetDatabase.SaveAssets();
+        Debug.Log("[FightingPrototypeSetup] BaseFighter.controller successfully updated with crouching transitions!");
     }
 
     private static AnimatorState AddState(AnimatorStateMachine machine, string name, AnimationClip clip, float speed, Vector3 position)
@@ -627,7 +872,7 @@ public static class FightingPrototypeSetup
         }
 
         Scene scene = EditorSceneManager.OpenScene(TestScene, OpenSceneMode.Single);
-        FighterController[] oldFighters = UnityEngine.Object.FindObjectsByType<FighterController>(FindObjectsSortMode.None);
+        FighterController[] oldFighters = UnityEngine.Object.FindObjectsByType<FighterController>();
         Vector3[] positions = oldFighters.Select(f => f.transform.position).OrderBy(p => p.x).ToArray();
         foreach (FighterController old in oldFighters) UnityEngine.Object.DestroyImmediate(old.gameObject);
 
@@ -661,7 +906,7 @@ public static class FightingPrototypeSetup
         SetPrivateBool(playerController, "showOnScreenControls", true);
         SetPrivateBool(opponentController, "showOnScreenControls", false);
 
-        TekkenCamera cameraRig = UnityEngine.Object.FindFirstObjectByType<TekkenCamera>();
+        TekkenCamera cameraRig = UnityEngine.Object.FindAnyObjectByType<TekkenCamera>();
         if (cameraRig == null && Camera.main != null) cameraRig = Camera.main.gameObject.AddComponent<TekkenCamera>();
         if (cameraRig != null)
         {
@@ -669,7 +914,7 @@ public static class FightingPrototypeSetup
             cameraRig.Fighter2 = opponent.transform;
         }
 
-        GameFlowController flow = UnityEngine.Object.FindFirstObjectByType<GameFlowController>();
+        GameFlowController flow = UnityEngine.Object.FindAnyObjectByType<GameFlowController>();
         if (flow == null) flow = new GameObject("GameFlow").AddComponent<GameFlowController>();
         SerializedObject flowSo = new SerializedObject(flow);
         SerializedProperty prefabsProperty = flowSo.FindProperty("characterPrefabs");

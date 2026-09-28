@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 /// <summary>
 /// Estado Neutro: Permite movimentação 3D livre via FighterMovement e escuta inputs de ataque.
@@ -15,6 +15,14 @@ public class NeutralState : IFighterState
         if (fighter.Movement != null)
         {
             fighter.Movement.CanMove = true;
+        }
+
+        // Se houver comando de ataque registrado no buffer durante o HitStun, executa imediatamente ao retornar ao neutro
+        if (fighter.HasBufferedAttack())
+        {
+            FighterAttackType bufferedAttack = fighter.ConsumeBufferedAttack();
+            fighter.TriggerAttack(bufferedAttack);
+            return;
         }
 
         // Toca animação neutra (Idle/Locomoção)
