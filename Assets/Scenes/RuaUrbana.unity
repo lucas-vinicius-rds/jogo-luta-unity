@@ -8687,7 +8687,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cd7e500e2a50e2d4a841516e34d4e52f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AutoFightTester
-  runOnPlay: 1
+  runOnPlay: 0
   recordTelemetry: 1
   captureScreenshots: 1
   settleTime: 0.25

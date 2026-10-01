@@ -1,4 +1,4 @@
-﻿#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -28,8 +28,15 @@ public enum TestSideFilter
 public class AutoFightTester : MonoBehaviour
 {
     [Header("Execução dos Testes")]
-    [Tooltip("Executa automaticamente os testes assim que o Play Mode iniciar.")]
-    [SerializeField] private bool runOnPlay = true;
+    [Tooltip("Execução estritamente opt-in via menu UnDFight > Testes ou batchmode.")]
+    [SerializeField] private bool runOnPlay = false;
+
+#if UNITY_EDITOR
+    private const string SessionKeyTestRequested = "UnDFight_AutoFightTest_Requested";
+    private const string SessionKeyTestTargetIndex = "UnDFight_AutoFightTest_TargetIndex";
+    private const string SessionKeyTestTargetName = "UnDFight_AutoFightTest_TargetName";
+#endif
+    private static bool isBatchModeRequested = false;
 
     [Tooltip("Grava telemetria a cada frame relevante em CSV e JSON.")]
     [SerializeField] private bool recordTelemetry = true;
@@ -185,16 +192,57 @@ public class AutoFightTester : MonoBehaviour
 
     private void Awake()
     {
+        bool explicitRequest = false;
+
+#if UNITY_EDITOR
+        if (SessionState.GetBool(SessionKeyTestRequested, false))
+        {
+            explicitRequest = true;
+            // Consome a sinalização imediatamente para que o próximo Play normal seja 100% limpo
+            SessionState.SetBool(SessionKeyTestRequested, false);
+            singleCharacterIndex = SessionState.GetInt(SessionKeyTestTargetIndex, singleCharacterIndex);
+            singleCharacterNameFilter = SessionState.GetString(SessionKeyTestTargetName, singleCharacterNameFilter);
+        }
+#endif
+
+        if (Application.isBatchMode || isBatchModeRequested)
+        {
+            explicitRequest = true;
+        }
+
+        // Se NÃO houver pedido explícito de teste, desativa o harness completamente e encerra sem interferir no jogo
+        if (!explicitRequest)
+        {
+            enabled = false;
+            return;
+        }
+
         logsDirectory = Path.Combine(Application.dataPath, "..", "Logs");
         if (!Directory.Exists(logsDirectory)) Directory.CreateDirectory(logsDirectory);
     }
 
     private void Start()
     {
-        if (runOnPlay)
+        // Se foi desativado no Awake por ausência de solicitação explícita, não executa nada
+        if (!enabled) return;
+
+        StartHarnessExplicitly();
+    }
+
+    /// <summary>
+    /// Inicia a rotina de testes explicitamente.
+    /// </summary>
+    public void StartHarnessExplicitly()
+    {
+        if (isRunning) return;
+
+        if (string.IsNullOrEmpty(logsDirectory))
         {
-            StartCoroutine(RunMultiCharacterHarnessRoutine());
+            logsDirectory = Path.Combine(Application.dataPath, "..", "Logs");
+            if (!Directory.Exists(logsDirectory)) Directory.CreateDirectory(logsDirectory);
         }
+
+        StartCoroutine(RunMultiCharacterHarnessRoutine());
     }
 
     private void Update()
@@ -205,10 +253,35 @@ public class AutoFightTester : MonoBehaviour
         }
     }
 
+    private void OnDisable()
+    {
+        ClearDebugVisuals();
+        ResetSimulationInputs();
+    }
+
     private void OnDestroy()
     {
         ClearDebugVisuals();
+        ResetSimulationInputs();
         CloseConsolidatedCsv();
+    }
+
+    /// <summary>
+    /// Reseta quaisquer comandos simulados nos lutadores sob teste para evitar sobreposição na entrada real.
+    /// </summary>
+    private void ResetSimulationInputs()
+    {
+        if (p1InputConfig != null) p1InputConfig.ResetSimulation();
+        if (p2InputConfig != null) p2InputConfig.ResetSimulation();
+
+        // Limpeza adicional defensiva em todos os FighterInputConfig da cena
+        foreach (var fighter in FindObjectsByType<FighterController>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+        {
+            if (fighter != null && fighter.InputConfig != null)
+            {
+                fighter.InputConfig.ResetSimulation();
+            }
+        }
     }
 
     // ========================================================================
@@ -439,6 +512,8 @@ public class AutoFightTester : MonoBehaviour
                   $"• Relatório diagnóstico salvo em: {Path.Combine(logsDirectory, "resumo.md")}");
 
         isRunning = false;
+        ClearDebugVisuals();
+        ResetSimulationInputs();
     }
 
     // ========================================================================
@@ -1663,11 +1738,28 @@ public class AutoFightTester : MonoBehaviour
     {
         for (int i = 0; i < debugVisualObjects.Count; i++)
         {
-            if (debugVisualObjects[i] != null) Destroy(debugVisualObjects[i]);
+            if (debugVisualObjects[i] != null)
+            {
+                var rend = debugVisualObjects[i].GetComponent<Renderer>();
+                if (rend != null && rend.material != null)
+                {
+                    Destroy(rend.material);
+                }
+                Destroy(debugVisualObjects[i]);
+            }
         }
         debugVisualObjects.Clear();
         hitboxVisualPairs.Clear();
         hurtboxVisualPairs.Clear();
+
+        // Destrói quaisquer primitivas remanescentes na cena
+        foreach (var obj in FindObjectsByType<GameObject>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+        {
+            if (obj != null && (obj.name == "_DebugHurtboxVisual" || obj.name == "_DebugHitboxVisual"))
+            {
+                Destroy(obj);
+            }
+        }
     }
 
     // ========================================================================
@@ -1785,42 +1877,73 @@ public class AutoFightTester : MonoBehaviour
     [MenuItem("UnDFight/Testes/Executar Teste Multi-Personagem (Todos)")]
     public static void RunAllFromMenu()
     {
-        if (!EditorApplication.isPlaying) EditorApplication.isPlaying = true;
-        EditorApplication.playModeStateChanged += OnPlayStateChangedAll;
-    }
+        SessionState.SetBool(SessionKeyTestRequested, true);
+        SessionState.SetInt(SessionKeyTestTargetIndex, -1);
+        SessionState.SetString(SessionKeyTestTargetName, "");
 
-    private static void OnPlayStateChangedAll(PlayModeStateChange state)
-    {
-        if (state == PlayModeStateChange.EnteredPlayMode)
+        if (!EditorApplication.isPlaying)
         {
-            EditorApplication.playModeStateChanged -= OnPlayStateChangedAll;
+            EditorApplication.playModeStateChanged += OnPlayStateChangedMenu;
+            EditorApplication.isPlaying = true;
+        }
+        else
+        {
+            SessionState.SetBool(SessionKeyTestRequested, false);
             var tester = EnsureTesterInScene();
+            tester.enabled = true;
             tester.singleCharacterIndex = -1;
             tester.singleCharacterNameFilter = "";
+            tester.StartHarnessExplicitly();
         }
     }
 
     [MenuItem("UnDFight/Testes/Executar Teste Rápido (Apenas Tiago)")]
     public static void RunQuickSingleFromMenu()
     {
-        if (!EditorApplication.isPlaying) EditorApplication.isPlaying = true;
-        EditorApplication.playModeStateChanged += OnPlayStateChangedSingle;
+        SessionState.SetBool(SessionKeyTestRequested, true);
+        SessionState.SetInt(SessionKeyTestTargetIndex, 0);
+        SessionState.SetString(SessionKeyTestTargetName, "");
+
+        if (!EditorApplication.isPlaying)
+        {
+            EditorApplication.playModeStateChanged += OnPlayStateChangedMenu;
+            EditorApplication.isPlaying = true;
+        }
+        else
+        {
+            SessionState.SetBool(SessionKeyTestRequested, false);
+            var tester = EnsureTesterInScene();
+            tester.enabled = true;
+            tester.singleCharacterIndex = 0;
+            tester.singleCharacterNameFilter = "";
+            tester.StartHarnessExplicitly();
+        }
     }
 
-    private static void OnPlayStateChangedSingle(PlayModeStateChange state)
+    private static void OnPlayStateChangedMenu(PlayModeStateChange state)
     {
         if (state == PlayModeStateChange.EnteredPlayMode)
         {
-            EditorApplication.playModeStateChanged -= OnPlayStateChangedSingle;
-            var tester = EnsureTesterInScene();
-            tester.singleCharacterIndex = 0;
-            tester.singleCharacterNameFilter = "";
+            EditorApplication.playModeStateChanged -= OnPlayStateChangedMenu;
+
+            // Se o tester não estava presente na cena para consumir a flag em seu Awake, garante inicialização aqui
+            if (SessionState.GetBool(SessionKeyTestRequested, false))
+            {
+                SessionState.SetBool(SessionKeyTestRequested, false);
+                int targetIdx = SessionState.GetInt(SessionKeyTestTargetIndex, -1);
+                string targetName = SessionState.GetString(SessionKeyTestTargetName, "");
+                var tester = EnsureTesterInScene();
+                tester.enabled = true;
+                tester.singleCharacterIndex = targetIdx;
+                tester.singleCharacterNameFilter = targetName;
+                tester.StartHarnessExplicitly();
+            }
         }
     }
 
     public static AutoFightTester EnsureTesterInScene()
     {
-        var tester = FindAnyObjectByType<AutoFightTester>();
+        var tester = FindAnyObjectByType<AutoFightTester>(FindObjectsInactive.Include);
         if (tester == null)
         {
             var go = new GameObject("AutoFightTester");
@@ -1832,8 +1955,22 @@ public class AutoFightTester : MonoBehaviour
     public static void RunBatchmode()
     {
         Debug.Log("[AutoFightTester] Iniciando execução em Batchmode...");
-        EditorApplication.isPlaying = true;
-        EnsureTesterInScene();
+        isBatchModeRequested = true;
+        SessionState.SetBool(SessionKeyTestRequested, true);
+        SessionState.SetInt(SessionKeyTestTargetIndex, -1);
+        SessionState.SetString(SessionKeyTestTargetName, "");
+
+        if (!EditorApplication.isPlaying)
+        {
+            EditorApplication.playModeStateChanged += OnPlayStateChangedMenu;
+            EditorApplication.isPlaying = true;
+        }
+        else
+        {
+            var tester = EnsureTesterInScene();
+            tester.enabled = true;
+            tester.StartHarnessExplicitly();
+        }
     }
 #endif
 }

@@ -145,12 +145,31 @@ MonoBehaviour:
   isPlayerControlled: 1
   forwardSpeed: 4.5
   backwardSpeed: 3.5
-  sidestepSpeed: 4
   minDistanceToOpponent: 0.75
-  rotationSpeed: 1080
+  arenaHalfWidth: 9
   gravity: -20
   groundedGravity: -2
+  jumpHeight: 2.2
+  laneZ: 0
+  laneDepth: 0.35
+  airControl: 0.62
+  crouchSpeedMultiplier: 0.58
+  impulseDrag: 9
+  maxAttackRootMotionSpeed: 8
   moveActionReference: {fileID: 558631918}
+  inputConfig:
+    playerIndex: 1
+    moveUp: 37
+    moveDown: 33
+    moveLeft: 15
+    moveRight: 18
+    punchKey: 20
+    punchKeyAlt: 1
+    attack2Key: 21
+    attack2KeyAlt: 0
+    enableGamepad: 1
+    gamepadIndex: 0
+  turnSpeed: 720
 --- !u!143 &122608271
 CharacterController:
   m_ObjectHideFlags: 0
@@ -198,13 +217,41 @@ MonoBehaviour:
   - {fileID: 1405613757}
   - {fileID: 1190913971}
   defaultAttackDamage: 15
+  secondaryAttackDamage: 15
   defaultKnockbackForce: 4
   attackDuration: 1
+  secondaryAttackDuration: 1
+  primaryAttackTiming:
+    activeStartNormalized: 0.35
+    activeEndNormalized: 0.5
+    recoveryEndNormalized: 0.82
+    playbackSpeed: 1
+    hitboxLimb: 0
+  secondaryAttackTiming:
+    activeStartNormalized: 0.45
+    activeEndNormalized: 0.58
+    recoveryEndNormalized: 0.98
+    playbackSpeed: 1
+    hitboxLimb: 2
   defaultHitStunDuration: 0.45
   defaultHitstopDuration: 0.08
   attackActionReference: {fileID: 1897659072}
+  inputConfig:
+    playerIndex: 1
+    moveUp: 37
+    moveDown: 33
+    moveLeft: 15
+    moveRight: 18
+    punchKey: 20
+    punchKeyAlt: 1
+    attack2Key: 21
+    attack2KeyAlt: 0
+    enableGamepad: 1
+    gamepadIndex: 0
+  hitStunInputBufferDuration: 0.15
   neutralAnimName: Idle
   attackAnimName: Attack
+  attack2AnimName: Attack2
   hitStunAnimName: HitStun
   knockoutAnimName: Dying
   turn180AnimName: Turn180
@@ -385,6 +432,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 0
   owner: {fileID: 1691181809}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &151216833
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -520,6 +569,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Hurtbox
   owner: {fileID: 1691181809}
+  showDebugGizmos: 1
 --- !u!136 &198672479
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -701,6 +751,63 @@ MonoBehaviour:
   zoomFactor: 0.6
   followDamping: 8
   rotationDamping: 10
+--- !u!1001 &339616599
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: 5a905e1c5358db24fb3170ac136e855f, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.369
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 5a905e1c5358db24fb3170ac136e855f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.11
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 5a905e1c5358db24fb3170ac136e855f, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 6.94
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 5a905e1c5358db24fb3170ac136e855f, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 5a905e1c5358db24fb3170ac136e855f, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 5a905e1c5358db24fb3170ac136e855f, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 5a905e1c5358db24fb3170ac136e855f, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 5a905e1c5358db24fb3170ac136e855f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 5a905e1c5358db24fb3170ac136e855f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 5a905e1c5358db24fb3170ac136e855f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 5a905e1c5358db24fb3170ac136e855f, type: 3}
+      propertyPath: m_Name
+      value: The Watchful Executive
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 5a905e1c5358db24fb3170ac136e855f, type: 3}
 --- !u!21 &364024541
 Material:
   serializedVersion: 8
@@ -1154,6 +1261,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Hurtbox
   owner: {fileID: 122608273}
+  showDebugGizmos: 1
 --- !u!136 &637125239
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -1431,6 +1539,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Hurtbox
   owner: {fileID: 1691181809}
+  showDebugGizmos: 1
 --- !u!136 &724388146
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -1966,6 +2075,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 0
   owner: {fileID: 122608273}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &1190913972
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -2216,6 +2327,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 1
   owner: {fileID: 122608273}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &1405613758
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -2630,12 +2743,31 @@ MonoBehaviour:
   isPlayerControlled: 0
   forwardSpeed: 4.5
   backwardSpeed: 3.5
-  sidestepSpeed: 4
   minDistanceToOpponent: 0.75
-  rotationSpeed: 1080
+  arenaHalfWidth: 9
   gravity: -20
   groundedGravity: -2
+  jumpHeight: 2.2
+  laneZ: 0
+  laneDepth: 0.35
+  airControl: 0.62
+  crouchSpeedMultiplier: 0.58
+  impulseDrag: 9
+  maxAttackRootMotionSpeed: 8
   moveActionReference: {fileID: 0}
+  inputConfig:
+    playerIndex: 1
+    moveUp: 37
+    moveDown: 33
+    moveLeft: 15
+    moveRight: 18
+    punchKey: 20
+    punchKeyAlt: 1
+    attack2Key: 21
+    attack2KeyAlt: 0
+    enableGamepad: 1
+    gamepadIndex: 0
+  turnSpeed: 720
 --- !u!143 &1691181806
 CharacterController:
   m_ObjectHideFlags: 0
@@ -2697,13 +2829,41 @@ MonoBehaviour:
   - {fileID: 2065466915}
   - {fileID: 151216832}
   defaultAttackDamage: 15
+  secondaryAttackDamage: 15
   defaultKnockbackForce: 4
   attackDuration: 1
+  secondaryAttackDuration: 1
+  primaryAttackTiming:
+    activeStartNormalized: 0.35
+    activeEndNormalized: 0.5
+    recoveryEndNormalized: 0.82
+    playbackSpeed: 1
+    hitboxLimb: 0
+  secondaryAttackTiming:
+    activeStartNormalized: 0.45
+    activeEndNormalized: 0.58
+    recoveryEndNormalized: 0.98
+    playbackSpeed: 1
+    hitboxLimb: 2
   defaultHitStunDuration: 0.45
   defaultHitstopDuration: 0.08
   attackActionReference: {fileID: 0}
+  inputConfig:
+    playerIndex: 1
+    moveUp: 37
+    moveDown: 33
+    moveLeft: 15
+    moveRight: 18
+    punchKey: 20
+    punchKeyAlt: 1
+    attack2Key: 21
+    attack2KeyAlt: 0
+    enableGamepad: 1
+    gamepadIndex: 0
+  hitStunInputBufferDuration: 0.15
   neutralAnimName: Idle
   attackAnimName: Attack
+  attack2AnimName: Attack2
   hitStunAnimName: HitStun
   knockoutAnimName: Dying
   turn180AnimName: Turn180
@@ -2863,6 +3023,63 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &1848994029
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: e3a523003fb884447bb2907dcb0c1956, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.926
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: e3a523003fb884447bb2907dcb0c1956, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.186
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: e3a523003fb884447bb2907dcb0c1956, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 6.858
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: e3a523003fb884447bb2907dcb0c1956, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: e3a523003fb884447bb2907dcb0c1956, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: e3a523003fb884447bb2907dcb0c1956, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: e3a523003fb884447bb2907dcb0c1956, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: e3a523003fb884447bb2907dcb0c1956, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: e3a523003fb884447bb2907dcb0c1956, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: e3a523003fb884447bb2907dcb0c1956, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: e3a523003fb884447bb2907dcb0c1956, type: 3}
+      propertyPath: m_Name
+      value: The Watchful Executive
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: e3a523003fb884447bb2907dcb0c1956, type: 3}
 --- !u!114 &1897659072
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2953,6 +3170,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 1
   owner: {fileID: 1691181809}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!1001 &2066231656
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3181,6 +3400,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Hurtbox
   owner: {fileID: 122608273}
+  showDebugGizmos: 1
 --- !u!136 &2131894577
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -3216,3 +3436,5 @@ SceneRoots:
   - {fileID: 1592281333}
   - {fileID: 1691181802}
   - {fileID: 2022239236}
+  - {fileID: 1848994029}
+  - {fileID: 339616599}

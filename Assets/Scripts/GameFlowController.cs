@@ -875,8 +875,10 @@ public sealed class GameFlowController : MonoBehaviour
             Destroy(fighter.gameObject);
     }
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
     /// <summary>
     /// Inicia uma luta imediatamente com os lutadores especificados para o harness de teste automatizado.
+    /// Exclusivo para testes automatizados — nunca deve ser chamado pelo fluxo normal do jogo.
     /// </summary>
     public static void StartDirectFightForTesting(int p1Index = 0, int p2Index = 1)
     {
@@ -894,4 +896,5 @@ public sealed class GameFlowController : MonoBehaviour
             instance.screen = FlowScreen.Fight;
         }
     }
+#endif
 }

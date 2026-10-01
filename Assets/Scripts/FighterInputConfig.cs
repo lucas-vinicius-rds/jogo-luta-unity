@@ -50,6 +50,16 @@ public class FighterInputConfig
     public bool SimulatedAttack2 { get => simulatedAttack2; set => simulatedAttack2 = value; }
 
     /// <summary>
+    /// Zera quaisquer comandos simulados, garantindo que o harness não interfira na entrada real do jogador.
+    /// </summary>
+    public void ResetSimulation()
+    {
+        simulatedMovement = Vector2.zero;
+        simulatedPunch = false;
+        simulatedAttack2 = false;
+    }
+
+    /// <summary>
     /// Lê a entrada de movimentação combinando teclado e gamepad atribuído.
     /// </summary>
     public Vector2 ReadMovement()
