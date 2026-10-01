@@ -23,6 +23,8 @@ public sealed class GameFlowController : MonoBehaviour
     public static string[] CharacterDisplayNames => DisplayNames;
     public static GameFlowController Instance => instance;
     public bool HasInitialTransforms => hasInitialTransforms;
+    public FighterController CurrentPlayer => currentPlayer;
+    public FighterController CurrentOpponent => currentOpponent;
 
     private static GameFlowController instance;
     private Vector3 initialPlayerPosition;
@@ -46,6 +48,8 @@ public sealed class GameFlowController : MonoBehaviour
     private bool victoryShown;
     private FighterController currentPlayer;
     private FighterController currentOpponent;
+    private RuntimeAnimatorController originalPlayerAnimator;
+    private RuntimeAnimatorController originalOpponentAnimator;
     private string victoryWinnerName;
     private string victoryLoserName;
     private int victoryOption;
@@ -168,6 +172,16 @@ public sealed class GameFlowController : MonoBehaviour
     {
         if (playerOneConfirmed) confirmationPulse += Time.unscaledDeltaTime;
         if (screen == FlowScreen.VS && Time.unscaledTime >= vsUntil) screen = FlowScreen.Fight;
+        if (screen == FlowScreen.Fight && !victoryShown)
+        {
+            // Monitoramento contínuo em combate para acionar derrota mesmo se eventos C# oscilarem (P1 vs P2 e CPU)
+            FighterController defeated = GetDefeatedFighter();
+            if (defeated != null)
+            {
+                TriggerFighterKnockout(defeated);
+                return;
+            }
+        }
         if (screen == FlowScreen.Victory)
         {
             if (Input.GetKeyDown(KeyCode.UpArrow)) victoryOption = Mathf.Max(0, victoryOption - 1);
@@ -248,6 +262,7 @@ public sealed class GameFlowController : MonoBehaviour
 
     private void BeginSelection(GameMode selectedMode)
     {
+        DestroyVictoryDisplays();
         mode = selectedMode;
         playerSelection = 0;
         opponentSelection = characterPrefabs != null && characterPrefabs.Length > 1 ? 1 : 0;
@@ -466,10 +481,36 @@ public sealed class GameFlowController : MonoBehaviour
         GUI.Label(new Rect(rect.x, rect.yMax - 36f, rect.width, 30f), name, subtitleStyle);
     }
 
+    /// <summary>
+    /// Retorna o lutador derrotado verificando IsDead, vida <= 0 ou KnockoutState.
+    /// </summary>
+    private FighterController GetDefeatedFighter()
+    {
+        if (currentPlayer != null && (currentPlayer.HealthSystem?.IsDead == true || currentPlayer.HealthSystem?.CurrentHealth <= 0f || currentPlayer.CurrentState is KnockoutState))
+            return currentPlayer;
+        if (currentOpponent != null && (currentOpponent.HealthSystem?.IsDead == true || currentOpponent.HealthSystem?.CurrentHealth <= 0f || currentOpponent.CurrentState is KnockoutState))
+            return currentOpponent;
+        return null;
+    }
+
     private void OnFighterKnockout()
     {
         if (victoryShown) return;
-        FighterController loser = currentPlayer != null && currentPlayer.HealthSystem != null && currentPlayer.HealthSystem.IsDead ? currentPlayer : currentOpponent;
+        FighterController loser = GetDefeatedFighter();
+        if (loser == null)
+        {
+            loser = currentPlayer != null && currentPlayer.HealthSystem != null && currentPlayer.HealthSystem.IsDead ? currentPlayer : currentOpponent;
+        }
+        TriggerFighterKnockout(loser);
+    }
+
+    /// <summary>
+    /// Dispara a transição de término de combate para a tela de vitória/derrota com trava de disparo único.
+    /// </summary>
+    private void TriggerFighterKnockout(FighterController loser)
+    {
+        if (victoryShown) return;
+        victoryShown = true;
         StartCoroutine(ShowVictoryAfterKnockout(loser));
     }
 
@@ -484,11 +525,10 @@ public sealed class GameFlowController : MonoBehaviour
                 yield return null;
             }
             float duration = loser.Animator.GetCurrentAnimatorStateInfo(0).length;
-            yield return new WaitForSecondsRealtime(Mathf.Clamp(duration * .95f, 1.2f, 4f));
+            yield return new WaitForSecondsRealtime(Mathf.Clamp(duration * .95f, 0.8f, 3f));
         }
-        yield return new WaitForSecondsRealtime(.25f);
-        if (victoryShown) yield break;
-        victoryShown = true;
+        yield return new WaitForSecondsRealtime(.2f);
+
         FighterController winner = loser == currentPlayer ? currentOpponent : currentPlayer;
         victoryWinnerName = winner == currentPlayer ? DisplayNames[pendingPlayer] : DisplayNames[pendingOpponent];
         victoryLoserName = loser == currentPlayer ? DisplayNames[pendingPlayer] : DisplayNames[pendingOpponent];
@@ -501,10 +541,18 @@ public sealed class GameFlowController : MonoBehaviour
         screen = FlowScreen.Victory;
     }
 
-    private void CreateVictoryDisplays(FighterController winner, FighterController loser)
+    /// <summary>
+    /// Destrói os modelos 3D, câmeras e texturas geradas para a tela de vitória, evitando duplicatas no Rematch.
+    /// </summary>
+    private void DestroyVictoryDisplays()
     {
         DestroyPreview(ref victoryWinnerObject, ref victoryWinnerCamera, ref victoryWinnerTexture);
         DestroyPreview(ref victoryLoserObject, ref victoryLoserCamera, ref victoryLoserTexture);
+    }
+
+    private void CreateVictoryDisplays(FighterController winner, FighterController loser)
+    {
+        DestroyVictoryDisplays();
         int winnerIndex = winner == currentPlayer ? pendingPlayer : pendingOpponent;
         int loserIndex = loser == currentPlayer ? pendingPlayer : pendingOpponent;
         CreatePreview(winnerIndex, ref victoryWinnerObject, ref victoryWinnerCamera, ref victoryWinnerTexture, "VictoryWinner", false, 18, false);
@@ -564,11 +612,13 @@ public sealed class GameFlowController : MonoBehaviour
         else if (victoryOption == 1)
         {
             victoryShown = false;
+            DestroyVictoryDisplays();
             BeginSelection(pendingMode);
         }
         else
         {
             victoryShown = false;
+            DestroyVictoryDisplays();
             RemoveSceneFighters();
             screen = FlowScreen.Main;
             SetMainCameraPreviewVisibility(false);
@@ -707,6 +757,7 @@ public sealed class GameFlowController : MonoBehaviour
         if (currentPlayer != null && currentPlayer.HealthSystem != null) currentPlayer.HealthSystem.OnKnockout -= OnFighterKnockout;
         if (currentOpponent != null && currentOpponent.HealthSystem != null) currentOpponent.HealthSystem.OnKnockout -= OnFighterKnockout;
         victoryShown = false;
+        DestroyVictoryDisplays();
         foreach (FighterController fighter in FindObjectsByType<FighterController>()) Destroy(fighter.gameObject);
         GameObject player = InstantiatePrefab(pendingPlayer);
         GameObject opponent = InstantiatePrefab(pendingOpponent);
@@ -714,7 +765,7 @@ public sealed class GameFlowController : MonoBehaviour
         {
             if (player != null) Destroy(player);
             if (opponent != null) Destroy(opponent);
-            Debug.LogError("UnDFight: nÃ£o foi possÃ­vel instanciar os prefabs dos lutadores selecionados.");
+            Debug.LogError("UnDFight: não foi possível instanciar os prefabs dos lutadores selecionados.");
             screen = FlowScreen.Select;
             return;
         }
@@ -734,6 +785,11 @@ public sealed class GameFlowController : MonoBehaviour
         FighterMovement om = opponent.GetComponent<FighterMovement>();
         currentPlayer = player.GetComponent<FighterController>();
         currentOpponent = opponent.GetComponent<FighterController>();
+
+        // Guarda os controllers originais do Animator para evitar contaminação permanente após a tela de vitória
+        originalPlayerAnimator = currentPlayer != null && currentPlayer.Animator != null ? currentPlayer.Animator.runtimeAnimatorController : null;
+        originalOpponentAnimator = currentOpponent != null && currentOpponent.Animator != null ? currentOpponent.Animator.runtimeAnimatorController : null;
+
         if (currentPlayer != null && currentPlayer.HealthSystem != null) currentPlayer.HealthSystem.OnKnockout -= OnFighterKnockout;
         if (currentOpponent != null && currentOpponent.HealthSystem != null) currentOpponent.HealthSystem.OnKnockout -= OnFighterKnockout;
         if (currentPlayer != null && currentPlayer.HealthSystem != null) currentPlayer.HealthSystem.OnKnockout += OnFighterKnockout;
@@ -751,10 +807,12 @@ public sealed class GameFlowController : MonoBehaviour
 
     /// <summary>
     /// Reinicia a partida atual mantendo os lutadores, resetando saúde, estado e posições.
+    /// Destrói os modelos de preview de vitória para evitar sobreposição duplicada.
     /// </summary>
     public void Rematch()
     {
         victoryShown = false;
+        DestroyVictoryDisplays();
         ResetRound();
         screen = FlowScreen.Fight;
     }
@@ -764,6 +822,19 @@ public sealed class GameFlowController : MonoBehaviour
     /// </summary>
     public void ResetRound()
     {
+        // Restaura animators originais para limpar poses de vitória/derrota
+        if (currentPlayer != null && currentPlayer.Animator != null && originalPlayerAnimator != null)
+        {
+            currentPlayer.Animator.runtimeAnimatorController = originalPlayerAnimator;
+            currentPlayer.Animator.speed = 1f;
+        }
+
+        if (currentOpponent != null && currentOpponent.Animator != null && originalOpponentAnimator != null)
+        {
+            currentOpponent.Animator.runtimeAnimatorController = originalOpponentAnimator;
+            currentOpponent.Animator.speed = 1f;
+        }
+
         if (currentPlayer != null && hasInitialTransforms)
         {
             ResetFighterPhysicsAndState(currentPlayer, initialPlayerPosition, initialPlayerRotation);
@@ -821,7 +892,7 @@ public sealed class GameFlowController : MonoBehaviour
     }
 
     /// <summary>
-    /// Controla a visibilidade das camadas de preview (layers 20 a 30) na câmera principal/gameplay.
+    /// Controla a visibilidade das camadas de preview (layers 18 a 30) na câmera principal/gameplay.
     /// Garante que fiquem visíveis apenas na tela de seleção e nunca vazem durante o combate.
     /// </summary>
     private void SetMainCameraPreviewVisibility(bool visible)
@@ -836,7 +907,8 @@ public sealed class GameFlowController : MonoBehaviour
         if (targetCamera == null) return;
 
         int previewMask = 0;
-        for (int layer = 20; layer <= 30; layer++)
+        // Cobre todas as camadas de previews (18 e 19 para vitória, 20 a 30 para seleção e cartas)
+        for (int layer = 18; layer <= 30; layer++)
         {
             previewMask |= (1 << layer);
         }
@@ -875,20 +947,24 @@ public sealed class GameFlowController : MonoBehaviour
             Destroy(fighter.gameObject);
     }
 
+    public bool IsVictoryScreen => screen == FlowScreen.Victory;
+    public bool IsFightScreen => screen == FlowScreen.Fight;
+
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
     /// <summary>
     /// Inicia uma luta imediatamente com os lutadores especificados para o harness de teste automatizado.
     /// Exclusivo para testes automatizados — nunca deve ser chamado pelo fluxo normal do jogo.
     /// </summary>
-    public static void StartDirectFightForTesting(int p1Index = 0, int p2Index = 1)
+    public static void StartDirectFightForTesting(int p1Index = 0, int p2Index = 1, bool cpuMode = false)
     {
-        pendingMode = GameMode.Local;
+        pendingMode = cpuMode ? GameMode.Cpu : GameMode.Local;
         pendingPlayer = p1Index;
         pendingOpponent = p2Index;
         pendingFight = true;
 
         if (instance != null)
         {
+            instance.DestroyVictoryDisplays();
             instance.DestroyPreview(ref instance.previewPlayerObject, ref instance.previewPlayerCamera, ref instance.previewPlayerTexture);
             instance.DestroyPreview(ref instance.previewOpponentObject, ref instance.previewOpponentCamera, ref instance.previewOpponentTexture);
             instance.DestroyCardPreviews();

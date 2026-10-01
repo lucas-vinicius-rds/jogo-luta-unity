@@ -12,6 +12,7 @@ Este registro é atualizado a cada nova tarefa para garantir a rastreabilidade e
 3. [Ciclo 3 (28/09/2026) - Timing de HitStun no Hitstop e Transição Suave de Virada (Turn180)](#-ciclo-3-28092026---timing-de-hitstun-no-hitstop-e-transição-suave-de-virada-turn180)
 4. [Ciclo 4 (28/09/2026) - Offsets de Hitbox no Espaço do Osso](#-ciclo-4-28092026---offsets-de-hitbox-no-espaço-do-osso)
 5. [Ciclo 5 (28/09/2026) - Harness de Teste Automático de Combate (AutoFightTester - FASE 1)](#-ciclo-5-28092026---harness-de-teste-automático-de-combate-autofighttester---fase-1)
+6. [Ciclo 6 (01/10/2026) - Correção de Duplicação no Rematch e Fim de Luta em P1 vs P2 (Bug 1 e Bug 2)](#-ciclo-6-01102026---correção-de-duplicação-no-rematch-e-fim-de-luta-em-p1-vs-p2-bug-1-e-bug-2)
 
 ---
 
@@ -107,3 +108,50 @@ Este registro é atualizado a cada nova tarefa para garantir a rastreabilidade e
 - **Execução do Harness:** Bateria de testes concluída com sucesso:
   - **2343 frames** de telemetria gravados em CSV e JSON dentro de `Logs/`.
   - **21 screenshots** salvas em `Logs/Screenshots/` com caixas de colisão 3D claramente visíveis.
+
+---
+
+## 🥊 Ciclo 6: 01/10/2026 - Correção de Duplicação no Rematch e Fim de Luta em P1 vs P2 (Bug 1 e Bug 2)
+
+### 🎯 Objetivos do Ciclo
+1. **Modelos duplicados ao clicar em "Jogar novamente" (Bug 1):**
+   - Ao clicar em "Jogar novamente" na tela de vitória/derrota, os modelos dos personagens apareciam duplicados e ficavam executando animações.
+   - Diagnóstico: `CreateVictoryDisplays()` gerava clones 3D nas camadas 18 e 19 que não eram destruídos no `Rematch()`. Além disso, a câmera de combate estava configurada com máscara `~(1 << 20..30)`, deixando as camadas 18 e 19 visíveis. Adicionalmente, as animações de vitória sobrescreviam o `RuntimeAnimatorController` original do lutador sem restauração.
+   - Solução: Implementar `DestroyVictoryDisplays()`, restaurar animators originais no `ResetRound()`, destruir os modelos em todas as rotas de saída e estender o culling mask da câmera para cobrir camadas 18 a 30.
+2. **P1 vs P2 não vai para a tela de derrota (Bug 2):**
+   - No modo local com Player 1 e Player 2, quando um lutador era derrotado, a luta não terminava: o lutador derrotado ficava parado e a tela de derrota não abria.
+   - Diagnóstico: `GameFlowController` não possuía checagem ativa de fim de combate no `Update()` durante `FlowScreen.Fight`, confiando exclusivamente no evento C# `HealthSystem.OnKnockout`. Se o evento falhasse ou ocorresse oscilação/dessincronia no modo local com `LocalPlayerTwoInput`, o fluxo nunca era notificado e o personagem ficava congelado no `KnockoutState`.
+   - Solução: Adicionar verificação contínua no `Update()` via `GetDefeatedFighter()` cobrindo `currentHealth <= 0`, `IsDead == true` e `KnockoutState` para ambos os lutadores, em qualquer modo (IA ou Local), com trava única `TriggerFighterKnockout(loser)`.
+3. **Cenário 10 de Verificação no Harness (`AutoFightTester.cs`):**
+   - Adicionar cenário cobrindo os 4 subcasos de nocaute e rematch:
+     - Contra IA: derrotar P1 -> tela de derrota abre -> rematch -> exatamente 2 lutadores ativos e 0 previews.
+     - Contra IA: derrotar P2 (IA) -> tela de derrota abre -> rematch -> exatamente 2 lutadores ativos e 0 previews.
+     - Modo Local P1 vs P2: derrotar P1 -> tela de derrota abre -> rematch -> exatamente 2 lutadores ativos e 0 previews.
+     - Modo Local P1 vs P2: derrotar P2 -> tela de derrota abre -> rematch -> exatamente 2 lutadores ativos e 0 previews.
+   - Validar execução completa sem regressões e atualizar telemetria e `resumo.md`.
+
+### 🛠 Alterações Realizadas
+- **GameFlowController.cs:**
+  - `DestroyVictoryDisplays()`: Destrói `victoryWinnerObject` e `victoryLoserObject`, suas câmeras dedicadas e libera os `RenderTexture`s. Invocado em `Rematch()`, `ConfirmVictoryOption()`, `BeginSelection()`, `SetupFight()` e `StartDirectFightForTesting()`.
+  - `SetMainCameraPreviewVisibility()`: Ajustado para mascarar da camada 18 à 30 (`layers 18..30`), impedindo vazamento de previews na câmera de jogabilidade.
+  - Preservação de Animators: Variáveis `originalPlayerAnimator` e `originalOpponentAnimator` salvas em `SetupFight()` e restauradas em `ResetRound()`.
+  - `Update()` / `GetDefeatedFighter()`: Monitoramento contínuo do estado de derrota de ambos os personagens em combate com acionamento por trava única (`TriggerFighterKnockout`).
+  - Getters de estado: Expostas propriedades públicas `IsVictoryScreen`, `IsFightScreen`, `CurrentPlayer` e `CurrentOpponent`.
+- **AutoFightTester.cs:**
+  - `ExecuteScenarioKnockoutAndRematchFlow()` e `TestKnockoutAndRematchSubcase()`: Implementação do Cenário 10 executando os 4 subcasos solicitados.
+  - Atualização de `scenarioHeaders` para incluir C10 na matriz diagnóstica do relatório `resumo.md`.
+
+### 📂 Arquivos Afetados no Ciclo 6
+| Arquivo | Tipo de Alteração | Descrição |
+|---|---|---|
+| `Assets/Scripts/GameFlowController.cs` | Modificado | Limpeza de displays de vitória no Rematch, restauração de animators, culling mask 18..30 e detecção de derrota em P1 vs P2. |
+| `Assets/Scripts/Debug/AutoFightTester.cs` | Modificado | Adicionado Cenário 10 cobrindo os 4 subcasos de nocaute/rematch e exibição na matriz de resumo. |
+| `REGISTRO_DE_ALTERACOES.md` | Modificado | Documentação do Ciclo 6. |
+
+### 🧪 Status de Compilação e Execução
+- **Compilação Unity MCP:** `0 Erros, 0 Avisos`.
+- **Execução do Harness:** Bateria de testes executada com sucesso:
+  - **Cenário 10:** Validado com **✅ OK** em ambos os lados (P1 e P2), cobrindo todos os 4 subcasos de nocaute e rematch sem anomalias.
+  - **58 screenshots** salvas (incluindo as telas de derrota dos 4 subcasos em `Logs/Tiago/P1/Screenshots/`).
+  - **11.674 frames de telemetria** registrados e relatório `Logs/resumo.md` atualizado com a matriz completa de C1 a C10.
+

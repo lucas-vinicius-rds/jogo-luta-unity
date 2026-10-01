@@ -594,6 +594,11 @@ public class AutoFightTester : MonoBehaviour
         // ====================================================================
         yield return StartCoroutine(ExecuteScenarioRematchReset(target, side, subject, opponent, "Cenário 9: Rematch Final"));
 
+        // ====================================================================
+        // CENÁRIO 10: Fluxo de Nocaute, Derrota e Rematch (IA e P1 vs P2)
+        // ====================================================================
+        yield return StartCoroutine(ExecuteScenarioKnockoutAndRematchFlow(target, side, screenshotsFolder));
+
         // Salva arquivos individuais do personagem
         FinalizeCharacterLogs(charSideFolder, target.displayName, side);
 
@@ -1216,6 +1221,154 @@ public class AutoFightTester : MonoBehaviour
     }
 
     // ========================================================================
+    // CENÁRIO 10: FLUXO DE NOCAUTE, TELA DE DERROTA E JOGAR NOVAMENTE (REMATCH)
+    // ========================================================================
+
+    /// <summary>
+    /// Executa o Cenário 10 cobrindo os modos Contra IA e P1 vs P2 (Local),
+    /// verificando a detecção de nocaute de ambos os lados, abertura da tela de derrota e limpeza no Rematch.
+    /// </summary>
+    private IEnumerator ExecuteScenarioKnockoutAndRematchFlow(CharacterMetadata target, string side, string screenshotsFolder)
+    {
+        currentScenario = "Cenário 10: Fluxo de Nocaute e Rematch";
+
+        var flow = FindAnyObjectByType<GameFlowController>();
+        if (flow == null)
+        {
+            var flows = Resources.FindObjectsOfTypeAll<GameFlowController>();
+            if (flows != null && flows.Length > 0) flow = flows[0];
+        }
+
+        if (flow == null)
+        {
+            RecordAnomaly(target.displayName, side, currentScenario, "GameFlowController não encontrado na cena para teste de fluxo.", "Instância ausente ou destruída.");
+            yield break;
+        }
+
+        // Subcaso 1: Modo Contra a IA - Derrotar P1
+        yield return StartCoroutine(TestKnockoutAndRematchSubcase(flow, target, side, isCpu: true, defeatP1: true, screenshotsFolder, "IA_P1_Derrotado"));
+
+        // Subcaso 2: Modo Contra a IA - Derrotar P2 (IA)
+        yield return StartCoroutine(TestKnockoutAndRematchSubcase(flow, target, side, isCpu: true, defeatP1: false, screenshotsFolder, "IA_P2_Derrotado"));
+
+        // Subcaso 3: Modo Local P1 vs P2 - Derrotar P1
+        yield return StartCoroutine(TestKnockoutAndRematchSubcase(flow, target, side, isCpu: false, defeatP1: true, screenshotsFolder, "Local_P1_Derrotado"));
+
+        // Subcaso 4: Modo Local P1 vs P2 - Derrotar P2
+        yield return StartCoroutine(TestKnockoutAndRematchSubcase(flow, target, side, isCpu: false, defeatP1: false, screenshotsFolder, "Local_P2_Derrotado"));
+
+        yield return new WaitForSeconds(settleTime);
+    }
+
+    /// <summary>
+    /// Testa um subcaso específico de nocaute e rematch, validando tela de vitória, contagem de lutadores e ausência de previews ativos.
+    /// </summary>
+    private IEnumerator TestKnockoutAndRematchSubcase(GameFlowController flow, CharacterMetadata target, string side, bool isCpu, bool defeatP1, string screenshotsFolder, string subcaseLabel)
+    {
+        SampleTelemetry(currentScenario, $"{subcaseLabel}_Start");
+
+        // Determina índices dos lutadores a partir dos prefabs disponíveis
+        int oppIndex = (flow.CharacterPrefabs != null && flow.CharacterPrefabs.Length > 1) ? (target.index == 0 ? 1 : 0) : 0;
+        int p1Index = side == "P1" ? target.index : oppIndex;
+        int p2Index = side == "P1" ? oppIndex : target.index;
+
+        // Inicia o combate diretamente pelo GameFlowController
+        GameFlowController.StartDirectFightForTesting(p1Index, p2Index, isCpu);
+
+        // Aguarda ciclo de instanciação
+        yield return null;
+        yield return null;
+
+        FighterController p1 = flow.CurrentPlayer;
+        FighterController p2 = flow.CurrentOpponent;
+
+        if (p1 == null || p2 == null)
+        {
+            RecordAnomaly(target.displayName, side, currentScenario, $"Subcaso {subcaseLabel}: Falha ao instanciar lutadores via GameFlowController.", "GameFlowController.StartDirectFightForTesting não gerou instâncias válidas.");
+            yield break;
+        }
+
+        // Atualiza referências do tester para telemetria precisa
+        currentP1Controller = p1;
+        currentP2Controller = p2;
+        currentP1Object = p1.gameObject;
+        currentP2Object = p2.gameObject;
+
+        // Desativa ações autônomas da IA durante o teste determinístico de nocaute
+        var ai = p2.GetComponent<FighterSparringAI>();
+        if (ai != null) ai.AutoSparring = false;
+
+        // Aplica dano fatal ao lutador alvo
+        FighterController victim = defeatP1 ? p1 : p2;
+        FighterController attacker = defeatP1 ? p2 : p1;
+
+        if (victim.HealthSystem != null)
+        {
+            victim.HealthSystem.TakeDamage(new DamageData(999f, 0.5f, Vector3.zero, attacker));
+        }
+
+        // Aguarda abertura da tela de vitória/derrota com tempo limite de segurança
+        float timer = 0f;
+        while (!flow.IsVictoryScreen && timer < 4.0f)
+        {
+            timer += Time.unscaledDeltaTime;
+            SampleTelemetry(currentScenario, $"{subcaseLabel}_WaitingVictory");
+            yield return null;
+        }
+
+        bool victoryOpened = flow.IsVictoryScreen;
+        yield return CaptureScreenshotRoutine(screenshotsFolder, $"{target.displayName}_{side}_{subcaseLabel}_DefeatScreen");
+
+        if (!victoryOpened)
+        {
+            RecordAnomaly(target.displayName, side, currentScenario, $"Subcaso {subcaseLabel}: A tela de derrota/vitória não abriu após nocaute.", "GameFlowController não transitou para FlowScreen.Victory após o lutador atingir vida zero ou KnockoutState.");
+            yield break;
+        }
+
+        // Simula o clique em 'Jogar novamente' (Rematch)
+        flow.Rematch();
+        yield return null;
+        yield return null;
+
+        // Verificação 1: Devem existir exatamente 2 lutadores ativos na cena
+        FighterController[] activeFighters = FindObjectsByType<FighterController>(FindObjectsInactive.Exclude);
+        bool exactlyTwoFighters = (activeFighters != null && activeFighters.Length == 2);
+
+        // Verificação 2: Nenhum modelo de preview da tela de vitória deve permanecer ativo
+        GameObject[] allActiveObjects = FindObjectsByType<GameObject>(FindObjectsInactive.Exclude);
+        int previewObjectsCount = 0;
+        foreach (var go in allActiveObjects)
+        {
+            if (go.name.Contains("VictoryWinner") || go.name.Contains("VictoryLoser") || (go.layer >= 18 && go.layer <= 30 && go.name.Contains("Preview")))
+            {
+                previewObjectsCount++;
+            }
+        }
+
+        bool noPreviewsLeft = (previewObjectsCount == 0);
+        bool fightScreenActive = flow.IsFightScreen;
+
+        // Verificação 3: Os lutadores devem estar vivos com saúde restaurada
+        bool fightersReset = (p1 != null && p2 != null && p1.HealthSystem != null && p2.HealthSystem != null && !p1.HealthSystem.IsDead && !p2.HealthSystem.IsDead);
+
+        if (victoryOpened && exactlyTwoFighters && noPreviewsLeft && fightScreenActive && fightersReset)
+        {
+            RecordScenarioSuccess(target.displayName, side, currentScenario, $"Subcaso {subcaseLabel}: Nocaute detectado e tela de derrota aberta com sucesso. Rematch executado com exatamente 2 lutadores, 0 previews ativos e saúde resetada.");
+        }
+        else
+        {
+            string issues = "";
+            if (!exactlyTwoFighters) issues += $"Contagem de lutadores incorreta ({activeFighters?.Length ?? 0} ao invés de 2). ";
+            if (!noPreviewsLeft) issues += $"Detectados {previewObjectsCount} modelos de preview ativos na cena. ";
+            if (!fightScreenActive) issues += "Fluxo não retornou para FlowScreen.Fight. ";
+            if (!fightersReset) issues += "Lutadores não resetaram vida/estado adequadamente. ";
+            RecordAnomaly(target.displayName, side, currentScenario, $"Subcaso {subcaseLabel}: Falha após rematch - {issues.Trim()}", "GameFlowController.Rematch ou DestroyVictoryDisplays falhou na limpeza.");
+        }
+
+        yield return new WaitForSeconds(0.1f);
+    }
+
+    // ========================================================================
     // TELEMETRIA E LOGS (CSV e JSON)
     // ========================================================================
 
@@ -1513,7 +1666,8 @@ public class AutoFightTester : MonoBehaviour
             "Cenário 6: Golpe Secundário Acerta (Attack2 Hit)",
             "Cenário 7: Ataques Agachado e no Ar",
             "Cenário 8: Contra-Ataque / Dano Recebido",
-            "Cenário 9: Rematch Final"
+            "Cenário 9: Rematch Final",
+            "Cenário 10: Fluxo de Nocaute e Rematch"
         };
 
         sb.Append("| Personagem | Lado | ");
