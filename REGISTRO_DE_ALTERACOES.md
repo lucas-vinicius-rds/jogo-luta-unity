@@ -11,8 +11,9 @@ Este registro é atualizado a cada nova tarefa para garantir a rastreabilidade e
 2. [Ciclo 2 (28/09/2026) - Correção de Hurtbox ao Agachar, Vínculo de Hitboxes a Ossos e Debug Gizmos](#-ciclo-2-28092026---correção-de-hurtbox-ao-agachar-vínculo-de-hitboxes-a-ossos-e-debug-gizmos)
 3. [Ciclo 3 (28/09/2026) - Timing de HitStun no Hitstop e Transição Suave de Virada (Turn180)](#-ciclo-3-28092026---timing-de-hitstun-no-hitstop-e-transição-suave-de-virada-turn180)
 4. [Ciclo 4 (28/09/2026) - Offsets de Hitbox no Espaço do Osso](#-ciclo-4-28092026---offsets-de-hitbox-no-espaço-do-osso)
-5. [Ciclo 5 (28/09/2026) - Harness de Teste Automático de Combate (AutoFightTester - FASE 1)](#-ciclo-5-28092026---harness-de-teste-automático-de-combate-autofighttester---fase-1)
-6. [Ciclo 6 (01/10/2026) - Correção de Duplicação no Rematch e Fim de Luta em P1 vs P2 (Bug 1 e Bug 2)](#-ciclo-6-01102026---correção-de-duplicação-no-rematch-e-fim-de-luta-em-p1-vs-p2-bug-1-e-bug-2)
+5. [Ciclo 4.1 / Prompt 4 (29/09/2026) - Fluxo de Rematch e Camadas de Preview na Câmera](#-ciclo-41--prompt-4-29092026---fluxo-de-rematch-e-camadas-de-preview-na-câmera)
+6. [Ciclo 5 (28/09/2026) - Harness de Teste Automático de Combate (AutoFightTester - FASE 1)](#-ciclo-5-28092026---harness-de-teste-automático-de-combate-autofighttester---fase-1)
+7. [Ciclo 6 (01/10/2026) - Correção de Duplicação no Rematch e Fim de Luta em P1 vs P2 (Bug 1 e Bug 2)](#-ciclo-6-01102026---correção-de-duplicação-no-rematch-e-fim-de-luta-em-p1-vs-p2-bug-1-e-bug-2)
 
 ---
 
@@ -71,6 +72,25 @@ Este registro é atualizado a cada nova tarefa para garantir a rastreabilidade e
 - O fallback de `HeadHitbox` foi corrigido para um ponto central à frente da cabeça, em vez de reutilizar o offset da mão esquerda.
 - Os Gizmos agora mostram, para cada hitbox, o golpe configurado, o membro e o estado `ATIVA`/`inativa`.
 - O prefab ativo do Player 2 (`EmeraldStrength`) foi alinhado: `BodyHurtbox.height = 2`, igual ao `CharacterController` e ao setup.
+
+---
+
+## 🔁 Ciclo 4.1 / Prompt 4: 29/09/2026 - Fluxo de Rematch e Camadas de Preview na Câmera
+
+### 🎯 Objetivos do Ciclo
+1. **Reiniciar partida mantendo os lutadores (Bug A do Prompt 4):**
+   - Implementar opção "Jogar novamente" na tela de vitória que reinicie o combate instantaneamente sem recarregar a cena Unity nem passar pela tela de seleção.
+   - Preservar as instâncias dos lutadores, restaurando posições e rotações iniciais exatas (`initialPlayerPosition`, `initialOpponentPosition`), vida máxima e estado neutro da FSM.
+2. **Ocultar camadas de preview durante a luta (Bug B do Prompt 4):**
+   - Ao transitar da seleção de personagens para a arena de combate, desativar da câmera de gameplay principal (`TekkenCamera`) a renderização das camadas de preview 3D (`cullingMask`), evitando sobreposição visual indesejada.
+
+### 🛠 Alterações Realizadas
+- **GameFlowController.cs:**
+  - Adicionadas variáveis de estado `initialPlayerPosition`, `initialPlayerRotation`, `initialOpponentPosition`, `initialOpponentRotation` e flag `hasInitialTransforms`, capturadas no término de `SetupFight()`.
+  - Implementado `ResetRound()`: restaura posições e rotações originais, zera velocidades e inércia do `FighterMovement`, chama `HealthSystem.ResetHealth()` e faz transição forçada para `NeutralState`.
+  - Implementado `Rematch()`: executa `ResetRound()` e define `screen = FlowScreen.Fight`.
+  - Implementado menu de vitória com navegação vertical entre "Jogar novamente" (índice 0) e "Escolher personagens" (índice 1).
+  - Implementado `SetMainCameraPreviewVisibility(bool visible)` para ligar/desligar o `cullingMask` das camadas reservadas a previews.
 
 ---
 
