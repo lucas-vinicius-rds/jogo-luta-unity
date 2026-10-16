@@ -1,4 +1,4 @@
-# 🤖 Relatório Técnico: Harness de Teste Automatizado (`AutoFightTester`) — UnDFight
+"# 🤖 Relatório Técnico: Harness de Teste Automatizado (`AutoFightTester`) — UnDFight
 
 Documento elaborado para planejamento de correções e refatorações no jogo **UnDFight** (Unity 6 / C#). Este documento consolida a arquitetura do harness, as alterações de código realizadas para viabilizá-lo, as informações extraídas dos testes e as anomalias diagnosticadas em todos os 7 personagens jogáveis.
 

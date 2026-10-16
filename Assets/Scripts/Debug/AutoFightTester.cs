@@ -135,6 +135,20 @@ public class AutoFightTester : MonoBehaviour
     private readonly List<ScenarioStatusEntry> scenarioResults = new List<ScenarioStatusEntry>();
     private readonly List<ScenarioAnomaly> detectedAnomalies = new List<ScenarioAnomaly>();
 
+    public class RangeSweepEntry
+    {
+        public string character;
+        public string side;
+        public string attackName;
+        public HitboxLimb limb;
+        public float maxRange;
+        public Dictionary<float, bool> hits = new Dictionary<float, bool>();
+        public Dictionary<float, float> minGaps = new Dictionary<float, float>();
+        public float maxDisplacement;
+    }
+
+    private readonly List<RangeSweepEntry> rangeSweepResults = new List<RangeSweepEntry>();
+
     private static readonly CultureInfo Inv = CultureInfo.InvariantCulture;
 
     [Serializable]
@@ -433,6 +447,7 @@ public class AutoFightTester : MonoBehaviour
         totalTelemetryFrames = 0;
         scenarioResults.Clear();
         detectedAnomalies.Clear();
+        rangeSweepResults.Clear();
 
         float startRealTime = Time.realtimeSinceStartup;
 
@@ -598,6 +613,11 @@ public class AutoFightTester : MonoBehaviour
         // CENÁRIO 10: Fluxo de Nocaute, Derrota e Rematch (IA e P1 vs P2)
         // ====================================================================
         yield return StartCoroutine(ExecuteScenarioKnockoutAndRematchFlow(target, side, screenshotsFolder));
+
+        // ====================================================================
+        // CENÁRIO 11: Varredura de Alcance (Range Sweep - 0.5m a 1.6m)
+        // ====================================================================
+        yield return StartCoroutine(ExecuteScenarioRangeSweep(target, side, subject, opponent, subjectInput, screenshotsFolder));
 
         // Salva arquivos individuais do personagem
         FinalizeCharacterLogs(charSideFolder, target.displayName, side);
@@ -1206,6 +1226,9 @@ public class AutoFightTester : MonoBehaviour
     private void ResetFighterState(FighterController fighter, Vector3 pos, float yRot)
     {
         if (fighter == null) return;
+        var cc = fighter.GetComponent<CharacterController>();
+        if (cc != null) cc.enabled = false;
+
         if (fighter.Movement != null)
         {
             fighter.Movement.ResetMotion();
@@ -1213,6 +1236,7 @@ public class AutoFightTester : MonoBehaviour
         }
         fighter.transform.position = pos;
         fighter.transform.rotation = Quaternion.Euler(0f, yRot, 0f);
+        if (cc != null) cc.enabled = true;
 
         if (fighter.HealthSystem != null) fighter.HealthSystem.ResetHealth();
         fighter.DisableAllHitboxes();
@@ -1366,6 +1390,154 @@ public class AutoFightTester : MonoBehaviour
         }
 
         yield return new WaitForSeconds(0.1f);
+    }
+
+    // ========================================================================
+    // CENÁRIO 11: VARREDURA DE ALCANCE (RANGE SWEEP - 0.5m a 1.6m)
+    // ========================================================================
+
+    private IEnumerator ExecuteScenarioRangeSweep(CharacterMetadata target, string side, FighterController subject, FighterController opponent, FighterInputConfig config, string screenshotsFolder)
+    {
+        currentScenario = "Cenário 11: Varredura de Alcance (Range Sweep)";
+
+        // Atualiza para as referências ativas atuais da cena (caso o Cenário 10 tenha recriado objetos via GameFlowController)
+        subject = side == "P1" ? currentP1Controller : currentP2Controller;
+        opponent = side == "P1" ? currentP2Controller : currentP1Controller;
+
+        if (subject == null || opponent == null)
+        {
+            RecordAnomaly(target.displayName, side, currentScenario, "Lutadores ausentes para varredura de alcance.", "Instâncias de FighterController destruídas.");
+            yield break;
+        }
+
+        subject.RefreshHitboxCache();
+        opponent.RefreshHitboxCache();
+        if (currentP1Object != null) foreach (var ai in currentP1Object.GetComponents<FighterSparringAI>()) ai.AutoSparring = false;
+        if (currentP2Object != null) foreach (var ai in currentP2Object.GetComponents<FighterSparringAI>()) ai.AutoSparring = false;
+
+        float[] distances = { 0.5f, 0.6f, 0.7f, 0.8f, 0.9f, 1.0f, 1.1f, 1.2f, 1.3f, 1.4f, 1.5f, 1.6f };
+
+        // 1. Varredura Golpe Primário (Punch)
+        yield return StartCoroutine(RunSweepForAttack(target, side, subject, opponent, config, FighterAttackType.Punch, "Punch", target.primaryLimb, distances));
+
+        // 2. Varredura Golpe Secundário (Attack2)
+        yield return StartCoroutine(RunSweepForAttack(target, side, subject, opponent, config, FighterAttackType.Attack2, "Attack2", target.secondaryLimb, distances));
+
+        var pEntry = rangeSweepResults.Find(r => r.character == target.displayName && r.side == side && r.attackName == "Punch");
+        var aEntry = rangeSweepResults.Find(r => r.character == target.displayName && r.side == side && r.attackName == "Attack2");
+        float pRange = pEntry != null ? pEntry.maxRange : 0f;
+        float aRange = aEntry != null ? aEntry.maxRange : 0f;
+
+        if (pRange > 0f && aRange > 0f)
+        {
+            RecordScenarioSuccess(target.displayName, side, currentScenario, $"Varredura concluída: Punch alcança até {pRange:F1}m, Attack2 alcança até {aRange:F1}m.");
+        }
+        else
+        {
+            string failInfo = "";
+            if (pRange <= 0f) failInfo += "Punch não acertou em nenhuma distância. ";
+            if (aRange <= 0f) failInfo += "Attack2 não acertou em nenhuma distância (alcance 0.0m). ";
+            RecordAnomaly(target.displayName, side, currentScenario, failInfo.Trim(), "Hitbox não intercepta a hurtbox em nenhuma distância entre 0.5m e 1.6m (membro incorreto ou timing descompassado).");
+        }
+
+        yield return new WaitForSeconds(settleTime);
+    }
+
+    private IEnumerator RunSweepForAttack(CharacterMetadata target, string side, FighterController subject, FighterController opponent, FighterInputConfig config, FighterAttackType attackType, string attackName, HitboxLimb limb, float[] distances)
+    {
+        var entry = new RangeSweepEntry
+        {
+            character = target.displayName,
+            side = side,
+            attackName = attackName,
+            limb = limb,
+            maxRange = 0f,
+            maxDisplacement = 0f
+        };
+
+        Collider targetHurtCol = opponent != null ? opponent.GetComponentInChildren<Hurtbox>()?.GetComponent<Collider>() : null;
+
+        for (int i = 0; i < distances.Length; i++)
+        {
+            float dist = distances[i];
+            float half = dist * 0.5f;
+
+            Vector3 subPos = new Vector3(side == "P1" ? -half : half, 0f, 0f);
+            Vector3 oppPos = new Vector3(side == "P1" ? half : -half, 0f, 0f);
+            float subYRot = side == "P1" ? 90f : -90f;
+            float oppYRot = side == "P1" ? -90f : 90f;
+
+            ResetFighterState(subject, subPos, subYRot);
+            ResetFighterState(opponent, oppPos, oppYRot);
+            Physics.SyncTransforms();
+            yield return new WaitForSeconds(0.04f);
+
+            float oppStartHp = opponent.HealthSystem != null ? opponent.HealthSystem.CurrentHealth : 100f;
+            bool hit = false;
+            float minGap = float.MaxValue;
+            float startX = subject.transform.position.x;
+            float maxDisp = 0f;
+
+            // Dispara o ataque diretamente no FighterController
+            subject.TriggerAttack(attackType);
+
+            float elapsed = 0f;
+            float timeout = subject.CurrentAttackDuration + 0.25f;
+
+            while (elapsed < timeout)
+            {
+                elapsed += Time.deltaTime;
+                SampleTelemetry(currentScenario, $"Sweep_{attackName}_{dist:F1}m");
+
+                float curDisp = Mathf.Abs(subject.transform.position.x - startX);
+                if (curDisp > maxDisp) maxDisp = curDisp;
+
+                Hitbox activeHb = null;
+                foreach (var hb in subject.GetComponentsInChildren<Hitbox>(true))
+                {
+                    if (hb.IsActive)
+                    {
+                        activeHb = hb;
+                        break;
+                    }
+                }
+
+                if (activeHb != null && targetHurtCol != null)
+                {
+                    float r = 0.22f;
+                    if (activeHb.GetComponent<SphereCollider>() is SphereCollider sc)
+                    {
+                        r = sc.radius * Mathf.Max(activeHb.transform.lossyScale.x, activeHb.transform.lossyScale.y, activeHb.transform.lossyScale.z);
+                    }
+                    Vector3 closest = targetHurtCol.ClosestPoint(activeHb.transform.position);
+                    float gap = Mathf.Max(0f, Vector3.Distance(activeHb.transform.position, closest) - r);
+                    if (gap < minGap) minGap = gap;
+                }
+
+                if (subject.IsInHitstop || opponent.IsInHitstop || (opponent.HealthSystem != null && (oppStartHp - opponent.HealthSystem.CurrentHealth) > 0.5f))
+                {
+                    hit = true;
+                    minGap = 0f;
+                    break;
+                }
+
+                if (elapsed > 0.2f && subject.CurrentState is NeutralState)
+                {
+                    break;
+                }
+
+                yield return null;
+            }
+
+            if (minGap == float.MaxValue) minGap = -1f;
+
+            entry.hits[dist] = hit;
+            entry.minGaps[dist] = minGap;
+            if (hit && dist > entry.maxRange) entry.maxRange = dist;
+            if (maxDisp > entry.maxDisplacement) entry.maxDisplacement = maxDisp;
+        }
+
+        rangeSweepResults.Add(entry);
     }
 
     // ========================================================================
@@ -1667,7 +1839,8 @@ public class AutoFightTester : MonoBehaviour
             "Cenário 7: Ataques Agachado e no Ar",
             "Cenário 8: Contra-Ataque / Dano Recebido",
             "Cenário 9: Rematch Final",
-            "Cenário 10: Fluxo de Nocaute e Rematch"
+            "Cenário 10: Fluxo de Nocaute e Rematch",
+            "Cenário 11: Varredura de Alcance (Range Sweep)"
         };
 
         sb.Append("| Personagem | Lado | ");
@@ -1773,6 +1946,43 @@ public class AutoFightTester : MonoBehaviour
         sb.AppendLine("- No lado P2, o lutador inicia com rotação Y em **-90°** olhando para a esquerda.");
         sb.AppendLine("- O comando de avanço em direção ao oponente requer vetor `-X`, e o comando de recuo requer `+X`.");
         sb.AppendLine("- A sincronização da cápsula de `BodyHurtbox` durante agachamento opera independentemente do lado em que o personagem está posicionado.");
+        sb.AppendLine();
+
+        // 5. Tabela de Alcance Efetivo por Golpe e Varredura de Distância (0.5m a 1.6m)
+        sb.AppendLine("## 5. Tabela de Alcance Efetivo por Golpe e Varredura de Distância (0.5m a 1.6m)");
+        sb.AppendLine();
+        sb.AppendLine("Varredura de acerto/erro testando distâncias de **0.5m a 1.6m** (passo 0.1m). Para cada distância é indicado se o golpe acertou (✅) ou errou (❌), com a menor distância entre a hitbox ativa e a hurtbox do alvo durante a janela ativa.");
+        sb.AppendLine();
+
+        sb.AppendLine("| Personagem | Lado | Golpe | Membro | 0.5m | 0.6m | 0.7m | 0.8m | 0.9m | 1.0m | 1.1m | 1.2m | 1.3m | 1.4m | 1.5m | 1.6m | Alcance Máx | Gap a 0.9m | Desloc RootMotion |");
+        sb.AppendLine("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|");
+
+        float[] sweepDists = { 0.5f, 0.6f, 0.7f, 0.8f, 0.9f, 1.0f, 1.1f, 1.2f, 1.3f, 1.4f, 1.5f, 1.6f };
+        foreach (var r in rangeSweepResults)
+        {
+            sb.Append($"| **{r.character}** | {r.side} | {r.attackName} | `{r.limb}` | ");
+            foreach (float d in sweepDists)
+            {
+                if (r.hits.TryGetValue(d, out bool didHit) && didHit)
+                {
+                    sb.Append("✅ | ");
+                }
+                else if (r.minGaps.TryGetValue(d, out float gap))
+                {
+                    if (gap < 0f) sb.Append("❌ (Inat) | ");
+                    else sb.Append($"❌ ({gap:F2}m) | ");
+                }
+                else
+                {
+                    sb.Append("- | ");
+                }
+            }
+
+            string maxRangeStr = r.maxRange > 0f ? $"{r.maxRange:F1}m" : "**0.0m (Nunca acerta)**";
+            string gap09Str = r.hits.TryGetValue(0.9f, out bool hit09) && hit09 ? "0.00m (Hit)" : (r.minGaps.TryGetValue(0.9f, out float g09) ? (g09 < 0f ? "Inativo" : $"{g09:F2}m") : "-");
+            sb.Append($"{maxRangeStr} | {gap09Str} | {r.maxDisplacement:F2}m |");
+            sb.AppendLine();
+        }
         sb.AppendLine();
 
         try
