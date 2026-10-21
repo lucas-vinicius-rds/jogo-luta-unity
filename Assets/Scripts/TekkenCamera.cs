@@ -37,11 +37,18 @@ public class TekkenCamera : MonoBehaviour
     public Transform Fighter1 { get => fighter1; set => fighter1 = value; }
     public Transform Fighter2 { get => fighter2; set => fighter2 = value; }
 
+    private Camera targetCamera;
+
+    private void Awake()
+    {
+        targetCamera = GetComponent<Camera>();
+    }
+
     private void LateUpdate()
     {
         if (fighter1 == null || fighter2 == null) return;
 
-        Camera camera = GetComponent<Camera>();
+        if (targetCamera == null) targetCamera = GetComponent<Camera>();
 
         // 1. Calcula o ponto médio entre os lutadores
         Vector3 p1 = fighter1.position;
@@ -53,11 +60,11 @@ public class TekkenCamera : MonoBehaviour
         float fighterDistance = Mathf.Abs(p2.x - p1.x);
         float currentDistance = baseDistance + (fighterDistance * zoomFactor);
         Vector3 targetPosition = new Vector3(midpoint.x, midpoint.y + height, -currentDistance);
-        targetPosition.y = midpoint.y + height;
-        if (camera != null)
+        // targetPosition ja configurado acima
+        if (targetCamera != null)
         {
-            camera.orthographic = true;
-            camera.orthographicSize = Mathf.Clamp(3.2f + fighterDistance * 0.22f, 3.2f, 6.5f);
+            targetCamera.orthographic = true;
+            targetCamera.orthographicSize = Mathf.Clamp(3.2f + fighterDistance * 0.22f, 3.2f, 6.5f);
         }
 
         // Interpolação suave de posição
