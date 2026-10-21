@@ -28,6 +28,7 @@ public class FighterSparringAI : MonoBehaviour
     private FighterMovement movement;
     private float timer;
     private float currentInterval;
+    private Coroutine moveCoroutine;
 
     public AIDifficulty Difficulty
     {
@@ -51,6 +52,19 @@ public class FighterSparringAI : MonoBehaviour
         movement = GetComponent<FighterMovement>();
 
         ResetTimerForDifficulty();
+    }
+
+    private void OnDisable()
+    {
+        if (moveCoroutine != null)
+        {
+            StopCoroutine(moveCoroutine);
+            moveCoroutine = null;
+        }
+        if (movement != null)
+        {
+            movement.ExternalInput = Vector2.zero;
+        }
     }
 
     private void Update()
@@ -176,13 +190,15 @@ public class FighterSparringAI : MonoBehaviour
                 break;
         }
 
-        StartCoroutine(PerformMovementRoutine(moveDir, moveDuration));
+        if (moveCoroutine != null) StopCoroutine(moveCoroutine);
+        moveCoroutine = StartCoroutine(PerformMovementRoutine(moveDir, moveDuration));
     }
 
     private IEnumerator PerformMovementRoutine(Vector2 dir, float duration)
     {
         movement.ExternalInput = dir;
         yield return new WaitForSeconds(duration);
+        moveCoroutine = null;
         movement.ExternalInput = Vector2.zero;
     }
 
