@@ -758,7 +758,7 @@ public sealed class GameFlowController : MonoBehaviour
         if (currentOpponent != null && currentOpponent.HealthSystem != null) currentOpponent.HealthSystem.OnKnockout -= OnFighterKnockout;
         victoryShown = false;
         DestroyVictoryDisplays();
-        foreach (FighterController fighter in FindObjectsByType<FighterController>()) Destroy(fighter.gameObject);
+        foreach (FighterController fighter in FindObjectsByType<FighterController>(FindObjectsSortMode.None)) Destroy(fighter.gameObject);
         GameObject player = InstantiatePrefab(pendingPlayer);
         GameObject opponent = InstantiatePrefab(pendingOpponent);
         if (player == null || opponent == null)
@@ -857,7 +857,7 @@ public sealed class GameFlowController : MonoBehaviour
         if (fighter == null) return;
 
         // Desativa temporariamente o CharacterController para mover o Transform sem conflito de colisão
-        CharacterController cc = fighter.GetComponent<CharacterController>();
+        CharacterController cc = fighter.Movement != null ? fighter.Movement.CharacterController : fighter.GetComponent<CharacterController>();
         if (cc != null) cc.enabled = false;
 
         fighter.transform.SetPositionAndRotation(initialPosition, initialRotation);
@@ -943,7 +943,7 @@ public sealed class GameFlowController : MonoBehaviour
 
     private void RemoveSceneFighters()
     {
-        foreach (FighterController fighter in FindObjectsByType<FighterController>(FindObjectsInactive.Include))
+        foreach (FighterController fighter in FindObjectsByType<FighterController>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             Destroy(fighter.gameObject);
     }
 
