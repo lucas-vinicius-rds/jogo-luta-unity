@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -15,6 +15,12 @@ public sealed partial class GameFlowController : MonoBehaviour
     [SerializeField] private string fightSceneName = "FightingPrototype";
     [SerializeField] private AnimationClip[] victoryClips;
     [SerializeField] private AnimationClip defeatedClip;
+
+    [Header("Quality & Performance")]
+    [Tooltip("Taxa de quadros alvo do jogo (padrÃ£o 60 FPS para jogos de luta).")]
+    [SerializeField] private int targetFrameRate = 60;
+    [Tooltip("SincronizaÃ§Ã£o vertical com o monitor.")]
+    [SerializeField] private bool enableVSync = true;
 
     public GameObject[] CharacterPrefabs => characterPrefabs;
     public static string[] CharacterDisplayNames => DisplayNames;
@@ -100,10 +106,17 @@ public sealed partial class GameFlowController : MonoBehaviour
         if (instance != null && instance != this) { Destroy(gameObject); return; }
         instance = this;
         DontDestroyOnLoad(gameObject);
+        ApplyQualitySettings();
         SceneManager.sceneLoaded += OnSceneLoaded;
         screen = pendingFight ? FlowScreen.VS : FlowScreen.Main;
         if (!pendingFight) RemoveSceneFighters();
         StartCoroutine(LoadMenuAssets());
+    }
+
+    private void ApplyQualitySettings()
+    {
+        QualitySettings.vSyncCount = enableVSync ? 1 : 0;
+        Application.targetFrameRate = targetFrameRate;
     }
 
     private void OnDestroy()

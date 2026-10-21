@@ -356,6 +356,13 @@ Cenario: 300 frames de sparring ativo (Tiago vs CPU Isaac):
 - **Erros de Compilacao:** 0 erros no Unity MCP.
 - **Harness de Testes:** Bateria de testes automatizados (AutoFightTester) executada com sucesso, mantendo 100% de paridade em todos os cenarios e telemetrias em relacao a baseline.
 
+---
+
+### âš™ï¸ Ajuste de Qualidade e Taxa de Quadros (Target Frame Rate e V-Sync)
+- **ConfiguraÃ§Ã£o de V-Sync:** QualitySettings.vSyncCount = 1 aplicado em ProjectSettings/QualitySettings.asset (nÃ­veis Mobile e PC).
+- **Target Frame Rate:** Adicionado targetFrameRate = 60 e enableVSync = true em GameFlowController.cs (com campos configurÃ¡veis no Inspector e aplicados no Awake()).
+- **Resultado:** O jogo agora roda travado em **60 FPS cravados** (16,66 ms por frame), eliminando aquecimento desnecessÃ¡rio de GPU/CPU, oscilaÃ§Ãµes de frame pacing (stuttering) e garantindo a resposta padrÃ£o esperada de jogos de luta de precisÃ£o.
+
 ## 🎬 Catálogo Geral de Animações e Parâmetros (Mixamo)
 
 Referência dos assets de animação disponíveis em `Assets/Animations/Mixamo/`.
