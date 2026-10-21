@@ -30,6 +30,24 @@ public class FighterMovement : MonoBehaviour
     [Tooltip("Velocidade de rotação suave em graus por segundo ao virar para o oponente.")]
     [SerializeField, Min(180f)] private float turnSpeed = 720f;
 
+    // Hashes numéricos pré-calculados de parâmetros do Animator (Zero GC e busca O(1))
+    private static readonly int CrouchHash = Animator.StringToHash("Crouch");
+    private static readonly int CrouchDirectionHash = Animator.StringToHash("CrouchDirection");
+    private static readonly int MoveDirectionHash = Animator.StringToHash("MoveDirection");
+    private static readonly int JumpTypeHash = Animator.StringToHash("JumpType");
+    private static readonly int JumpHash = Animator.StringToHash("Jump");
+
+    // Rotações fixas pré-calculadas (evita alocações e chamadas Euler per-frame)
+    private static readonly Quaternion RotFacingRight = Quaternion.Euler(0f, 90f, 0f);
+    private static readonly Quaternion RotFacingLeft = Quaternion.Euler(0f, -90f, 0f);
+
+    // Flags cacheadas de presença dos parâmetros no Animator Controller atual
+    private bool hasParamCrouch;
+    private bool hasParamCrouchDirection;
+    private bool hasParamMoveDirection;
+    private bool hasParamJumpType;
+    private bool hasParamJump;
+
     private CharacterController characterController;
     private Animator animator;
     private Hurtbox bodyHurtbox;
@@ -71,6 +89,7 @@ public class FighterMovement : MonoBehaviour
         wasGroundedLastFrame = characterController.isGrounded;
         fighterController = GetComponent<FighterController>();
         lastFacingDirection = transform.forward.x >= 0f ? 1f : -1f;
+        CacheAnimatorParameters();
         // Inicializa configuração padrão para Player 1 caso não atribuída
         if (inputConfig == null)
         {
@@ -169,8 +188,8 @@ public class FighterMovement : MonoBehaviour
         {
             verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
             int jumpDirection = GetRelativeMoveDirection(input.x);
-            if (HasParameter("JumpType")) animator.SetInteger("JumpType", jumpDirection > 0 ? 2 : jumpDirection < 0 ? 1 : 0);
-            if (HasParameter("Jump")) animator.SetTrigger("Jump");
+            if (hasParamJumpType) animator.SetInteger(JumpTypeHash, jumpDirection > 0 ? 2 : jumpDirection < 0 ? 1 : 0);
+            if (hasParamJump) animator.SetTrigger(JumpHash);
         }
         wasJumpHeld = jumpHeld;
     }
@@ -179,9 +198,9 @@ public class FighterMovement : MonoBehaviour
     {
         if (animator == null) return;
         CurrentMoveDirection = GetRelativeMoveDirection(input.x);
-        if (HasParameter("Crouch")) animator.SetBool("Crouch", IsCrouching);
-        if (HasParameter("CrouchDirection")) animator.SetInteger("CrouchDirection", CurrentMoveDirection);
-        if (HasParameter("MoveDirection")) animator.SetInteger("MoveDirection", CurrentMoveDirection);
+        if (hasParamCrouch) animator.SetBool(CrouchHash, IsCrouching);
+        if (hasParamCrouchDirection) animator.SetInteger(CrouchDirectionHash, CurrentMoveDirection);
+        if (hasParamMoveDirection) animator.SetInteger(MoveDirectionHash, CurrentMoveDirection);
     }
 
     private int GetRelativeMoveDirection(float horizontalInput)
@@ -190,6 +209,30 @@ public class FighterMovement : MonoBehaviour
         if (opponent == null) return horizontalInput > 0f ? 1 : -1;
         float towardOpponent = Mathf.Sign(opponent.position.x - transform.position.x);
         return horizontalInput * towardOpponent > 0f ? 1 : -1;
+    }
+
+    /// <summary>
+    /// Pré-cacheia a presença dos parâmetros no Animator para evitar alocações de array por frame.
+    /// </summary>
+    public void CacheAnimatorParameters()
+    {
+        hasParamCrouch = false;
+        hasParamCrouchDirection = false;
+        hasParamMoveDirection = false;
+        hasParamJumpType = false;
+        hasParamJump = false;
+
+        if (animator == null || animator.runtimeAnimatorController == null) return;
+        var parameters = animator.parameters;
+        for (int i = 0; i < parameters.Length; i++)
+        {
+            int hash = parameters[i].nameHash;
+            if (hash == CrouchHash) hasParamCrouch = true;
+            else if (hash == CrouchDirectionHash) hasParamCrouchDirection = true;
+            else if (hash == MoveDirectionHash) hasParamMoveDirection = true;
+            else if (hash == JumpTypeHash) hasParamJumpType = true;
+            else if (hash == JumpHash) hasParamJump = true;
+        }
     }
 
     private bool HasParameter(string parameterName)
@@ -294,7 +337,7 @@ public class FighterMovement : MonoBehaviour
         }
 
         // Rotação suave em direção ao oponente para evitar virada instantânea
-        Quaternion targetRotation = Quaternion.Euler(0f, desiredDirection > 0f ? 90f : -90f, 0f);
+        Quaternion targetRotation = desiredDirection > 0f ? RotFacingRight : RotFacingLeft;
         transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, turnSpeed * Time.deltaTime);
     }
 }
