@@ -9,6 +9,8 @@ public class AttackState : IFighterState
     private float elapsedTime;
     private bool hitboxesEnabled;
     private bool windowOpened;
+    private float currentAttackDuration;
+    private FighterAttackTiming currentTiming;
 
     public void Enter(FighterController fighter)
     {
@@ -36,7 +38,8 @@ public class AttackState : IFighterState
         
         // Ajusta a velocidade da animação respeitando a configuração do golpe
         // (limitada entre 0.85f e 1.6f para garantir fluidez natural sem acelerar excessivamente)
-        FighterAttackTiming currentTiming = fighter.CurrentAttackTiming;
+        currentTiming = fighter.CurrentAttackTiming;
+        currentAttackDuration = fighter.CurrentAttackDuration;
         float targetSpeed = currentTiming != null && currentTiming.playbackSpeed > 0f ? currentTiming.playbackSpeed : 1f;
         fighter.SetAnimatorSpeed(Mathf.Clamp(targetSpeed, 0.85f, 1.6f));
     }
@@ -44,11 +47,11 @@ public class AttackState : IFighterState
     public void Update(FighterController fighter)
     {
         elapsedTime += Time.deltaTime;
-        FighterAttackTiming timing = fighter.CurrentAttackTiming;
+        FighterAttackTiming timing = currentTiming ?? fighter.CurrentAttackTiming;
         bool hasAnimationProgress = fighter.TryGetCurrentAttackProgress(out float progress);
         float attackProgress = hasAnimationProgress
             ? progress
-            : elapsedTime / Mathf.Max(0.05f, fighter.CurrentAttackDuration);
+            : elapsedTime / Mathf.Max(0.05f, currentAttackDuration);
 
         if (!windowOpened && attackProgress >= timing.activeStartNormalized)
         {
@@ -66,7 +69,7 @@ public class AttackState : IFighterState
 
         // Retorna ao Neutro ao atingir recoveryEndNormalized
         // O timeout de segurança é dinâmico baseado na duração real do ataque (evitando cortar prematuramente)
-        float maxDuration = Mathf.Max(2.5f, fighter.CurrentAttackDuration + 0.5f);
+        float maxDuration = Mathf.Max(2.5f, currentAttackDuration + 0.5f);
         bool recoveryDone = attackProgress >= timing.recoveryEndNormalized;
         bool timedOut = elapsedTime > maxDuration;
         if (recoveryDone || timedOut)

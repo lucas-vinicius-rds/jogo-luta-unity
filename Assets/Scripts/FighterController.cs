@@ -118,6 +118,14 @@ public class FighterController : MonoBehaviour
     private bool wasMouseHeld;
     private string lastDetectedInput = "Nenhum";
 
+    // Cache de referências e nomes do oponente para OnGUI e combate (Zero GC)
+    private Transform cachedOpponentTransform;
+    private FighterController cachedOpponentController;
+    private HealthSystem cachedOpponentHealth;
+    private FighterSparringAI cachedOpponentAI;
+    private string cachedP1Name;
+    private string cachedP2Name = "IA";
+
     // Hashes numéricos de animação
     public int NeutralAnimHash { get; private set; }
     public int AttackAnimHash { get; private set; }
@@ -215,10 +223,10 @@ public class FighterController : MonoBehaviour
         KnockoutAnimHash = Animator.StringToHash(knockoutAnimName);
         Turn180AnimHash = Animator.StringToHash(turn180AnimName);
 
-        NeutralState = new NeutralState();
-        AttackState = new AttackState();
-        HitStunState = new HitStunState();
-        KnockoutState = new KnockoutState();
+        // Estados FSM ja instanciados nas propriedades
+
+
+
 
         if (movement != null && movement.IsPlayerControlled)
         {
@@ -671,9 +679,33 @@ public class FighterController : MonoBehaviour
         GUI.color = Color.white;
         var boxStyle = GUI.skin.box;
 
-        var opponentController = movement.Opponent != null ? movement.Opponent.GetComponent<FighterController>() : null;
-        var opHealth = opponentController != null ? opponentController.HealthSystem : null;
-        var ai = movement.Opponent != null ? movement.Opponent.GetComponent<FighterSparringAI>() : null;
+        if (cachedP1Name == null)
+        {
+            cachedP1Name = gameObject.name.Replace("Player_", string.Empty).Replace("(Clone)", string.Empty).Trim();
+        }
+
+        if (movement.Opponent != cachedOpponentTransform)
+        {
+            cachedOpponentTransform = movement.Opponent;
+            if (cachedOpponentTransform != null)
+            {
+                cachedOpponentTransform.TryGetComponent(out cachedOpponentController);
+                cachedOpponentTransform.TryGetComponent(out cachedOpponentAI);
+                cachedOpponentHealth = cachedOpponentController != null ? cachedOpponentController.HealthSystem : null;
+                cachedP2Name = cachedOpponentTransform.gameObject.name.Replace("Opponent_", string.Empty).Replace("(Clone)", string.Empty).Trim();
+            }
+            else
+            {
+                cachedOpponentController = null;
+                cachedOpponentAI = null;
+                cachedOpponentHealth = null;
+                cachedP2Name = "IA";
+            }
+        }
+
+        var opponentController = cachedOpponentController;
+        var opHealth = cachedOpponentHealth;
+        var ai = cachedOpponentAI;
 
         // 1. Painel de Status & Barra de Vida em Tempo Real
         GUILayout.BeginArea(new Rect(15, 15, 390, 200), boxStyle);
@@ -682,8 +714,8 @@ public class FighterController : MonoBehaviour
         float p1Hp = healthSystem != null ? healthSystem.CurrentHealth : 100f;
         float p1Max = healthSystem != null ? healthSystem.MaxHealth : 100f;
         string p1Status = healthSystem != null && healthSystem.IsDead ? "<color=red>K.O. (Dying)</color>" : $"{p1Hp:F0}/{p1Max:F0}";
-        string p1Name = gameObject.name.Replace("Player_", string.Empty).Replace("(Clone)", string.Empty).Trim();
-        string p2Name = opponentController != null ? opponentController.gameObject.name.Replace("Opponent_", string.Empty).Replace("(Clone)", string.Empty).Trim() : "IA";
+        string p1Name = cachedP1Name;
+        string p2Name = cachedP2Name;
         GUILayout.Label($"P1 (Você - {p1Name}): <b>{p1Status}</b> | Estado: <b><color=yellow>{CurrentState?.GetType().Name}</color></b>");
 
         float p2Hp = opHealth != null ? opHealth.CurrentHealth : 100f;
@@ -783,7 +815,7 @@ public class FighterController : MonoBehaviour
 
         if (movement != null && movement.Opponent != null)
         {
-            var op = movement.Opponent.GetComponent<FighterController>();
+            var op = cachedOpponentController != null ? cachedOpponentController : movement.Opponent.GetComponent<FighterController>();
             if (op != null)
             {
                 if (op.HealthSystem != null) op.HealthSystem.ResetHealth();
