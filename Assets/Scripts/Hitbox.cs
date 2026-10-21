@@ -40,6 +40,7 @@ public class Hitbox : MonoBehaviour
     private DamageData currentDamageData;
     private bool isActive;
     private Transform followBone;
+    private bool boneBindingAttempted;
     // O setup armazena a posição de projeto no espaço do lutador. Ao vincular o
     // osso, ela é convertida uma vez para o espaço local daquele osso; assim a
     // esfera mantém o deslocamento desejado durante animações e giros.
@@ -101,7 +102,8 @@ public class Hitbox : MonoBehaviour
     public void BindBone()
     {
         if (!followAnimatedBone) return;
-        if (followBone != null) return;
+        if (followBone != null || boneBindingAttempted) return;
+        boneBindingAttempted = true;
         EnsureComponents();
         if (owner == null) return;
 
@@ -338,8 +340,7 @@ public class Hitbox : MonoBehaviour
         if (!isActive || other == null) return;
 
         // Procura Hurtbox no objeto atingido
-        var hurtbox = other.GetComponent<Hurtbox>();
-        if (hurtbox == null || hurtbox.Owner == null) return;
+        if (!other.TryGetComponent<Hurtbox>(out var hurtbox) || hurtbox.Owner == null) return;
 
         // Ignora colisão com o próprio lutador
         if (hurtbox.Owner == owner) return;

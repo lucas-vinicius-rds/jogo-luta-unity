@@ -175,14 +175,18 @@ public class FighterMovement : MonoBehaviour
 
     private void HandleJumpAndCrouch(Vector2 input)
     {
-        IsCrouching = input.y < -0.5f && characterController.isGrounded;
-        float targetHeight = IsCrouching ? standingHeight * 0.62f : standingHeight;
-        characterController.height = targetHeight;
-        Vector3 targetCenter = IsCrouching
-            ? new Vector3(standingCenter.x, standingCenter.y * 0.62f, standingCenter.z)
-            : standingCenter;
-        characterController.center = targetCenter;
-        if (bodyHurtbox != null) bodyHurtbox.SetBounds(targetHeight, targetCenter);
+        bool newCrouch = input.y < -0.5f && characterController.isGrounded;
+        if (newCrouch != IsCrouching)
+        {
+            IsCrouching = newCrouch;
+            float targetHeight = IsCrouching ? standingHeight * 0.62f : standingHeight;
+            characterController.height = targetHeight;
+            Vector3 targetCenter = IsCrouching
+                ? new Vector3(standingCenter.x, standingCenter.y * 0.62f, standingCenter.z)
+                : standingCenter;
+            characterController.center = targetCenter;
+            if (bodyHurtbox != null) bodyHurtbox.SetBounds(targetHeight, targetCenter);
+        }
         bool jumpHeld = input.y > 0.5f;
         if (jumpHeld && !wasJumpHeld && characterController.isGrounded)
         {

@@ -21,6 +21,8 @@ public class Hurtbox : MonoBehaviour
     private CapsuleCollider capsuleCol;
     private Vector3 initialLocalPosition;
     private Vector3 initialCapsuleCenter;
+    private float lastAppliedHeight = -1f;
+    private Vector3 lastAppliedCenter = Vector3.negativeInfinity;
 
     public FighterController Owner
     {
@@ -57,6 +59,12 @@ public class Hurtbox : MonoBehaviour
     /// </summary>
     public void SetBounds(float targetHeight, Vector3 targetCenter)
     {
+        if (Mathf.Abs(lastAppliedHeight - targetHeight) < 0.001f && (lastAppliedCenter - targetCenter).sqrMagnitude < 0.0001f)
+            return;
+
+        lastAppliedHeight = targetHeight;
+        lastAppliedCenter = targetCenter;
+
         if (capsuleCol != null)
         {
             capsuleCol.height = targetHeight;
