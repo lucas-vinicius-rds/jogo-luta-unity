@@ -14,6 +14,7 @@ Este registro é atualizado a cada nova tarefa para garantir a rastreabilidade e
 5. [Ciclo 4.1 / Prompt 4 (29/09/2026) - Fluxo de Rematch e Camadas de Preview na Câmera](#-ciclo-41--prompt-4-29092026---fluxo-de-rematch-e-camadas-de-preview-na-câmera)
 6. [Ciclo 5 (28/09/2026) - Harness de Teste Automático de Combate (AutoFightTester - FASE 1)](#-ciclo-5-28092026---harness-de-teste-automático-de-combate-autofighttester---fase-1)
 7. [Ciclo 6 (01/10/2026) - Correção de Duplicação no Rematch e Fim de Luta em P1 vs P2 (Bug 1 e Bug 2)](#-ciclo-6-01102026---correção-de-duplicação-no-rematch-e-fim-de-luta-em-p1-vs-p2-bug-1-e-bug-2)
+8. [Ciclo 6.1 (15/10/2026) - Rodada de Referência (Baseline) e Cenário 11 (Varredura de Alcance)](#-ciclo-61-15102026---rodada-de-referência-baseline-e-cenário-11-varredura-de-alcance)
 
 ---
 
@@ -174,4 +175,19 @@ Este registro é atualizado a cada nova tarefa para garantir a rastreabilidade e
   - **Cenário 10:** Validado com **✅ OK** em ambos os lados (P1 e P2), cobrindo todos os 4 subcasos de nocaute e rematch sem anomalias.
   - **58 screenshots** salvas (incluindo as telas de derrota dos 4 subcasos em `Logs/Tiago/P1/Screenshots/`).
   - **11.674 frames de telemetria** registrados e relatório `Logs/resumo.md` atualizado com a matriz completa de C1 a C10.
+
+---
+
+## 📊 Ciclo 6.1: 15/10/2026 - Rodada de Referência (Baseline) e Cenário 11 (Varredura de Alcance)
+
+### 🎯 Objetivos do Ciclo
+1. Confirmar que o Play normal no Unity Editor é estritamente opt-in (`AutoFightTester` permanece `enabled = false` no `Awake()` sem `SessionState` ou batchmode).
+2. Executar a bateria multi-personagem completa (7 personagens, P1 e P2, cenários C1 a C11) e arquivar o resultado de referência em `Logs/baseline_resumo.md`.
+3. Verificar a cobertura integral do Cenário 10 (nocaute de P1/P2 contra IA e em modo Local P1 vs P2, abertura de `FlowScreen.Victory` e `flow.Rematch()` real com exatamente 2 lutadores e 0 previews) e do Cenário 11 (Range Sweep de 0.5m a 1.6m).
+
+### 🧪 Resultados da Rodada Baseline
+- **Execução:** 7 personagens x 2 lados (14 suítes), **150.764 frames** de telemetria e **388 screenshots** em **632,2s** (~10,5 min).
+- **Arquivos Gerados:** `Logs/resumo.md` e cópia idêntica `Logs/baseline_resumo.md`.
+- **Cenário 10 (Nocaute e Rematch Real):** ✅ OK em todos os 7 personagens (P1 e P2).
+- **Cenário 11 (Range Sweep 0.5m–1.6m):** Identificou alcance `0.0m` (nunca acerta) no `Attack2` de Tiago, Jompi e Gabutas, enquanto o `Attack2` de Isaac acerta até `1.4m` (apesar de falhar no C6 por janela/timing a 0.9m com input simulado).
 
