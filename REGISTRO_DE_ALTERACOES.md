@@ -1,12 +1,13 @@
 # 📜 Registro de Alterações e Correções - UnDFight
 
-Documento de acompanhamento contínuo das correções de bugs, refatorações pontuais e novas funcionalidades implementadas no jogo **UnDFight** (Unity 6 / C#).
+Documento de acompanhamento contínuo das correções de bugs, refatorações pontuais, arquitetura e novas funcionalidades implementadas no jogo **UnDFight** (Unity 6 / C#).
 
-Este registro é atualizado a cada nova tarefa para garantir a rastreabilidade e a integridade da arquitetura do projeto.
+Este registro consolida todo o histórico técnico, catálogo de animações e decisões de projeto para garantir a rastreabilidade e a integridade da arquitetura do projeto.
 
 ---
 
-## 📑 Índice de Ciclos
+## 📑 Índice de Seções
+0. [Ciclo 0 - Origem, Protótipo Inicial e Arquitetura Base](#-ciclo-0---origem-protótipo-inicial-e-arquitetura-base)
 1. [Ciclo 1 (28/09/2026) - Correções de Input e Limpeza de APIs Obsoletas](#-ciclo-1-28092026---correções-de-input-e-limpeza-de-apis-obsoletas)
 2. [Ciclo 2 (28/09/2026) - Correção de Hurtbox ao Agachar, Vínculo de Hitboxes a Ossos e Debug Gizmos](#-ciclo-2-28092026---correção-de-hurtbox-ao-agachar-vínculo-de-hitboxes-a-ossos-e-debug-gizmos)
 3. [Ciclo 3 (28/09/2026) - Timing de HitStun no Hitstop e Transição Suave de Virada (Turn180)](#-ciclo-3-28092026---timing-de-hitstun-no-hitstop-e-transição-suave-de-virada-turn180)
@@ -16,6 +17,58 @@ Este registro é atualizado a cada nova tarefa para garantir a rastreabilidade e
 7. [Ciclo 6 (01/10/2026) - Correção de Duplicação no Rematch e Fim de Luta em P1 vs P2 (Bug 1 e Bug 2)](#-ciclo-6-01102026---correção-de-duplicação-no-rematch-e-fim-de-luta-em-p1-vs-p2-bug-1-e-bug-2)
 8. [Ciclo 6.1 (15/10/2026) - Rodada de Referência (Baseline) e Cenário 11 (Varredura de Alcance)](#-ciclo-61-15102026---rodada-de-referência-baseline-e-cenário-11-varredura-de-alcance)
 9. [Ciclo 7 (21/10/2026) - Otimização de Performance e Limpeza de Código](#-ciclo-7-21102026---otimização-de-performance-e-limpeza-de-código)
+10. [Catálogo Geral de Animações e Parâmetros (Mixamo)](#-catálogo-geral-de-animações-e-parâmetros-mixamo)
+
+---
+
+## 🏛 Ciclo 0 - Origem, Protótipo Inicial e Arquitetura Base
+
+### 🎯 Visão Geral do Jogo
+O **UnDFight** foi concebido e estruturado a partir de um protótipo de jogo de luta 2.5D no Unity, com o seguinte fluxo de telas:
+```text
+Menu Principal → Versus → Modo de Jogo → Seleção de Personagens → Tela VS → Luta → K.O. e Vitória
+```
+
+### 🖥 Telas e Menus
+1. **Menu Principal:**
+   - Título: `UnDFight`.
+   - Opções: `VERSUS` e `SAIR`.
+   - Identidade visual azul escuro e branco centralizada com imagem de fundo `Assets/telaInicial.png` e áudio tema `Assets/eltema.mp3`.
+2. **Menu Versus:**
+   - Opções: `PLAYER VS CPU`, `PLAYER VS PLAYER LOCAL` e `VOLTAR`.
+3. **Seleção de Personagens:**
+   - 7 lutadores com seleção independente para P1 (esquerda) e P2/CPU (direita).
+   - Bloqueio de seleção duplicada (P2 não pode escolher o mesmo personagem que P1).
+   - Destaque com contorno ciano para personagem em foco e verde-claro para confirmado.
+   - Navegação por mouse ou setas/Enter, com cancelamento por Esc.
+4. **Sistema de Previews Duplo:**
+   - **Preview Lateral 3D:** Renderizado via `RenderTexture` em tempo real com Animator ativo e zoom óptico, com isolamento em camadas específicas de preview (`PreviewLayersMask`).
+   - **Retratos dos Cards:** Câmeras estáticas dedicadas por personagem, focadas na cabeça/rosto com Animator desligado para os cards da grade.
+5. **Tela de Vitória e K.O.:**
+   - Disparada após o término da animação de queda do derrotado.
+   - Apresenta vencedor e derrotado com suas poses de vitória/derrota.
+   - Opções de ação: `JOGAR NOVAMENTE`, `ESCOLHER PERSONAGENS` e `VOLTAR AO MENU`.
+
+### 👥 Personagens e Identidade
+Configurados com prefabs originais adaptados para humanoid avatars e materiais Lit no URP:
+
+| Nome Original do Prefab | Nome Exibido no Jogo | Animação de Vitória (`Assets/Animations/Mixamo/`) |
+|---|---|---|
+| Casual Smiling Man | **Tiago** | `tigas.fbx` |
+| Emerald Strength | **Isaac** | `isaac.fbx` |
+| Man in Black | **Lucas** | `lusca.fbx` |
+| Modern Gentleman | **Enomoto** | `enomoto.fbx` |
+| Shadow Sentinel | **Jompi** | `jompis.fbx` |
+| Studio Rocker | **Gabutas** | `gabutas.fbx` |
+| Vasco Jacket Avatar | **Ricardinho** | `ricardin.fbx` |
+
+> Animação do Derrotado comum: `X Bot@Surprise Uppercut (1).fbx`.
+
+### 🥊 Mecânicas de Combate e Locomoção
+- **Movimento 2.5D:** Controle no plano X/Y com travamento no eixo Z. Suporte a caminhada frontal, recuo, pulos (parado, frente, trás) e agachamento (parado, caminhada agachada).
+- **Máquina de Estados (FSM):** Arquitetura desacoplada com `NeutralState`, `AttackState`, `HitStunState` e `KnockoutState`.
+- **Colisões e Dano:** Hitboxes vinculadas aos ossos dos membros (`followAnimatedBone`), com verificação de acerto único por golpe via `HashSet<FighterController>` e envio de `DamageData` para a `Hurtbox` do oponente.
+- **Hitstop e Reação:** Congelamento temporário da animação do atacante e defensor no impacto, seguido de atordoamento (`HitStun`) com suporte a buffer de input.
 
 ---
 
@@ -88,11 +141,11 @@ Este registro é atualizado a cada nova tarefa para garantir a rastreabilidade e
 
 ### 🛠 Alterações Realizadas
 - **GameFlowController.cs:**
-  - Adicionadas variáveis de estado `initialPlayerPosition`, `initialPlayerRotation`, `initialOpponentPosition`, `initialOpponentRotation` e flag `hasInitialTransforms`, capturadas no término de `SetupFight()`.
-  - Implementado `ResetRound()`: restaura posições e rotações originais, zera velocidades e inércia do `FighterMovement`, chama `HealthSystem.ResetHealth()` e faz transição forçada para `NeutralState`.
-  - Implementado `Rematch()`: executa `ResetRound()` e define `screen = FlowScreen.Fight`.
-  - Implementado menu de vitória com navegação vertical entre "Jogar novamente" (índice 0) e "Escolher personagens" (índice 1).
-  - Implementado `SetMainCameraPreviewVisibility(bool visible)` para ligar/desligar o `cullingMask` das camadas reservadas a previews.
+   - Adicionadas variáveis de estado `initialPlayerPosition`, `initialPlayerRotation`, `initialOpponentPosition`, `initialOpponentRotation` e flag `hasInitialTransforms`, capturadas no término de `SetupFight()`.
+   - Implementado `ResetRound()`: restaura posições e rotações originais, zera velocidades e inércia do `FighterMovement`, chama `HealthSystem.ResetHealth()` e faz transição forçada para `NeutralState`.
+   - Implementado `Rematch()`: executa `ResetRound()` e define `screen = FlowScreen.Fight`.
+   - Implementado menu de vitória com navegação vertical entre "Jogar novamente" (índice 0) e "Escolher personagens" (índice 1).
+   - Implementado `SetMainCameraPreviewVisibility(bool visible)` para ligar/desligar o `cullingMask` das camadas reservadas a previews.
 
 ---
 
@@ -128,8 +181,8 @@ Este registro é atualizado a cada nova tarefa para garantir a rastreabilidade e
 ### 🧪 Status de Compilação e Execução
 - **Compilação Unity MCP:** `0 Erros, 0 Avisos`.
 - **Execução do Harness:** Bateria de testes concluída com sucesso:
-  - **2343 frames** de telemetria gravados em CSV e JSON dentro de `Logs/`.
-  - **21 screenshots** salvas em `Logs/Screenshots/` com caixas de colisão 3D claramente visíveis.
+   - **2343 frames** de telemetria gravados em CSV e JSON dentro de `Logs/`.
+   - **21 screenshots** salvas em `Logs/Screenshots/` com caixas de colisão 3D claramente visíveis.
 
 ---
 
@@ -154,14 +207,14 @@ Este registro é atualizado a cada nova tarefa para garantir a rastreabilidade e
 
 ### 🛠 Alterações Realizadas
 - **GameFlowController.cs:**
-  - `DestroyVictoryDisplays()`: Destrói `victoryWinnerObject` e `victoryLoserObject`, suas câmeras dedicadas e libera os `RenderTexture`s. Invocado em `Rematch()`, `ConfirmVictoryOption()`, `BeginSelection()`, `SetupFight()` e `StartDirectFightForTesting()`.
-  - `SetMainCameraPreviewVisibility()`: Ajustado para mascarar da camada 18 à 30 (`layers 18..30`), impedindo vazamento de previews na câmera de jogabilidade.
-  - Preservação de Animators: Variáveis `originalPlayerAnimator` e `originalOpponentAnimator` salvas em `SetupFight()` e restauradas em `ResetRound()`.
-  - `Update()` / `GetDefeatedFighter()`: Monitoramento contínuo do estado de derrota de ambos os personagens em combate com acionamento por trava única (`TriggerFighterKnockout`).
-  - Getters de estado: Expostas propriedades públicas `IsVictoryScreen`, `IsFightScreen`, `CurrentPlayer` e `CurrentOpponent`.
+   - `DestroyVictoryDisplays()`: Destrói `victoryWinnerObject` e `victoryLoserObject`, suas câmeras dedicadas e libera os `RenderTexture`s. Invocado em `Rematch()`, `ConfirmVictoryOption()`, `BeginSelection()`, `SetupFight()` e `StartDirectFightForTesting()`.
+   - `SetMainCameraPreviewVisibility()`: Ajustado para mascarar da camada 18 à 30 (`layers 18..30`), impedindo vazamento de previews na câmera de jogabilidade.
+   - Preservação de Animators: Variáveis `originalPlayerAnimator` e `originalOpponentAnimator` salvas em `SetupFight()` e restauradas em `ResetRound()`.
+   - `Update()` / `GetDefeatedFighter()`: Monitoramento contínuo do estado de derrota de ambos os personagens em combate com acionamento por trava única (`TriggerFighterKnockout`).
+   - Getters de estado: Expostas propriedades públicas `IsVictoryScreen`, `IsFightScreen`, `CurrentPlayer` e `CurrentOpponent`.
 - **AutoFightTester.cs:**
-  - `ExecuteScenarioKnockoutAndRematchFlow()` e `TestKnockoutAndRematchSubcase()`: Implementação do Cenário 10 executando os 4 subcasos solicitados.
-  - Atualização de `scenarioHeaders` para incluir C10 na matriz diagnóstica do relatório `resumo.md`.
+   - `ExecuteScenarioKnockoutAndRematchFlow()` e `TestKnockoutAndRematchSubcase()`: Implementação do Cenário 10 executando os 4 subcasos solicitados.
+   - Atualização de `scenarioHeaders` para incluir C10 na matriz diagnóstica do relatório `resumo.md`.
 
 ### 📂 Arquivos Afetados no Ciclo 6
 | Arquivo | Tipo de Alteração | Descrição |
@@ -173,9 +226,9 @@ Este registro é atualizado a cada nova tarefa para garantir a rastreabilidade e
 ### 🧪 Status de Compilação e Execução
 - **Compilação Unity MCP:** `0 Erros, 0 Avisos`.
 - **Execução do Harness:** Bateria de testes executada com sucesso:
-  - **Cenário 10:** Validado com **✅ OK** em ambos os lados (P1 e P2), cobrindo todos os 4 subcasos de nocaute e rematch sem anomalias.
-  - **58 screenshots** salvas (incluindo as telas de derrota dos 4 subcasos em `Logs/Tiago/P1/Screenshots/`).
-  - **11.674 frames de telemetria** registrados e relatório `Logs/resumo.md` atualizado com a matriz completa de C1 a C10.
+   - **Cenário 10:** Validado com **✅ OK** em ambos os lados (P1 e P2), cobrindo todos os 4 subcasos de nocaute e rematch sem anomalias.
+   - **58 screenshots** salvas (incluindo as telas de derrota dos 4 subcasos em `Logs/Tiago/P1/Screenshots/`).
+   - **11.674 frames de telemetria** registrados e relatório `Logs/resumo.md` atualizado com a matriz completa de C1 a C10.
 
 ---
 
@@ -226,6 +279,7 @@ Este registro é atualizado a cada nova tarefa para garantir a rastreabilidade e
 - **Cache de Oponente e Nomes no OnGUI:** Referências ao oponente (`FighterController`, `HealthSystem`, `FighterSparringAI`) e nomes formatados foram cacheados, evitando buscas de componentes e operações de `Replace()` a cada frame de GUI.
 - **Duração de Ataque no AttackState:** `CurrentAttackDuration` e timing calculados e cacheados uma única vez no `Enter()` do estado de ataque, em vez de consultar `animator.GetCurrentAnimatorStateInfo(0)` múltiplos frames consecutivos no `Update()`.
 - **Limpeza de Instanciação Duplicada:** Removida recriação redundante dos estados FSM no `Awake()`.
+- **Remoção de Código Morto:** Removidos campos legados não lidos (`wasSpaceHeld`, `wasJHeld`, `wasKHeld`, `wasEnterHeld` e `lastDetectedInput`).
 
 #### 6. `FighterSparringAI.cs`
 - **Gestão Segura de Corrotinas:** Corrotina de movimentação da IA agora é rastreada e interrompida apropriadamente antes de novos comandos e limpa no `OnDisable()`.
@@ -234,6 +288,7 @@ Este registro é atualizado a cada nova tarefa para garantir a rastreabilidade e
 - **FindObjectsSortMode.None:** Consultas de busca de lutadores atualizadas para `FindObjectsByType<FighterController>(FindObjectsSortMode.None)`, evitando ordenação de objetos no Unity 6.
 - **Uso de Referências Cacheadas:** `CharacterController` lido diretamente de `FighterMovement.CharacterController`.
 - **Máscara de Layers Pré-calculada:** Visibilidade de previews agora usa constante binária `PreviewLayersMask = 0x7FFC0000`, eliminando loops repetidos.
+- **Limpeza de Usings:** Removidos `System.Linq` e `UnityEditor` não utilizados.
 
 ---
 
@@ -251,4 +306,70 @@ Cenário: 300 frames de sparring ativo (`Tiago` vs `CPU Isaac`):
 - **Erros de Compilação:** 0 erros no Unity MCP.
 - **Harness de Testes:** Bateria de testes automatizados (`AutoFightTester`) executada com sucesso, mantendo 100% de paridade com o comportamento de combate e telemetria da baseline.
 
+---
 
+## 🎬 Catálogo Geral de Animações e Parâmetros (Mixamo)
+
+Referência dos assets de animação disponíveis em `Assets/Animations/Mixamo/`.
+
+### 1. Animações Ligadas ao Controlador (`BaseFighter.controller`)
+
+| Arquivo | Uso Atual / Significado |
+|---|---|
+| `Fighter_Idle.anim` | Idle base do lutador em pose neutra. |
+| `X Bot@Bouncing Fight Idle.fbx` | Idle de luta alternativo, com balanço contínuo. |
+| `X Bot@Walking.fbx` | Caminhada / locomoção para frente. |
+| `X Bot@Running Backward.fbx` | Recuo / locomoção para trás. |
+| `X Bot@Standing To Crouched.fbx` | Transição de em pé para agachado (ao pressionar para baixo). |
+| `X Bot@Crouched To Standing.fbx` | Transição de agachado para em pé (ao soltar direcional baixo). |
+| `X Bot@Crouch Walk Forward.fbx` | Deslocamento agachado para frente. |
+| `X Bot@Crouch Walk Back.fbx` | Deslocamento agachado para trás. |
+| `X Bot@Crouching Idle.fbx` | Agachamento parado / postura agachada contínua. |
+| `X Bot@Jumping1.fbx` | Pulo parado (`jumping1`), sem deslocamento horizontal. |
+| `X Bot@Jump.fbx` | Pulo para trás. |
+| `Pulo pra frente.fbx` | Pulo para frente. |
+| `X Bot@Punching.fbx` | Soco principal (`Punch` / ataque primário). |
+| `X Bot@Kicking.fbx` | Chute principal (`Attack2` / ataque secundário). |
+| `X Bot@Hit To Body.fbx` | Reação ao receber golpe no corpo (`HitStun`). |
+| `X Bot@Walking Turn 180.fbx` | Virada de 180 graus quando oponente troca de lado (`Turn180`). |
+
+### 2. Ataques e Golpes Disponíveis para Expansão
+
+| Arquivo | Possível Uso / Aplicação |
+|---|---|
+| `X Bot@Cross Punch.fbx` | Soco cruzado; alternativa para ataque primário ou golpe pesado. |
+| `X Bot@Surprise Uppercut.fbx` | Uppercut surpresa; golpe vertical de curto alcance. |
+| `X Bot@Surprise Uppercut (1).fbx` | Variação do uppercut / animação padrão de derrota no K.O. |
+| `X Bot@Headbutt.fbx` | Cabeçada; ataque de curta distância. |
+| `X Bot@Flying Kick.fbx` | Chute voador; ataque aéreo com avanço horizontal. |
+| `X Bot@Kicking (1).fbx` | Variação do chute; comparar alcance e timing com `Kicking.fbx`. |
+| `X Bot@Martelo 2.fbx` | Golpe de martelo; ataque descendente ou pesado. |
+| `X Bot@Macaco Side.fbx` | Golpe lateral / acrobático estilo capoeira. |
+
+### 3. Reações, Estados e Utilitários
+
+| Arquivo | Possível Uso / Aplicação |
+|---|---|
+| `X Bot@Dying.fbx` | Queda e nocaute no chão após perda total de vida. |
+| `X Bot@Getting Up.fbx` | Levantamento e recuperação após knockdown. |
+| `X Bot@Reaction.fbx` | Reação de impacto genérica ou defesa. |
+| `X Bot@Kneeling Down.fbx` | Postura de agachamento alternativa. |
+| `X Bot@Jumping.fbx` | Pulo original alternativo. |
+| `X Bot@Step Backward.fbx` | Passo curto para trás (backdash). |
+| `X Bot@Walk Backwards.fbx` | Caminhada alternativa para trás. |
+| `X Bot@Silly Dancing.fbx` | Provocação (taunt) ou menu. |
+
+### 4. Parâmetros do Animator (`BaseFighter.controller`)
+- `Punch` (*Trigger*): Dispara o golpe primário (soco).
+- `Attack2` (*Trigger*): Dispara o golpe secundário (chute).
+- `Hit` (*Trigger*): Aciona o estado de dano / reação a golpe.
+- `Crouch` (*Bool*): Mantém o lutador na postura de agachamento.
+- `CrouchDirection` (*Float*): Diferencia locomoção agachada para frente (+1) e para trás (-1).
+- `Jump` (*Trigger*): Dispara o pulo.
+- `JumpType` (*Int*): `0` para pulo parado, `1` para pulo recuando, `2` para pulo avançando.
+- `Speed` (*Float*): Controla a velocidade de locomoção no Blend Tree da caminhada.
+
+### 5. Diretrizes para Incorporação de Novas Animações
+- **Root Motion:** Para golpes com deslocamento, validar se o clipe tem root motion e se o avanço deve ser persistido via script pelo `CharacterController`.
+- **Janelas de Contato:** Ao configurar novos ataques, calibrar a janela de ativação da hitbox no `Hitbox.cs` para bater exatamente com a extensão máxima do membro.
+- **Tempo de Salto:** Adequar a duração visual do clipe de pulo à física de gravidade e velocidade vertical do `FighterMovement.cs`.

@@ -109,15 +109,7 @@ public class FighterController : MonoBehaviour
     // Edge-detection para inputs
     private bool wasPunchHeld;
     private bool wasAttack2Held;
-
-    // Edge-detection para inputs de hardware
-    private bool wasSpaceHeld;
-    private bool wasJHeld;
-    private bool wasKHeld;
-    private bool wasEnterHeld;
     private bool wasMouseHeld;
-    private string lastDetectedInput = "Nenhum";
-
     // Cache de referências e nomes do oponente para OnGUI e combate (Zero GC)
     private Transform cachedOpponentTransform;
     private FighterController cachedOpponentController;
@@ -613,7 +605,6 @@ public class FighterController : MonoBehaviour
             FighterAttackType attack = inputConfig.ReadAttack(ref wasPunchHeld, ref wasAttack2Held, out string detected);
             if (attack != FighterAttackType.None)
             {
-                lastDetectedInput = detected;
                 return attack;
             }
         }
@@ -625,20 +616,17 @@ public class FighterController : MonoBehaviour
             wasMouseHeld = isMouse;
             if (triggered)
             {
-                lastDetectedInput = "Mouse Esquerdo";
                 return FighterAttackType.Punch;
             }
         }
 
         if (runtimeAttack2Action != null && (runtimeAttack2Action.triggered || runtimeAttack2Action.WasPressedThisFrame()))
         {
-            lastDetectedInput = "Attack2 InputAction";
             return FighterAttackType.Attack2;
         }
 
         if (runtimeAttackAction != null && (runtimeAttackAction.triggered || runtimeAttackAction.WasPressedThisFrame()))
         {
-            lastDetectedInput = "Punch InputAction";
             return FighterAttackType.Punch;
         }
 

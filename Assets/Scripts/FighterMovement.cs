@@ -162,12 +162,6 @@ public class FighterMovement : MonoBehaviour
         Vector2 input = Vector2.zero;
         if (inputConfig != null) input = inputConfig.ReadMovement();
 
-        /*
-            if (Keyboard.current.aKey.isPressed) input.x -= 1f;
-            if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed) input.x += 1f;
-            if (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed) input.y += 1f;
-            if (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed) input.y -= 1f;
-        */
         if (input.sqrMagnitude < 0.001f && runtimeMoveAction?.enabled == true)
             input = runtimeMoveAction.ReadValue<Vector2>();
         return Vector2.ClampMagnitude(input, 1f);

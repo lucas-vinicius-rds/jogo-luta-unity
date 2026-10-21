@@ -1,12 +1,8 @@
 using System.Collections;
 using System.IO;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 
 /// <summary>Fluxo UnDFight: menu principal, modo, seleÃ§Ã£o, VS e luta.</summary>
 public sealed class GameFlowController : MonoBehaviour
