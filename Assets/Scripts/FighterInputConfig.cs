@@ -34,6 +34,25 @@ public class FighterInputConfig
     private bool simulatedPunch;
     private bool simulatedAttack2;
 
+    // Strings de debug pré-formatadas para evitar alocações de string no heap
+    private string detectedSimulatedAttack2;
+    private string detectedSimulatedPunch;
+    private string detectedAttack2;
+    private string detectedPunch;
+    private string detectedGamepadAttack2;
+    private string detectedGamepadPunch;
+
+    private void EnsureDetectedStrings()
+    {
+        if (detectedPunch != null) return;
+        detectedSimulatedAttack2 = $"P{playerIndex} Simulated Attack2";
+        detectedSimulatedPunch = $"P{playerIndex} Simulated Punch";
+        detectedAttack2 = $"P{playerIndex} Attack2 ({attack2Key})";
+        detectedPunch = $"P{playerIndex} Punch ({punchKey})";
+        detectedGamepadAttack2 = $"P{playerIndex} Gamepad Attack2 (West / X)";
+        detectedGamepadPunch = $"P{playerIndex} Gamepad Punch (South / A)";
+    }
+
     public int PlayerIndex => playerIndex;
     public Key MoveUp => moveUp;
     public Key MoveDown => moveDown;
@@ -73,12 +92,13 @@ public class FighterInputConfig
         Vector2 input = Vector2.zero;
 
         // Leitura de teclado
-        if (Keyboard.current != null)
+        Keyboard kbd = Keyboard.current;
+        if (kbd != null)
         {
-            if (IsKeyPressed(moveLeft)) input.x -= 1f;
-            if (IsKeyPressed(moveRight)) input.x += 1f;
-            if (IsKeyPressed(moveUp)) input.y += 1f;
-            if (IsKeyPressed(moveDown)) input.y -= 1f;
+            if (IsKeyPressed(kbd, moveLeft)) input.x -= 1f;
+            if (IsKeyPressed(kbd, moveRight)) input.x += 1f;
+            if (IsKeyPressed(kbd, moveUp)) input.y += 1f;
+            if (IsKeyPressed(kbd, moveDown)) input.y -= 1f;
         }
 
         // Leitura de gamepad correspondente
@@ -102,6 +122,7 @@ public class FighterInputConfig
     /// </summary>
     public FighterAttackType ReadAttack(ref bool wasPunchHeld, ref bool wasAttack2Held, out string detectedInput)
     {
+        EnsureDetectedStrings();
         detectedInput = "Nenhum";
 
         // 0. Leitura de ataques simulados (harness de teste) com edge-detection idêntico ao hardware
@@ -118,22 +139,23 @@ public class FighterInputConfig
 
             if (attack2Triggered)
             {
-                detectedInput = $"P{playerIndex} Simulated Attack2";
+                detectedInput = detectedSimulatedAttack2;
                 return FighterAttackType.Attack2;
             }
 
             if (punchTriggered)
             {
-                detectedInput = $"P{playerIndex} Simulated Punch";
+                detectedInput = detectedSimulatedPunch;
                 return FighterAttackType.Punch;
             }
         }
 
         // 1. Leitura no teclado
-        if (Keyboard.current != null)
+        Keyboard kbd = Keyboard.current;
+        if (kbd != null)
         {
-            bool punchDown = IsKeyPressed(punchKey) || IsKeyPressed(punchKeyAlt);
-            bool attack2Down = IsKeyPressed(attack2Key) || IsKeyPressed(attack2KeyAlt);
+            bool punchDown = IsKeyPressed(kbd, punchKey) || IsKeyPressed(kbd, punchKeyAlt);
+            bool attack2Down = IsKeyPressed(kbd, attack2Key) || IsKeyPressed(kbd, attack2KeyAlt);
 
             bool punchTriggered = punchDown && !wasPunchHeld;
             bool attack2Triggered = attack2Down && !wasAttack2Held;
@@ -144,13 +166,13 @@ public class FighterInputConfig
             // Prioriza ataque secundário se ambos dispararem no mesmo frame
             if (attack2Triggered)
             {
-                detectedInput = $"P{playerIndex} Attack2 ({attack2Key})";
+                detectedInput = detectedAttack2;
                 return FighterAttackType.Attack2;
             }
 
             if (punchTriggered)
             {
-                detectedInput = $"P{playerIndex} Punch ({punchKey})";
+                detectedInput = detectedPunch;
                 return FighterAttackType.Punch;
             }
         }
@@ -162,13 +184,13 @@ public class FighterInputConfig
             // Bug C corrigido: buttonWest exclusivo para Attack2, buttonSouth exclusivo para Punch
             if (pad.buttonWest.wasPressedThisFrame)
             {
-                detectedInput = $"P{playerIndex} Gamepad Attack2 (West / X)";
+                detectedInput = detectedGamepadAttack2;
                 return FighterAttackType.Attack2;
             }
 
             if (pad.buttonSouth.wasPressedThisFrame)
             {
-                detectedInput = $"P{playerIndex} Gamepad Punch (South / A)";
+                detectedInput = detectedGamepadPunch;
                 return FighterAttackType.Punch;
             }
         }
@@ -192,20 +214,15 @@ public class FighterInputConfig
     }
 
     /// <summary>
-    /// Checagem segura de tecla pressionada.
+    /// Checagem segura e sem alocações de tecla pressionada.
     /// </summary>
-    private bool IsKeyPressed(Key key)
+    private static bool IsKeyPressed(Keyboard kbd, Key key)
     {
-        if (key == Key.None || Keyboard.current == null) return false;
-        try
-        {
-            return Keyboard.current[key].isPressed;
-        }
-        catch
-        {
-            return false;
-        }
+        if (kbd == null || key <= Key.None || (int)key > (int)Key.IMESelected) return false;
+        return kbd[key].isPressed;
     }
+
+    private bool IsKeyPressed(Key key) => IsKeyPressed(Keyboard.current, key);
 
     /// <summary>
     /// Configuração padrão de fábrica para o Player 1:
