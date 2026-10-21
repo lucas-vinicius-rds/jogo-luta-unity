@@ -292,15 +292,37 @@ Configurados com prefabs originais adaptados para humanoid avatars e materiais L
 
 ---
 
-### 📊 Comparativo de Performance (Antes vs. Depois)
+### 🚀 Fase 2: Otimizações Estruturais de Performance Adicionais
+
+#### 1. `Hitbox.cs`
+- **Eliminação do `Update()`:** O método `Update()` foi completamente removido do componente `Hitbox`. A checagem de sobreposição (`CheckOverlaps()`) foi consolidada no `LateUpdate()`, logo após o alinhamento com o esqueleto (`SyncBonePosition()`). Isso eliminou 10 invocações desnecessárias do player loop do Unity por frame e removeu o duplo sincronismo de ossos por frame durante ataques ativos.
+
+#### 2. `TekkenCamera.cs`
+- **Remoção de Busca per-frame:** Removido o fallback `GetComponent<Camera>()` do `LateUpdate()`.
+- **Eliminação de Matriz Suja:** `targetCamera.orthographic = true` foi movido para o `Awake()`, evitando reinvalidação contínua da matriz de projeção da câmera a cada frame.
+- **Tolerância de OrthographicSize:** A alteração do zoom ortográfico agora só aplica valor quando a variação for superior a `0.001f`.
+
+#### 3. `FighterController.cs`
+- **Cache de Rects no OnGUI:** Retângulos de layout da interface (`CombatPanelRect`, `ControlsPanelRect`) transformados em campos estáticos imutáveis, eliminando instanciações repetidas de `Rect` a cada ciclo de GUI.
+- **Eliminação de Reflexão per-frame:** Substituídas as chamadas `CurrentState?.GetType().Name` por leitura direta da propriedade cacheada `CurrentStateName`, zerando alocações de string por reflexão no loop visual.
+- **TryGetComponent no Reset:** Referência ao oponente obtida com segurança e cacheada sem `GetComponent` repetido.
+
+#### 4. `GameFlowController.cs`
+- **Hashes Numéricos no Animator:** Substituídas consultas por string (`IsName("Dying")` e `"Idle"`) por hashes inteiros pré-calculados (`DyingAnimHash` e `IdleAnimHash`).
+- **Cache de Câmera e Máscara Binária:** Eliminadas buscas de câmera e loops iterativos de layer em `SetMainCameraPreviewVisibility()`, utilizando `cachedMainCamera` e constante binária `PreviewLayersMask`.
+- **TryGetComponent e Reuso de Propriedades:** `ResetFighterPhysicsAndState` passou a ler `fighter.Movement` diretamente e usar `TryGetComponent` para `Rigidbody` e `CharacterController`.
+
+---
+
+### 📊 Comparativo Consolidado de Performance (Baseline vs. Fase 2)
 Cenário: 300 frames de sparring ativo (`Tiago` vs `CPU Isaac`):
 
-| Métrica | Antes (Baseline) | Depois (Otimizado) | Variação / Ganho |
-|---|---|---|---|
-| **Tempo Médio de Frame** | 3,89 ms | **2,73 ms** | **-29,8%** (mais rápido) |
-| **FPS Médio** | 257,3 FPS | **366,0 FPS** | **+108,7 FPS (+42,2%)** |
-| **Alocação de GC por Frame** | 30.829,8 bytes (30,11 KB) | **24.963,7 bytes (24,38 KB)** | **-5.866 bytes/frame (-19,0%)** |
-| **Scripts no Update (`BehaviourUpdate`)** | 0,155 ms | **0,037 ms** | **-76,1% de tempo de CPU!** |
+| Métrica | Antes (Baseline) | Fase 1 | Fase 2 (Final) | Variação Total vs Baseline |
+|---|---|---|---|---|
+| **Tempo Médio de Frame** | 3,89 ms | 2,73 ms | **2,74 ms** | **-29,6%** (mais rápido) |
+| **FPS Médio** | 257,3 FPS | 366,0 FPS | **365,5 FPS** | **+108,2 FPS (+42,1%)** |
+| **Alocação de GC por Frame** | 30.829,8 bytes (30,11 KB) | 24.963,7 bytes (24,38 KB) | **24.779,7 bytes (24,20 KB)** | **-6.050 bytes/frame (-19,6%)** |
+| **Scripts no Update (`BehaviourUpdate`)** | 0,155 ms | 0,037 ms | **0,033 ms** | **-78,7% de tempo de CPU!** |
 
 ### 🧪 Validação Funcional
 - **Erros de Compilação:** 0 erros no Unity MCP.

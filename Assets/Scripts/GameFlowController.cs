@@ -32,6 +32,10 @@ public sealed class GameFlowController : MonoBehaviour
     private static int pendingPlayer;
     private static int pendingOpponent;
     private static bool pendingFight;
+    private static readonly int DyingAnimHash = Animator.StringToHash("Dying");
+    private static readonly int IdleAnimHash = Animator.StringToHash("Idle");
+    private const int PreviewLayersMask = 0x7FFC0000;
+    private Camera cachedMainCamera;
     private FlowScreen screen = FlowScreen.Main;
     private GameMode mode;
     private int playerSelection;
@@ -515,7 +519,7 @@ public sealed class GameFlowController : MonoBehaviour
         if (loser != null && loser.Animator != null)
         {
             float wait = 0f;
-            while (wait < 1f && !loser.Animator.GetCurrentAnimatorStateInfo(0).IsName("Dying"))
+            while (wait < 1f && loser.Animator.GetCurrentAnimatorStateInfo(0).shortNameHash != DyingAnimHash)
             {
                 wait += Time.unscaledDeltaTime;
                 yield return null;
@@ -595,7 +599,7 @@ public sealed class GameFlowController : MonoBehaviour
         animator.runtimeAnimatorController = overrideController;
         animator.enabled = true;
         animator.speed = 1f;
-        animator.Play("Idle", 0, 0f);
+        animator.Play(IdleAnimHash, 0, 0f);
         animator.Update(0f);
     }
 
@@ -853,7 +857,8 @@ public sealed class GameFlowController : MonoBehaviour
         if (fighter == null) return;
 
         // Desativa temporariamente o CharacterController para mover o Transform sem conflito de colisão
-        CharacterController cc = fighter.Movement != null ? fighter.Movement.CharacterController : fighter.GetComponent<CharacterController>();
+        CharacterController cc = fighter.Movement != null ? fighter.Movement.CharacterController : null;
+        if (cc == null) fighter.TryGetComponent(out cc);
         if (cc != null) cc.enabled = false;
 
         fighter.transform.SetPositionAndRotation(initialPosition, initialRotation);
@@ -861,15 +866,15 @@ public sealed class GameFlowController : MonoBehaviour
         if (cc != null) cc.enabled = true;
 
         // Zera velocidade e rotação de Rigidbody, se houver
-        Rigidbody rb = fighter.GetComponent<Rigidbody>();
-        if (rb != null)
+        if (fighter.TryGetComponent(out Rigidbody rb))
+
         {
             rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
         }
 
         // Reseta movimento e física customizada
-        FighterMovement movement = fighter.GetComponent<FighterMovement>();
+        FighterMovement movement = fighter.Movement;
         if (movement != null)
         {
             movement.ResetMotion();
@@ -893,29 +898,25 @@ public sealed class GameFlowController : MonoBehaviour
     /// </summary>
     private void SetMainCameraPreviewVisibility(bool visible)
     {
-        Camera targetCamera = Camera.main;
-        if (targetCamera == null)
+        if (cachedMainCamera == null)
         {
-            TekkenCamera tc = FindAnyObjectByType<TekkenCamera>();
-            if (tc != null) targetCamera = tc.GetComponent<Camera>();
+            cachedMainCamera = Camera.main;
+            if (cachedMainCamera == null)
+            {
+                TekkenCamera tc = FindAnyObjectByType<TekkenCamera>();
+                if (tc != null) cachedMainCamera = tc.GetComponent<Camera>();
+            }
         }
 
-        if (targetCamera == null) return;
-
-        int previewMask = 0;
-        // Cobre todas as camadas de previews (18 e 19 para vitória, 20 a 30 para seleção e cartas)
-        for (int layer = 18; layer <= 30; layer++)
-        {
-            previewMask |= (1 << layer);
-        }
+        if (cachedMainCamera == null) return;
 
         if (visible)
         {
-            targetCamera.cullingMask |= previewMask;
+            cachedMainCamera.cullingMask |= PreviewLayersMask;
         }
         else
         {
-            targetCamera.cullingMask &= ~previewMask;
+            cachedMainCamera.cullingMask &= ~PreviewLayersMask;
         }
     }
 

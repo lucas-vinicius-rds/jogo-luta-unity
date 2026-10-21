@@ -134,6 +134,10 @@ public class FighterController : MonoBehaviour
 
     // Estado ativo
     public IFighterState CurrentState { get; private set; }
+    public string CurrentStateName => currentStateDebug;
+
+    private static readonly Rect CombatPanelRect = new Rect(15, 15, 390, 200);
+    private static readonly Rect ControlsPanelRect = new Rect(15, 225, 390, 180);
 
     /// <summary>
     /// Indica se o congelamento de quadros (hitstop) está ativo no momento.
@@ -696,7 +700,7 @@ public class FighterController : MonoBehaviour
         var ai = cachedOpponentAI;
 
         // 1. Painel de Status & Barra de Vida em Tempo Real
-        GUILayout.BeginArea(new Rect(15, 15, 390, 200), boxStyle);
+        GUILayout.BeginArea(CombatPanelRect, boxStyle);
         GUILayout.Label("<b>PAINEL DE COMBATE & DIFICULDADE DA IA</b>");
 
         float p1Hp = healthSystem != null ? healthSystem.CurrentHealth : 100f;
@@ -704,12 +708,12 @@ public class FighterController : MonoBehaviour
         string p1Status = healthSystem != null && healthSystem.IsDead ? "<color=red>K.O. (Dying)</color>" : $"{p1Hp:F0}/{p1Max:F0}";
         string p1Name = cachedP1Name;
         string p2Name = cachedP2Name;
-        GUILayout.Label($"P1 (Você - {p1Name}): <b>{p1Status}</b> | Estado: <b><color=yellow>{CurrentState?.GetType().Name}</color></b>");
+        GUILayout.Label($"P1 (Você - {p1Name}): <b>{p1Status}</b> | Estado: <b><color=yellow>{CurrentStateName}</color></b>");
 
         float p2Hp = opHealth != null ? opHealth.CurrentHealth : 100f;
         float p2Max = opHealth != null ? opHealth.MaxHealth : 100f;
         string p2Status = opHealth != null && opHealth.IsDead ? "<color=red>K.O. (Dying)</color>" : $"{p2Hp:F0}/{p2Max:F0}";
-        GUILayout.Label($"P2 (Oponente - {p2Name}): <b>{p2Status}</b> | Estado: <b><color=yellow>{(opponentController != null ? opponentController.CurrentState?.GetType().Name : "N/A")}</color></b>");
+        GUILayout.Label($"P2 (Oponente - {p2Name}): <b>{p2Status}</b> | Estado: <b><color=yellow>{(opponentController != null ? opponentController.CurrentStateName : "N/A")}</color></b>");
 
         string diffText = ai != null ? ai.Difficulty.ToString() : "N/A";
         string diffColor = diffText == "Easy" ? "lime" : (diffText == "Medium" ? "yellow" : "red");
@@ -718,7 +722,7 @@ public class FighterController : MonoBehaviour
         GUILayout.EndArea();
 
         // 2. Controles Virtuais Interativos
-        GUILayout.BeginArea(new Rect(15, 225, 390, 180), boxStyle);
+        GUILayout.BeginArea(ControlsPanelRect, boxStyle);
         GUILayout.Label("<b>CONTROLES & SELETOR DE DIFICULDADE:</b>");
 
         // Movimento P1 (A/D: faixa, W: salto, S: agachar)
@@ -803,7 +807,12 @@ public class FighterController : MonoBehaviour
 
         if (movement != null && movement.Opponent != null)
         {
-            var op = cachedOpponentController != null ? cachedOpponentController : movement.Opponent.GetComponent<FighterController>();
+            FighterController op = cachedOpponentController;
+            if (op == null && movement != null && movement.Opponent != null)
+            {
+                movement.Opponent.TryGetComponent(out op);
+                cachedOpponentController = op;
+            }
             if (op != null)
             {
                 if (op.HealthSystem != null) op.HealthSystem.ResetHealth();

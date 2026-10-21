@@ -42,13 +42,15 @@ public class TekkenCamera : MonoBehaviour
     private void Awake()
     {
         targetCamera = GetComponent<Camera>();
+        if (targetCamera != null)
+        {
+            targetCamera.orthographic = true;
+        }
     }
 
     private void LateUpdate()
     {
         if (fighter1 == null || fighter2 == null) return;
-
-        if (targetCamera == null) targetCamera = GetComponent<Camera>();
 
         // 1. Calcula o ponto médio entre os lutadores
         Vector3 p1 = fighter1.position;
@@ -63,8 +65,11 @@ public class TekkenCamera : MonoBehaviour
         // targetPosition ja configurado acima
         if (targetCamera != null)
         {
-            targetCamera.orthographic = true;
-            targetCamera.orthographicSize = Mathf.Clamp(3.2f + fighterDistance * 0.22f, 3.2f, 6.5f);
+            float targetSize = Mathf.Clamp(3.2f + fighterDistance * 0.22f, 3.2f, 6.5f);
+            if (Mathf.Abs(targetCamera.orthographicSize - targetSize) > 0.001f)
+            {
+                targetCamera.orthographicSize = targetSize;
+            }
         }
 
         // Interpolação suave de posição

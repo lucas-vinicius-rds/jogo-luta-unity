@@ -247,18 +247,14 @@ public class Hitbox : MonoBehaviour
         hasPreviousOverlapCenter = false;
     }
 
-    private void Update()
-    {
-        if (isActive)
-        {
-            CheckOverlaps();
-        }
-    }
-
     private void LateUpdate()
     {
         // Garante que a hitbox acompanhe a pose final calculada pelo Animator
         SyncBonePosition();
+        if (isActive)
+        {
+            CheckOverlaps();
+        }
     }
 
     /// <summary>
@@ -267,8 +263,6 @@ public class Hitbox : MonoBehaviour
     private void CheckOverlaps()
     {
         if (!isActive) return;
-
-        SyncBonePosition();
 
         int count = 0;
 
