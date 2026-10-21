@@ -5,11 +5,11 @@ using UnityEngine;
 /// Transiciona para AttackState ao receber o comando de ataque.
 /// Atualiza o parâmetro 'Speed' do Animator para transicionar entre Idle e Run.
 /// </summary>
-public class NeutralState : IFighterState
+public class NeutralState : FighterStateBase
 {
     private static readonly int SpeedHash = Animator.StringToHash("Speed");
 
-    public void Enter(FighterController fighter)
+    public override void Enter(FighterController fighter)
     {
         // Garante que o movimento 3D está habilitado
         if (fighter.Movement != null)
@@ -29,7 +29,7 @@ public class NeutralState : IFighterState
         fighter.CrossFadeAnimation(fighter.NeutralAnimHash, 0.1f);
     }
 
-    public void Update(FighterController fighter)
+    public override void Update(FighterController fighter)
     {
         // Monitora entrada de ataque para transicionar
         FighterAttackType attack = fighter.ReadAttackCommand();
@@ -49,7 +49,7 @@ public class NeutralState : IFighterState
         }
     }
 
-    public void Exit(FighterController fighter)
+    public override void Exit(FighterController fighter)
     {
         // Zera o Speed ao sair para outros estados (Ataque / HitStun)
         if (fighter.Animator != null)
@@ -58,4 +58,3 @@ public class NeutralState : IFighterState
         }
     }
 }
-

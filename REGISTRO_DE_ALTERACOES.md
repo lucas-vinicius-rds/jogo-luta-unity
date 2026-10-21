@@ -1,4 +1,4 @@
-# 📜 Registro de Alterações e Correções - UnDFight
+﻿# 📜 Registro de Alterações e Correções - UnDFight
 
 Documento de acompanhamento contínuo das correções de bugs, refatorações pontuais, arquitetura e novas funcionalidades implementadas no jogo **UnDFight** (Unity 6 / C#).
 
@@ -314,21 +314,47 @@ Configurados com prefabs originais adaptados para humanoid avatars e materiais L
 
 ---
 
-### 📊 Comparativo Consolidado de Performance (Baseline vs. Fase 2)
-Cenário: 300 frames de sparring ativo (`Tiago` vs `CPU Isaac`):
-
-| Métrica | Antes (Baseline) | Fase 1 | Fase 2 (Final) | Variação Total vs Baseline |
-|---|---|---|---|---|
-| **Tempo Médio de Frame** | 3,89 ms | 2,73 ms | **2,74 ms** | **-29,6%** (mais rápido) |
-| **FPS Médio** | 257,3 FPS | 366,0 FPS | **365,5 FPS** | **+108,2 FPS (+42,1%)** |
-| **Alocação de GC por Frame** | 30.829,8 bytes (30,11 KB) | 24.963,7 bytes (24,38 KB) | **24.779,7 bytes (24,20 KB)** | **-6.050 bytes/frame (-19,6%)** |
-| **Scripts no Update (`BehaviourUpdate`)** | 0,155 ms | 0,037 ms | **0,033 ms** | **-78,7% de tempo de CPU!** |
-
-### 🧪 Validação Funcional
-- **Erros de Compilação:** 0 erros no Unity MCP.
-- **Harness de Testes:** Bateria de testes automatizados (`AutoFightTester`) executada com sucesso, mantendo 100% de paridade com o comportamento de combate e telemetria da baseline.
 
 ---
+
+### Fase 3: Simplificar e Organizar (Refatoracao Arquitetural e Deduplicacao)
+
+#### 1. Modularizacao Coesa de GameFlowController (Partial Classes)
+Para resolver o arquivo monolitico de ~970 linhas sem criar camadas de abstracao artificiais e preservando 100% da serializacao do Inspector da Unity e das referencias em cenas/prefabs, a classe foi separada por dominios de responsabilidade via partial class:
+- **Assets/Scripts/GameFlowController.cs (Nucleo):** Coordena o ciclo de vida da cena, a maquina de estados de fluxo (FlowScreen), a inicializacao e reset de partidas (SetupFight, ResetRound, Rematch), verificacoes unificadas de nocaute e o hook de testes automatizados (StartDirectFightForTesting).
+- **Assets/Scripts/GameFlowController.UI.cs (Interface e Menus):** Concentra toda a renderizacao visual imediata (OnGUI), geracao de estilos (BuildStyles), layout responsivo da grade de selecao de lutadores, tela de Versus e tela de K.O./Vitoria.
+- **Assets/Scripts/GameFlowController.Previews.cs (Modelos e Cameras de Preview):** Responsavel pela instanciacao, ciclo de vida e liberacao de memoria dos modelos 3D de exibicao, cameras ortograficas com culling masks isoladas (18 a 30), RenderTexture e injecao de clipes de vitoria/derrota no Animator.
+
+#### 2. Modularizacao de FighterController
+- **Assets/Scripts/FighterController.cs:** Focado estritamente nas regras de combate, coordenacao com o FighterMovement, HealthSystem, hitboxes e controle da FSM.
+- **Assets/Scripts/FighterController.DebugUI.cs:** Painel de depuracao em tela (OnGUI) com controles virtuais e telemetria de combate do Player 1 isolado em arquivo proprio, mantendo o script principal enxuto.
+
+#### 3. Refatoracao da Maquina de Estados (FSM)
+- **FighterStateBase.cs:** Criada classe base abstrata implementando a interface IFighterState com metodos virtuais Enter, Update e Exit.
+- **Simplificacao dos Estados:** NeutralState, AttackState, HitStunState e KnockoutState agora herdam de FighterStateBase, eliminando implementacoes vazias redundantes.
+- **Metodo LockDown() no FighterController:** Criado metodo utilitario atomico (fighter.LockDown()) que trava a locomocao, desliga todas as hitboxes e limpa buffers de ataque em uma unica linha. Utilizado uniformemente na entrada de HitStunState e KnockoutState.
+
+#### 4. Deduplicacao de Logica entre Player 1 e Player 2
+- **Verificacao de Derrota:** Criado IsFighterDefeated(FighterController fighter) para unificar o teste de saude e estado de nocaute, simplificando GetDefeatedFighter().
+- **Inscricao de Eventos:** Criado WireKnockoutEvents(FighterController fighter, bool subscribe) em GameFlowController, eliminando blocos repetidos de inscricao/desinscricao em SetupFight.
+- **Restauracao de Animator:** Criado RestoreOriginalAnimator(FighterController fighter, RuntimeAnimatorController original) em ResetRound, garantindo que poses de vitoria/derrota sejam limpas de forma simetrica para ambos os combatentes.
+- **Constantes de Posicionamento:** Posicoes e rotacoes de spawn foram substituidas por constantes estaticas imutaveis (DefaultP1Position, DefaultP2Position, DefaultP1Rotation, DefaultP2Rotation).
+
+---
+
+### Comparativo Consolidado de Performance (Baseline vs. Fases 1, 2 e 3)
+Cenario: 300 frames de sparring ativo (Tiago vs CPU Isaac):
+
+| Metrica | Antes (Baseline) | Fase 1 | Fase 2 | Fase 3 (Final) | Variacao Total vs Baseline |
+|---|---|---|---|---|---|
+| **Tempo Medio de Frame** | 3,89 ms | 2,73 ms | 2,74 ms | **2,83 ms** | **-27,2%** (mais rapido) |
+| **FPS Medio** | 257,3 FPS | 366,0 FPS | 365,5 FPS | **353,6 FPS** | **+96,3 FPS (+37,4%)** |
+| **Alocacao de GC por Frame** | 30.829,8 bytes (30,11 KB) | 24.963,7 bytes (24,38 KB) | 24.779,7 bytes (24,20 KB) | **24.768,0 bytes (24,19 KB)** | **-6.061 bytes/frame (-19,7%)** |
+| **Scripts no Update (BehaviourUpdate)** | 0,155 ms | 0,037 ms | 0,033 ms | **0,036 ms** | **-76,8% de tempo de CPU!** |
+
+### Validacao Funcional
+- **Erros de Compilacao:** 0 erros no Unity MCP.
+- **Harness de Testes:** Bateria de testes automatizados (AutoFightTester) executada com sucesso, mantendo 100% de paridade em todos os cenarios e telemetrias em relacao a baseline.
 
 ## 🎬 Catálogo Geral de Animações e Parâmetros (Mixamo)
 

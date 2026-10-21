@@ -4,7 +4,7 @@ using UnityEngine;
 /// Estado de Ataque: Trava o deslocamento, dispara a animação de golpe no Animator,
 /// ativa a Hitbox do membro correspondente e aguarda a janela de recovery para retornar ao Neutro.
 /// </summary>
-public class AttackState : IFighterState
+public class AttackState : FighterStateBase
 {
     private float elapsedTime;
     private bool hitboxesEnabled;
@@ -12,7 +12,7 @@ public class AttackState : IFighterState
     private float currentAttackDuration;
     private FighterAttackTiming currentTiming;
 
-    public void Enter(FighterController fighter)
+    public override void Enter(FighterController fighter)
     {
         // Se o lutador estava avançando em direção ao oponente, aplica um
         // pequeno impulso forward para não parar bruscamente longe do alvo
@@ -44,7 +44,7 @@ public class AttackState : IFighterState
         fighter.SetAnimatorSpeed(Mathf.Clamp(targetSpeed, 0.85f, 1.6f));
     }
 
-    public void Update(FighterController fighter)
+    public override void Update(FighterController fighter)
     {
         elapsedTime += Time.deltaTime;
         FighterAttackTiming timing = currentTiming ?? fighter.CurrentAttackTiming;
@@ -78,7 +78,7 @@ public class AttackState : IFighterState
         }
     }
 
-    public void Exit(FighterController fighter)
+    public override void Exit(FighterController fighter)
     {
         elapsedTime = 0f;
         hitboxesEnabled = false;

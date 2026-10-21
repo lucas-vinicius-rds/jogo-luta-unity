@@ -4,7 +4,7 @@ using UnityEngine;
 /// Estado de Reação a Golpe (HitStun).
 /// Congela ações e movimentação temporariamente e executa a animação "Hit To Body" do Mixamo.
 /// </summary>
-public class HitStunState : IFighterState
+public class HitStunState : FighterStateBase
 {
     private float stunDuration = 0.45f;
     private float elapsedTime;
@@ -14,25 +14,14 @@ public class HitStunState : IFighterState
         stunDuration = duration;
     }
 
-    public void Enter(FighterController fighter)
+    public override void Enter(FighterController fighter)
     {
-        // Trava movimentação e desativa hitboxes durante o atordoamento
-        if (fighter.Movement != null)
-        {
-            fighter.Movement.CanMove = false;
-        }
-        fighter.DisableAllHitboxes();
-
-        // Limpa comandos anteriores ao iniciar um novo atordoamento
-        fighter.ClearAttackBuffer();
-
+        fighter.LockDown();
         elapsedTime = 0f;
-
-        // Dispara a animação "Hit To Body"
         fighter.CrossFadeAnimation(fighter.HitStunAnimHash, 0.05f);
     }
 
-    public void Update(FighterController fighter)
+    public override void Update(FighterController fighter)
     {
         // O timer do HitStun só decai quando o hitstop NÃO estiver ativo
         if (fighter == null || !fighter.IsInHitstop)
@@ -48,10 +37,5 @@ public class HitStunState : IFighterState
         {
             fighter.ChangeState(fighter.NeutralState);
         }
-    }
-
-    public void Exit(FighterController fighter)
-    {
-        elapsedTime = 0f;
     }
 }
