@@ -428,3 +428,37 @@ Referência dos assets de animação disponíveis em `Assets/Animations/Mixamo/`
 - **Root Motion:** Para golpes com deslocamento, validar se o clipe tem root motion e se o avanço deve ser persistido via script pelo `CharacterController`.
 - **Janelas de Contato:** Ao configurar novos ataques, calibrar a janela de ativação da hitbox no `Hitbox.cs` para bater exatamente com a extensão máxima do membro.
 - **Tempo de Salto:** Adequar a duração visual do clipe de pulo à física de gravidade e velocidade vertical do `FighterMovement.cs`.
+
+## 2026-10-22 — Reparo de retargeting Humanoid (Unity MCP)
+
+- Projeto confirmado pelo bridge MCP: Unity 6000.5.9f1, Teste antigravity, porta local 7890. Acesso pela API HTTP do plugin com.anklebreaker.unity-mcp 2.39.5; ferramentas MCP não expostas diretamente nesta sessão.
+- Backup realizado ANTES de alterar assets: `Backups/RigRepair_20261022_181732`. Inclui os 16 FBXs Meshy e seus .meta, os 7 prefabs e .meta, Fighter_Idle.anim e .meta, FightingPrototypeSetup.cs e .meta e este registro original. Integridade em manifest-sha256.json (SHA-256).
+- Diagnóstico: 38 FBXs Mixamo Humanoid válidos; 9 Meshy Humanoid válidos; 7 Meshy Generic/NoAvatar (6 Character_output e Running do Watchful Executive). audit-before.json contém caminhos, mapeamentos e clipes.
+- Coluna Meshy confirmada: Hips > Spine02 (Spine) > Spine01 (Chest) > Spine (UpperChest). Avatars existentes com pose válida segundo AvatarSetupTool do Editor. A quantidade diferente de ossos não exige igualar os esqueletos.
+- Fighter_Idle.anim: 182 curvas Transform, nenhuma curva Animator/Humanoid; incompatível como clipe universal entre esqueletos diferentes. Preservado integralmente no backup.
+- Prefabs CasualSmilingMan, ManInBlack e VascoJacket contêm overrides manuais de rotação em ossos. Os Animators filhos estão desativados corretamente; não há dois Animators ativos disputando o rig.
+- Baseline visual do idle Mixamo capturada em before-*.png, com cópias em cena de preview isolada. Não foi preciso Blender: nenhum problema estrutural de malha/rig foi demonstrado até aqui.
+- Planejado: converter os 7 Generic para Humanoid/CreateFromThisModel com Avatar próprio; restaurar rotações de ossos sobrescritas nos 3 prefabs; tornar Fighter_Idle.anim Humanoid preservando seu GUID. Não executar o gerador FightingPrototypeSetup, pois ele apaga/recria assets.
+
+### Alterações efetivamente aplicadas
+
+- Sete .fbx.meta: animationType Generic (2) -> Humanoid (3); avatarSetup NoAvatar (0) -> CreateFromThisModel (1). Cada modelo gera seu próprio Avatar; nenhum Avatar Mixamo foi copiado para um esqueleto Meshy.
+- Os seis Character_output corrigidos são Emerald Strength, Modern Gentleman poised, Shadow Sentinel, Studio Rocker Pose, The Watchful Executive e Vasco Jacket Avatar. O sétimo arquivo é Animation_Running_withSkin do The Watchful Executive.
+- Três prefabs: restauradas somente 8 propriedades de rotação de ossos (CasualSmilingMan/LeftLeg: 2; ManInBlack/RightShoulder: 4; VascoJacket/RightUpLeg: 2). Materiais, controllers, hierarquias e referências foram preservados. A serialização adicional de campos padrão feita ao salvar pelo Editor foi omitida para manter o diff restrito às rotações pretendidas; reimportação solicitada pelo MCP.
+- Fighter_Idle.anim agora usa uma cópia serializada do clipe Humanoid X Bot@Bouncing Fight Idle.fbx: 130 curvas, zero curvas Transform diretas. GUID preservado: 8f693952a6f913b46b09da7f8676b567. A animação anterior permanece no backup. Nenhum controller/scene/prefab possui referência a esse GUID atualmente; esta correção evita uso futuro de um idle específico de Meshy como universal.
+- Nenhum arquivo foi apagado. Nenhum FBX foi regravado (SHA-256 dos 16 FBXs Meshy conferido contra o backup). Nenhuma malha, peso, osso ou script de gameplay foi alterado. Blender não foi necessário.
+
+### Validação e evidências
+
+- audit-after.json: todos os 54 modelos inspecionados com Humanoid e Avatar válido (38 Mixamo + 16 Meshy).
+- validation-result.json: 23 modelos (7 personagens Mixamo + 16 Meshy), 39 clipes, 3 tempos por clipe = 2.691 amostras. prefab-validation-result.json: 7 prefabs, mesmos 39 clipes e 3 tempos = 819 amostras. Total: 3.510 amostras, zero falhas na validação final.
+- Amostragem via PlayableGraph manual em cenas de preview isoladas, com AlwaysAnimate para impedir descarte por câmera e root motion desativado. Conferidos valores finitos, distância dos ossos relativa ao quadril e variação de comprimento. Maior variação observada: aproximadamente 5%, compatível com o ajuste de retargeting; limite de detecção usado: 15%. Isto não constitui validação visual de cada frame de cada clipe.
+- A primeira versão da auditoria usou distância absoluta e sinalizou deslocamento de root motion como coordenada extrema; resultado preservado em validation-result-initial.json. O teste final mede distância relativa ao quadril. As primeiras capturas de modelos foram substituídas por capturas com AlwaysAnimate após detectar culling; os resultados finais estão nos JSONs citados.
+- mesh-validation.json: BakeMesh dos 16 Meshy durante soco Mixamo, todos com vértices finitos. Capturas punch-*.png. Capturas before-*.png e after-*.png do idle dos prefabs e kick-*.png do chute. Inspeção visual de exemplos de idle e silhueta de soco; demais imagens disponíveis para revisão.
+- Unity MCP compilation/errors: count 0, isCompiling false. Cena RuaUrbana mantida aberta e isDirty false. Não foi executada uma partida completa em Play Mode; a validação se concentrou nos Avatars, deformação e retargeting via Playables.
+- Scripts de diagnóstico/reparo e respostas do MCP preservados no diretório de backup. FightingPrototypeSetup.cs não alterado nem executado. Referência de apoio para a auditoria de pose: https://github.com/Unity-Technologies/UnityCsReference/blob/master/Editor/Mono/Inspector/Avatar/AvatarSetupTool.cs.
+
+### Como reverter
+
+Com o Unity fora do Play Mode, copiar de `Backups/RigRepair_20261022_181732` para os mesmos caminhos do projeto os sete .fbx.meta alterados, os três prefabs e Fighter_Idle.anim, preservando seus .meta/GUIDs; solicitar AssetDatabase.Refresh no Unity. O manifest-sha256.json lista os originais. Não restaurar pastas inteiras por exclusão e não apagar os backups.
+- Verificação final de diff: removidos apenas espaços ao fim de linha do YAML de Fighter_Idle.anim gerado pelo Unity; reimportação confirmou Humanoid e 130 curvas. git diff --check sem erros após normalização.

@@ -1,0 +1,206 @@
+﻿[
+    {
+        "path":  "REGISTRO_DE_ALTERACOES.md",
+        "sha256":  "DA293F7FD8BA7D2497C4AE0ADE9A8E918457E36E92C516F74342821763295347"
+    },
+    {
+        "path":  "Assets/Animations/Mixamo/Fighter_Idle.anim",
+        "sha256":  "C6D7B3B9BD8CCB1E92C49A88D15772F9C335A0D61540C1E2EFE269FA89C5E51D"
+    },
+    {
+        "path":  "Assets/Animations/Mixamo/Fighter_Idle.anim.meta",
+        "sha256":  "988A662802719E8EE2A2269449CD36D58C7B2F0FDA16920B9809372C9F393181"
+    },
+    {
+        "path":  "Assets/Editor/FightingPrototypeSetup.cs",
+        "sha256":  "F33B02E178E372957699C28F5637B4FADB1A968EC041DEA72F523AEF63270702"
+    },
+    {
+        "path":  "Assets/Editor/FightingPrototypeSetup.cs.meta",
+        "sha256":  "8B609C788E1EDBE923B9BD87BE3CF9AFB07AA1747F94C699F76D99D20FA10F61"
+    },
+    {
+        "path":  "Assets\\MeshyImports\\Casual Smiling Man with Curly Hair_20260902_174546\\Meshy_AI_Casual_Smiling_Man_wi_biped_Animation_Running_withSkin.fbx",
+        "sha256":  "BF94348CBA0384C90C79028248232DCFB5C24766047C872BA9FED284A8AC26F6"
+    },
+    {
+        "path":  "Assets\\MeshyImports\\Casual Smiling Man with Curly Hair_20260902_174546\\Meshy_AI_Casual_Smiling_Man_wi_biped_Animation_Running_withSkin.fbx.meta",
+        "sha256":  "7EDF0A1A79E5153C5CEDC8BEC2770535FD4067CC33B9CCEAB49893A2F0475121"
+    },
+    {
+        "path":  "Assets\\MeshyImports\\Casual Smiling Man with Curly Hair_20260902_174548\\Meshy_AI_Casual_Smiling_Man_wi_biped_Character_output.fbx",
+        "sha256":  "190F40524BF4E1513992E8B558FD36251B8CC7A5E44FDEA4612659B1EE1311E4"
+    },
+    {
+        "path":  "Assets\\MeshyImports\\Casual Smiling Man with Curly Hair_20260902_174548\\Meshy_AI_Casual_Smiling_Man_wi_biped_Character_output.fbx.meta",
+        "sha256":  "679C6E53E0770F13A18C3DDC8F2F6C62700015AC6660894CBFEF415A75CDCBC6"
+    },
+    {
+        "path":  "Assets\\MeshyImports\\Emerald Strength_20260902_201323\\Meshy_AI_Emerald_Strength_biped_Animation_Running_withSkin.fbx",
+        "sha256":  "F306F6A11EFDB8EA16F287B176889808451D4737BFEBF3FC3688D385CD2753CF"
+    },
+    {
+        "path":  "Assets\\MeshyImports\\Emerald Strength_20260902_201323\\Meshy_AI_Emerald_Strength_biped_Animation_Running_withSkin.fbx.meta",
+        "sha256":  "1A2B98341F5761EADF5617A7306F7CB7BD14436A4F4138D1D9D02BECB10C6F89"
+    },
+    {
+        "path":  "Assets\\MeshyImports\\Emerald Strength_20260902_201325\\Meshy_AI_Emerald_Strength_biped_Character_output.fbx",
+        "sha256":  "E166A7C21D4EC421BAA7B3ED2625DFF9A2A697A65D3A2845F249490F666625AF"
+    },
+    {
+        "path":  "Assets\\MeshyImports\\Emerald Strength_20260902_201325\\Meshy_AI_Emerald_Strength_biped_Character_output.fbx.meta",
+        "sha256":  "2743D86416D5B65BDD550804D50817A6E6B6B6E20CE35902FCD89A0AF679309A"
+    },
+    {
+        "path":  "Assets\\MeshyImports\\Man in Black_20260902_155135\\Meshy_AI_Man_in_Black_biped_Animation_Running_withSkin.fbx",
+        "sha256":  "73C2251F1474F125971D2C8D24815997F98B03F4CE257336EDBED5F992A11AA9"
+    },
+    {
+        "path":  "Assets\\MeshyImports\\Man in Black_20260902_155135\\Meshy_AI_Man_in_Black_biped_Animation_Running_withSkin.fbx.meta",
+        "sha256":  "7F402DD08692028F192968CD0D9D19AD8B7853C621EAB42E7D0746E4734A1ED1"
+    },
+    {
+        "path":  "Assets\\MeshyImports\\Man in Black_20260902_155137\\Meshy_AI_Man_in_Black_biped_Character_output.fbx",
+        "sha256":  "FEAAED13D540A2A89847306D1738DAB64AD6147A858ADE5BE54BC9FC64EBF9A8"
+    },
+    {
+        "path":  "Assets\\MeshyImports\\Man in Black_20260902_155137\\Meshy_AI_Man_in_Black_biped_Character_output.fbx.meta",
+        "sha256":  "237F683A472692D82F1756B72866B0319E3BCB45A580C0D7353EDD3123ED74BA"
+    },
+    {
+        "path":  "Assets\\MeshyImports\\Modern Gentleman poised_20260902_201744\\Meshy_AI_Modern_Gentleman_pois_biped_Animation_01a05a9b-b701-7510-8e23-90b8faa3c118_withSkin.fbx",
+        "sha256":  "393BCB5028387F6CF348F665C4302CF3E47F2E778AE9F06C124A02C6CFD996E5"
+    },
+    {
+        "path":  "Assets\\MeshyImports\\Modern Gentleman poised_20260902_201744\\Meshy_AI_Modern_Gentleman_pois_biped_Animation_01a05a9b-b701-7510-8e23-90b8faa3c118_withSkin.fbx.meta",
+        "sha256":  "3085FEB3C36E0D159F4858232911FC977E01C8FC2CC08D667EDAF0ADF85BD9B7"
+    },
+    {
+        "path":  "Assets\\MeshyImports\\Modern Gentleman poised_20260902_201746\\Meshy_AI_Modern_Gentleman_pois_biped_Character_output.fbx",
+        "sha256":  "AC757BB00B36314952C24A7584A161EC88971C2AC96FD00E021AB3049188602A"
+    },
+    {
+        "path":  "Assets\\MeshyImports\\Modern Gentleman poised_20260902_201746\\Meshy_AI_Modern_Gentleman_pois_biped_Character_output.fbx.meta",
+        "sha256":  "431E625AC34240D80D40DD57D706BDD0363BF9C0C270D5CE6E28E129415D8430"
+    },
+    {
+        "path":  "Assets\\MeshyImports\\Shadow Sentinel_20260902_201914\\Meshy_AI_Shadow_Sentinel_biped_Animation_Running_withSkin.fbx",
+        "sha256":  "FA6215FAC52E5C4552CE014959642D069ED1D41B790E1ACD3C00FDC12D905785"
+    },
+    {
+        "path":  "Assets\\MeshyImports\\Shadow Sentinel_20260902_201914\\Meshy_AI_Shadow_Sentinel_biped_Animation_Running_withSkin.fbx.meta",
+        "sha256":  "2E7EC01836D9F54B150170F3B48ABDF1638755D28F21B799C10DF5FAFE4E59D3"
+    },
+    {
+        "path":  "Assets\\MeshyImports\\Shadow Sentinel_20260902_201916\\Meshy_AI_Shadow_Sentinel_biped_Character_output.fbx",
+        "sha256":  "2E1C5EEEF354BEFDB2B25623CDFB09A1EB28ED65C0F710428D3E77E6C44851F7"
+    },
+    {
+        "path":  "Assets\\MeshyImports\\Shadow Sentinel_20260902_201916\\Meshy_AI_Shadow_Sentinel_biped_Character_output.fbx.meta",
+        "sha256":  "B04CEDA6F974ABED4A5F79A9B397C23C76F3B3515F9B3CC87647715222195629"
+    },
+    {
+        "path":  "Assets\\MeshyImports\\Studio Rocker Pose_20260902_200943\\Meshy_AI_Studio_Rocker_Pose_biped_Animation_Running_withSkin.fbx",
+        "sha256":  "502C9DA7EEB111FB9719E74234DFC04A4C65489D98F1002B51FF90952EB849E2"
+    },
+    {
+        "path":  "Assets\\MeshyImports\\Studio Rocker Pose_20260902_200943\\Meshy_AI_Studio_Rocker_Pose_biped_Animation_Running_withSkin.fbx.meta",
+        "sha256":  "D3FB37D7B27F766C24DE80542AAAC47278AABCCE281B9BFED43847608D5FDF86"
+    },
+    {
+        "path":  "Assets\\MeshyImports\\Studio Rocker Pose_20260902_200945\\Meshy_AI_Studio_Rocker_Pose_biped_Character_output.fbx",
+        "sha256":  "8046621241806E8D9FDAF052CAE4CD2D3B92F38635448A7DAE7271E12CF7E78C"
+    },
+    {
+        "path":  "Assets\\MeshyImports\\Studio Rocker Pose_20260902_200945\\Meshy_AI_Studio_Rocker_Pose_biped_Character_output.fbx.meta",
+        "sha256":  "72A5DB536C04F04CD7EF52A489AA5464810D8C6D442E87CEEF5939CC2D2E2FED"
+    },
+    {
+        "path":  "Assets\\MeshyImports\\The Watchful Executive_20260930_190805\\Meshy_AI_The_Watchful_Executiv_biped_Animation_Running_withSkin.fbx",
+        "sha256":  "0F22D86EC665AC5D58225E86A2071298BB752ADC88CE576A014521B49E2EEA13"
+    },
+    {
+        "path":  "Assets\\MeshyImports\\The Watchful Executive_20260930_190805\\Meshy_AI_The_Watchful_Executiv_biped_Animation_Running_withSkin.fbx.meta",
+        "sha256":  "4347EE5970154EA73D87B1DCFA4FFDE1155DF776A4469821F5DF6DE7F6FDE10F"
+    },
+    {
+        "path":  "Assets\\MeshyImports\\The Watchful Executive_20260930_190807\\Meshy_AI_The_Watchful_Executiv_biped_Character_output.fbx",
+        "sha256":  "E08E7F10C5D1106D33C5DF9C099029502B997ECC5F1EEF917809B27B5DD4B638"
+    },
+    {
+        "path":  "Assets\\MeshyImports\\The Watchful Executive_20260930_190807\\Meshy_AI_The_Watchful_Executiv_biped_Character_output.fbx.meta",
+        "sha256":  "1C3F42CE69A4DD0737B73CB7E10841ED3B46A6DBEDBC869E08ECFA187366EC0C"
+    },
+    {
+        "path":  "Assets\\MeshyImports\\Vasco Jacket Avatar_20260902_201115\\Meshy_AI_Vasco_Jacket_Avatar_biped_Animation_Running_withSkin.fbx",
+        "sha256":  "03544925BF4C2F315C32F0D350ABE9E3BAD529206D5D32DC35C2AE3CBC12B5BC"
+    },
+    {
+        "path":  "Assets\\MeshyImports\\Vasco Jacket Avatar_20260902_201115\\Meshy_AI_Vasco_Jacket_Avatar_biped_Animation_Running_withSkin.fbx.meta",
+        "sha256":  "FE0B0D3A37F9E044C080DC27B3328A2F6FD22CE539E4CF7C5700C08DC5D2D7E3"
+    },
+    {
+        "path":  "Assets\\MeshyImports\\Vasco Jacket Avatar_20260902_201117\\Meshy_AI_Vasco_Jacket_Avatar_biped_Character_output.fbx",
+        "sha256":  "BA276C9C9C972D269C36240D10D242B036D499E3D10D091170D49638A4A7928C"
+    },
+    {
+        "path":  "Assets\\MeshyImports\\Vasco Jacket Avatar_20260902_201117\\Meshy_AI_Vasco_Jacket_Avatar_biped_Character_output.fbx.meta",
+        "sha256":  "CDFA7D2551779C578D8EB78096D7B302E9FBF358FF301DB7E0E3BD9836675A59"
+    },
+    {
+        "path":  "Assets\\Prefabs\\Characters\\CasualSmilingMan.prefab",
+        "sha256":  "35480C23DD58F49C2068B2E0A799E7CFF750C101DDAE18D74A788159834B3C99"
+    },
+    {
+        "path":  "Assets\\Prefabs\\Characters\\CasualSmilingMan.prefab.meta",
+        "sha256":  "2137563158A8F57C8AA03267FD83D9E142FDB468DC7971A5032CE4152685DEAD"
+    },
+    {
+        "path":  "Assets\\Prefabs\\Characters\\EmeraldStrength.prefab",
+        "sha256":  "00FBDCFFD57D9CD6743FC70E56DC5217DBD98CDC03C8DF67687989FB2DF6CDB3"
+    },
+    {
+        "path":  "Assets\\Prefabs\\Characters\\EmeraldStrength.prefab.meta",
+        "sha256":  "A11309728E7012E488A7BD350F1FC17EC55A0CA5F1F1ED0E6B6B421A9F635C08"
+    },
+    {
+        "path":  "Assets\\Prefabs\\Characters\\ManInBlack.prefab",
+        "sha256":  "3CE12C850595741AF48941099631A7FDD61D1CFA166F9FD8FD1D7B6583B3C9B4"
+    },
+    {
+        "path":  "Assets\\Prefabs\\Characters\\ManInBlack.prefab.meta",
+        "sha256":  "ED2A82559911FDFA42097D0ECDC11542616FD42D9579360701BEAFB8D75AB722"
+    },
+    {
+        "path":  "Assets\\Prefabs\\Characters\\ModernGentleman.prefab",
+        "sha256":  "3AAE50CA2402CA1489A47CE0BA141046893F54C39C93B1DD747DDEBE42E23078"
+    },
+    {
+        "path":  "Assets\\Prefabs\\Characters\\ModernGentleman.prefab.meta",
+        "sha256":  "05E8EFF296BF65F426B7C31C40367BB8DD675BB086DBD30C03CA3FC1070D3EC3"
+    },
+    {
+        "path":  "Assets\\Prefabs\\Characters\\ShadowSentinel.prefab",
+        "sha256":  "50EEDC36ECE1BEBD3482F76CE7E44425519C9B16D053215B0B21FE80E3C81703"
+    },
+    {
+        "path":  "Assets\\Prefabs\\Characters\\ShadowSentinel.prefab.meta",
+        "sha256":  "E5121AA36E71AF7334F3252D764C69B50A51C713444102B40849A46A1E4DACC6"
+    },
+    {
+        "path":  "Assets\\Prefabs\\Characters\\StudioRocker.prefab",
+        "sha256":  "1EE28BF47098D64A495D5B53004D6303B06163797743D059F4E13D6213C640CC"
+    },
+    {
+        "path":  "Assets\\Prefabs\\Characters\\StudioRocker.prefab.meta",
+        "sha256":  "E3FE84CEEF5E050218C7DC600A75665E1937835E74EF1BBEB9146B00DF11F058"
+    },
+    {
+        "path":  "Assets\\Prefabs\\Characters\\VascoJacket.prefab",
+        "sha256":  "091E07B65AF8934246BD8763750B280B20737DFA17128DF0B92C932B32337482"
+    },
+    {
+        "path":  "Assets\\Prefabs\\Characters\\VascoJacket.prefab.meta",
+        "sha256":  "1AC3A14FB0B96CBA50DDF373F9F51A84BD822DE8EEFB6868D5A1CA5BA06C1F9D"
+    }
+]

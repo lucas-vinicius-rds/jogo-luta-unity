@@ -1,0 +1,390 @@
+﻿{
+    "success":  true,
+    "result":  [
+                   {
+                       "p":  "Assets/MeshyImports/Casual Smiling Man with Curly Hair_20260902_174546/Meshy_AI_Casual_Smiling_Man_wi_biped_Animation_Running_withSkin.fbx",
+                       "finiteMesh":  true,
+                       "meshSize":  {
+                                        "x":  1.02241588,
+                                        "y":  1.84303772,
+                                        "z":  0.9943831
+                                    },
+                       "head":  {
+                                    "x":  0.0473063923,
+                                    "y":  1.31992424,
+                                    "z":  0.0929186344
+                                },
+                       "leftHand":  {
+                                        "x":  -0.133280724,
+                                        "y":  1.22599328,
+                                        "z":  0.226965189
+                                    },
+                       "rightHand":  {
+                                         "x":  0.206793934,
+                                         "y":  1.23115373,
+                                         "z":  0.234027982
+                                     }
+                   },
+                   {
+                       "p":  "Assets/MeshyImports/Casual Smiling Man with Curly Hair_20260902_174548/Meshy_AI_Casual_Smiling_Man_wi_biped_Character_output.fbx",
+                       "finiteMesh":  true,
+                       "meshSize":  {
+                                        "x":  1.02850556,
+                                        "y":  1.84060633,
+                                        "z":  0.9998999
+                                    },
+                       "head":  {
+                                    "x":  0.0481575355,
+                                    "y":  1.33755422,
+                                    "z":  0.09433305
+                                },
+                       "leftHand":  {
+                                        "x":  -0.132429808,
+                                        "y":  1.24362433,
+                                        "z":  0.228379726
+                                    },
+                       "rightHand":  {
+                                         "x":  0.20764488,
+                                         "y":  1.24878418,
+                                         "z":  0.235442638
+                                     }
+                   },
+                   {
+                       "p":  "Assets/MeshyImports/Emerald Strength_20260902_201323/Meshy_AI_Emerald_Strength_biped_Animation_Running_withSkin.fbx",
+                       "finiteMesh":  true,
+                       "meshSize":  {
+                                        "x":  0.99966985,
+                                        "y":  1.7751745,
+                                        "z":  0.9818618
+                                    },
+                       "head":  {
+                                    "x":  0.04247772,
+                                    "y":  1.26409757,
+                                    "z":  0.0839887857
+                                },
+                       "leftHand":  {
+                                        "x":  -0.14229548,
+                                        "y":  1.17003179,
+                                        "z":  0.211307168
+                                    },
+                       "rightHand":  {
+                                         "x":  0.199178174,
+                                         "y":  1.17425823,
+                                         "z":  0.214275122
+                                     }
+                   },
+                   {
+                       "p":  "Assets/MeshyImports/Emerald Strength_20260902_201325/Meshy_AI_Emerald_Strength_biped_Character_output.fbx",
+                       "finiteMesh":  true,
+                       "meshSize":  {
+                                        "x":  1.00209594,
+                                        "y":  1.77340484,
+                                        "z":  0.9868939
+                                    },
+                       "head":  {
+                                    "x":  0.0430972241,
+                                    "y":  1.27693236,
+                                    "z":  0.0850186348
+                                },
+                       "leftHand":  {
+                                        "x":  -0.141676053,
+                                        "y":  1.18286633,
+                                        "z":  0.212337017
+                                    },
+                       "rightHand":  {
+                                         "x":  0.1997978,
+                                         "y":  1.187093,
+                                         "z":  0.215304613
+                                     }
+                   },
+                   {
+                       "p":  "Assets/MeshyImports/Man in Black_20260902_155135/Meshy_AI_Man_in_Black_biped_Animation_Running_withSkin.fbx",
+                       "finiteMesh":  true,
+                       "meshSize":  {
+                                        "x":  1.00413108,
+                                        "y":  1.9240582,
+                                        "z":  1.00244117
+                                    },
+                       "head":  {
+                                    "x":  0.04748804,
+                                    "y":  1.36062753,
+                                    "z":  0.0915933847
+                                },
+                       "leftHand":  {
+                                        "x":  -0.12861301,
+                                        "y":  1.253645,
+                                        "z":  0.231468916
+                                    },
+                       "rightHand":  {
+                                         "x":  0.209444478,
+                                         "y":  1.26076412,
+                                         "z":  0.2396779
+                                     }
+                   },
+                   {
+                       "p":  "Assets/MeshyImports/Man in Black_20260902_155137/Meshy_AI_Man_in_Black_biped_Character_output.fbx",
+                       "finiteMesh":  true,
+                       "meshSize":  {
+                                        "x":  1.00878334,
+                                        "y":  1.92220187,
+                                        "z":  1.01045167
+                                    },
+                       "head":  {
+                                    "x":  0.04813809,
+                                    "y":  1.37409616,
+                                    "z":  0.0926741362
+                                },
+                       "leftHand":  {
+                                        "x":  -0.127962887,
+                                        "y":  1.26711285,
+                                        "z":  0.232549191
+                                    },
+                       "rightHand":  {
+                                         "x":  0.210094661,
+                                         "y":  1.27423239,
+                                         "z":  0.240758538
+                                     }
+                   },
+                   {
+                       "p":  "Assets/MeshyImports/Modern Gentleman poised_20260902_201744/Meshy_AI_Modern_Gentleman_pois_biped_Animation_01a05a9b-b701-7510-8e23-90b8faa3c118_withSkin.fbx",
+                       "finiteMesh":  true,
+                       "meshSize":  {
+                                        "x":  1.03774333,
+                                        "y":  1.74364054,
+                                        "z":  0.9525518
+                                    },
+                       "head":  {
+                                    "x":  0.0415043049,
+                                    "y":  1.30703151,
+                                    "z":  0.09171441
+                                },
+                       "leftHand":  {
+                                        "x":  -0.137070611,
+                                        "y":  1.188433,
+                                        "z":  0.201845616
+                                    },
+                       "rightHand":  {
+                                         "x":  0.191859692,
+                                         "y":  1.20276618,
+                                         "z":  0.215928763
+                                     }
+                   },
+                   {
+                       "p":  "Assets/MeshyImports/Modern Gentleman poised_20260902_201746/Meshy_AI_Modern_Gentleman_pois_biped_Character_output.fbx",
+                       "finiteMesh":  true,
+                       "meshSize":  {
+                                        "x":  1.03939855,
+                                        "y":  1.74229407,
+                                        "z":  0.9558221
+                                    },
+                       "head":  {
+                                    "x":  0.0419754125,
+                                    "y":  1.316796,
+                                    "z":  0.09249759
+                                },
+                       "leftHand":  {
+                                        "x":  -0.136599451,
+                                        "y":  1.19819748,
+                                        "z":  0.202628851
+                                    },
+                       "rightHand":  {
+                                         "x":  0.192330956,
+                                         "y":  1.21253073,
+                                         "z":  0.216712236
+                                     }
+                   },
+                   {
+                       "p":  "Assets/MeshyImports/Shadow Sentinel_20260902_201914/Meshy_AI_Shadow_Sentinel_biped_Animation_Running_withSkin.fbx",
+                       "finiteMesh":  true,
+                       "meshSize":  {
+                                        "x":  0.9155077,
+                                        "y":  1.68699074,
+                                        "z":  0.8759688
+                                    },
+                       "head":  {
+                                    "x":  0.037409246,
+                                    "y":  1.23071122,
+                                    "z":  0.08553696
+                                },
+                       "leftHand":  {
+                                        "x":  -0.130747467,
+                                        "y":  1.129626,
+                                        "z":  0.207399428
+                                    },
+                       "rightHand":  {
+                                         "x":  0.192556366,
+                                         "y":  1.13177574,
+                                         "z":  0.215219975
+                                     }
+                   },
+                   {
+                       "p":  "Assets/MeshyImports/Shadow Sentinel_20260902_201916/Meshy_AI_Shadow_Sentinel_biped_Character_output.fbx",
+                       "finiteMesh":  true,
+                       "meshSize":  {
+                                        "x":  0.91945,
+                                        "y":  1.68541861,
+                                        "z":  0.8829204
+                                    },
+                       "head":  {
+                                    "x":  0.0379602239,
+                                    "y":  1.24212551,
+                                    "z":  0.08645296
+                                },
+                       "leftHand":  {
+                                        "x":  -0.1301965,
+                                        "y":  1.14104009,
+                                        "z":  0.208315372
+                                    },
+                       "rightHand":  {
+                                         "x":  0.193107426,
+                                         "y":  1.14318979,
+                                         "z":  0.2161358
+                                     }
+                   },
+                   {
+                       "p":  "Assets/MeshyImports/Studio Rocker Pose_20260902_200943/Meshy_AI_Studio_Rocker_Pose_biped_Animation_Running_withSkin.fbx",
+                       "finiteMesh":  true,
+                       "meshSize":  {
+                                        "x":  0.883460343,
+                                        "y":  1.65543127,
+                                        "z":  0.8638538
+                                    },
+                       "head":  {
+                                    "x":  0.0422684737,
+                                    "y":  1.26200426,
+                                    "z":  0.109237671
+                                },
+                       "leftHand":  {
+                                        "x":  -0.143715367,
+                                        "y":  1.12158537,
+                                        "z":  0.211438179
+                                    },
+                       "rightHand":  {
+                                         "x":  0.204232112,
+                                         "y":  1.10837352,
+                                         "z":  0.217428565
+                                     }
+                   },
+                   {
+                       "p":  "Assets/MeshyImports/Studio Rocker Pose_20260902_200945/Meshy_AI_Studio_Rocker_Pose_biped_Character_output.fbx",
+                       "finiteMesh":  true,
+                       "meshSize":  {
+                                        "x":  0.8884328,
+                                        "y":  1.6534462,
+                                        "z":  0.869497657
+                                    },
+                       "head":  {
+                                    "x":  0.0429635048,
+                                    "y":  1.27640033,
+                                    "z":  0.110392809
+                                },
+                       "leftHand":  {
+                                        "x":  -0.14302054,
+                                        "y":  1.135982,
+                                        "z":  0.212593436
+                                    },
+                       "rightHand":  {
+                                         "x":  0.204927176,
+                                         "y":  1.12276936,
+                                         "z":  0.218583226
+                                     }
+                   },
+                   {
+                       "p":  "Assets/MeshyImports/The Watchful Executive_20260930_190805/Meshy_AI_The_Watchful_Executiv_biped_Animation_Running_withSkin.fbx",
+                       "finiteMesh":  true,
+                       "meshSize":  {
+                                        "x":  1.20404446,
+                                        "y":  1.70880651,
+                                        "z":  1.16382241
+                                    },
+                       "head":  {
+                                    "x":  0.04287116,
+                                    "y":  1.282621,
+                                    "z":  0.0839988
+                                },
+                       "leftHand":  {
+                                        "x":  -0.149341181,
+                                        "y":  1.168474,
+                                        "z":  0.212002337
+                                    },
+                       "rightHand":  {
+                                         "x":  0.219780326,
+                                         "y":  1.1694411,
+                                         "z":  0.2099315
+                                     }
+                   },
+                   {
+                       "p":  "Assets/MeshyImports/The Watchful Executive_20260930_190807/Meshy_AI_The_Watchful_Executiv_biped_Character_output.fbx",
+                       "finiteMesh":  true,
+                       "meshSize":  {
+                                        "x":  1.205637,
+                                        "y":  1.7067374,
+                                        "z":  1.164221
+                                    },
+                       "head":  {
+                                    "x":  0.04359527,
+                                    "y":  1.29762375,
+                                    "z":  0.0852025747
+                                },
+                       "leftHand":  {
+                                        "x":  -0.148617327,
+                                        "y":  1.18347681,
+                                        "z":  0.213206053
+                                    },
+                       "rightHand":  {
+                                         "x":  0.220504314,
+                                         "y":  1.18444371,
+                                         "z":  0.211135387
+                                     }
+                   },
+                   {
+                       "p":  "Assets/MeshyImports/Vasco Jacket Avatar_20260902_201115/Meshy_AI_Vasco_Jacket_Avatar_biped_Animation_Running_withSkin.fbx",
+                       "finiteMesh":  true,
+                       "meshSize":  {
+                                        "x":  0.98512733,
+                                        "y":  1.75778759,
+                                        "z":  0.9472672
+                                    },
+                       "head":  {
+                                    "x":  0.0436170846,
+                                    "y":  1.27436566,
+                                    "z":  0.09495652
+                                },
+                       "leftHand":  {
+                                        "x":  -0.108298436,
+                                        "y":  1.19581246,
+                                        "z":  0.223393083
+                                    },
+                       "rightHand":  {
+                                         "x":  0.1932334,
+                                         "y":  1.19657516,
+                                         "z":  0.243073225
+                                     }
+                   },
+                   {
+                       "p":  "Assets/MeshyImports/Vasco Jacket Avatar_20260902_201117/Meshy_AI_Vasco_Jacket_Avatar_biped_Character_output.fbx",
+                       "finiteMesh":  true,
+                       "meshSize":  {
+                                        "x":  0.990242243,
+                                        "y":  1.75574565,
+                                        "z":  0.9560768
+                                    },
+                       "head":  {
+                                    "x":  0.0443319455,
+                                    "y":  1.28917587,
+                                    "z":  0.09614456
+                                },
+                       "leftHand":  {
+                                        "x":  -0.107583418,
+                                        "y":  1.21062255,
+                                        "z":  0.224580944
+                                    },
+                       "rightHand":  {
+                                         "x":  0.193948239,
+                                         "y":  1.21138537,
+                                         "z":  0.244261265
+                                     }
+                   }
+               ],
+    "count":  16
+}

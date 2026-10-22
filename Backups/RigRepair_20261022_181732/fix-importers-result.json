@@ -1,0 +1,48 @@
+﻿{
+    "success":  true,
+    "result":  [
+                   {
+                       "p":  "Assets/MeshyImports/Emerald Strength_20260902_201325/Meshy_AI_Emerald_Strength_biped_Character_output.fbx",
+                       "action":  "Generic -\u003e Humanoid/CreateFromThisModel",
+                       "valid":  true,
+                       "human":  true
+                   },
+                   {
+                       "p":  "Assets/MeshyImports/Modern Gentleman poised_20260902_201746/Meshy_AI_Modern_Gentleman_pois_biped_Character_output.fbx",
+                       "action":  "Generic -\u003e Humanoid/CreateFromThisModel",
+                       "valid":  true,
+                       "human":  true
+                   },
+                   {
+                       "p":  "Assets/MeshyImports/Shadow Sentinel_20260902_201916/Meshy_AI_Shadow_Sentinel_biped_Character_output.fbx",
+                       "action":  "Generic -\u003e Humanoid/CreateFromThisModel",
+                       "valid":  true,
+                       "human":  true
+                   },
+                   {
+                       "p":  "Assets/MeshyImports/Studio Rocker Pose_20260902_200945/Meshy_AI_Studio_Rocker_Pose_biped_Character_output.fbx",
+                       "action":  "Generic -\u003e Humanoid/CreateFromThisModel",
+                       "valid":  true,
+                       "human":  true
+                   },
+                   {
+                       "p":  "Assets/MeshyImports/The Watchful Executive_20260930_190805/Meshy_AI_The_Watchful_Executiv_biped_Animation_Running_withSkin.fbx",
+                       "action":  "Generic -\u003e Humanoid/CreateFromThisModel",
+                       "valid":  true,
+                       "human":  true
+                   },
+                   {
+                       "p":  "Assets/MeshyImports/The Watchful Executive_20260930_190807/Meshy_AI_The_Watchful_Executiv_biped_Character_output.fbx",
+                       "action":  "Generic -\u003e Humanoid/CreateFromThisModel",
+                       "valid":  true,
+                       "human":  true
+                   },
+                   {
+                       "p":  "Assets/MeshyImports/Vasco Jacket Avatar_20260902_201117/Meshy_AI_Vasco_Jacket_Avatar_biped_Character_output.fbx",
+                       "action":  "Generic -\u003e Humanoid/CreateFromThisModel",
+                       "valid":  true,
+                       "human":  true
+                   }
+               ],
+    "count":  7
+}

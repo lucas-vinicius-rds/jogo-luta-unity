@@ -1,0 +1,76 @@
+﻿{
+    "success":  true,
+    "result":  {
+                   "models":  7,
+                   "clipCount":  39,
+                   "samples":  819,
+                   "failures":  [
+
+                                ],
+                   "results":  [
+                                   {
+                                       "p":  "Assets/Prefabs/Characters/CasualSmilingMan.prefab",
+                                       "valid":  true,
+                                       "human":  true,
+                                       "mappedBones":  22,
+                                       "checkedClips":  39,
+                                       "maxBoneLengthDrift":  0.05000311,
+                                       "maxCoordinate":  1.03812873
+                                   },
+                                   {
+                                       "p":  "Assets/Prefabs/Characters/EmeraldStrength.prefab",
+                                       "valid":  true,
+                                       "human":  true,
+                                       "mappedBones":  22,
+                                       "checkedClips":  39,
+                                       "maxBoneLengthDrift":  0.0500039421,
+                                       "maxCoordinate":  0.987916052
+                                   },
+                                   {
+                                       "p":  "Assets/Prefabs/Characters/ManInBlack.prefab",
+                                       "valid":  true,
+                                       "human":  true,
+                                       "mappedBones":  22,
+                                       "checkedClips":  39,
+                                       "maxBoneLengthDrift":  0.05000235,
+                                       "maxCoordinate":  1.0081774
+                                   },
+                                   {
+                                       "p":  "Assets/Prefabs/Characters/ModernGentleman.prefab",
+                                       "valid":  true,
+                                       "human":  true,
+                                       "mappedBones":  22,
+                                       "checkedClips":  39,
+                                       "maxBoneLengthDrift":  0.05000091,
+                                       "maxCoordinate":  1.01345885
+                                   },
+                                   {
+                                       "p":  "Assets/Prefabs/Characters/ShadowSentinel.prefab",
+                                       "valid":  true,
+                                       "human":  true,
+                                       "mappedBones":  22,
+                                       "checkedClips":  39,
+                                       "maxBoneLengthDrift":  0.0500040054,
+                                       "maxCoordinate":  1.00038779
+                                   },
+                                   {
+                                       "p":  "Assets/Prefabs/Characters/StudioRocker.prefab",
+                                       "valid":  true,
+                                       "human":  true,
+                                       "mappedBones":  22,
+                                       "checkedClips":  39,
+                                       "maxBoneLengthDrift":  0.0500035249,
+                                       "maxCoordinate":  0.9170678
+                                   },
+                                   {
+                                       "p":  "Assets/Prefabs/Characters/VascoJacket.prefab",
+                                       "valid":  true,
+                                       "human":  true,
+                                       "mappedBones":  22,
+                                       "checkedClips":  39,
+                                       "maxBoneLengthDrift":  0.05000376,
+                                       "maxCoordinate":  1.002223
+                                   }
+                               ]
+               }
+}

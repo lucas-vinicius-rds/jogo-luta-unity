@@ -1,0 +1,9 @@
+﻿if(EditorApplication.isPlaying)throw new Exception("Stop: Editor is playing");
+var rows=new List<object>();
+foreach(var p in AssetDatabase.FindAssets("t:Model",new[]{"Assets/MeshyImports"}).Select(AssetDatabase.GUIDToAssetPath)){
+ var i=(ModelImporter)AssetImporter.GetAtPath(p);if(i.animationType==ModelImporterAnimationType.Human)continue;
+ i.animationType=ModelImporterAnimationType.Human;i.avatarSetup=ModelImporterAvatarSetup.CreateFromThisModel;i.sourceAvatar=null;i.SaveAndReimport();
+ var a=AssetDatabase.LoadAllAssetsAtPath(p).OfType<Avatar>().FirstOrDefault();if(a==null||!a.isValid||!a.isHuman)throw new Exception("Invalid avatar: "+p);
+ rows.Add(new{p,action="Generic -> Humanoid/CreateFromThisModel",valid=a.isValid,human=a.isHuman});
+}
+AssetDatabase.SaveAssets();return rows;

@@ -1,0 +1,11 @@
+﻿var rows=new List<object>();
+foreach(var p in new[]{"Assets/Prefabs/Characters/CasualSmilingMan.prefab","Assets/Prefabs/Characters/ManInBlack.prefab","Assets/Prefabs/Characters/VascoJacket.prefab"}){
+ var go=PrefabUtility.LoadPrefabContents(p);try{
+ var visual=go.transform.Find("Visual");var mods=PrefabUtility.GetPropertyModifications(visual.gameObject);
+ var changes=mods.Where(m=>m.target is Transform && m.target.name!=PrefabUtility.GetCorrespondingObjectFromSource(visual).name && (m.propertyPath.StartsWith("m_LocalRotation.")||m.propertyPath.StartsWith("m_LocalEulerAnglesHint."))).ToArray();
+ if(changes.Length>0){PrefabUtility.SetPropertyModifications(visual.gameObject,mods.Except(changes).ToArray());PrefabUtility.SaveAsPrefabAsset(go,p);}
+ rows.Add(new{p,restored=changes.Select(m=>m.target.name+":"+m.propertyPath).ToArray()});
+ }finally{PrefabUtility.UnloadPrefabContents(go);}
+}
+var idle=AssetDatabase.LoadAssetAtPath<AnimationClip>("Assets/Animations/Mixamo/Fighter_Idle.anim");var source=AssetDatabase.LoadAllAssetsAtPath("Assets/Animations/Mixamo/X Bot@Bouncing Fight Idle.fbx").OfType<AnimationClip>().First(c=>!c.name.StartsWith("__preview__"));var name=idle.name;EditorUtility.CopySerialized(source,idle);idle.name=name;EditorUtility.SetDirty(idle);AssetDatabase.SaveAssets();
+rows.Add(new {idle=AssetDatabase.GetAssetPath(idle),idle.isHumanMotion,curves=AnimationUtility.GetCurveBindings(idle).Length,directBoneCurves=AnimationUtility.GetCurveBindings(idle).Count(b=>b.type==typeof(Transform))});return rows;

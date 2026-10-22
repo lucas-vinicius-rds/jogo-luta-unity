@@ -655,14 +655,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Visual
       objectReference: {fileID: 0}
-    - target: {fileID: 5420033347761576298, guid: 3d0f75d81933dd34ea5a5b41af72688e, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 0.39625865
-      objectReference: {fileID: 0}
-    - target: {fileID: 5420033347761576298, guid: 3d0f75d81933dd34ea5a5b41af72688e, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0.0086269025
-      objectReference: {fileID: 0}
     - target: {fileID: 5866666021909216657, guid: 3d0f75d81933dd34ea5a5b41af72688e, type: 3}
       propertyPath: m_Enabled
       value: 0

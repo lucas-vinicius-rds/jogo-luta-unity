@@ -1,0 +1,35 @@
+﻿{
+    "success":  true,
+    "result":  [
+                   {
+                       "p":  "Assets/Prefabs/Characters/CasualSmilingMan.prefab",
+                       "restored":  [
+                                        "LeftLeg:m_LocalRotation.w",
+                                        "LeftLeg:m_LocalRotation.y"
+                                    ]
+                   },
+                   {
+                       "p":  "Assets/Prefabs/Characters/ManInBlack.prefab",
+                       "restored":  [
+                                        "RightShoulder:m_LocalRotation.w",
+                                        "RightShoulder:m_LocalRotation.x",
+                                        "RightShoulder:m_LocalRotation.y",
+                                        "RightShoulder:m_LocalRotation.z"
+                                    ]
+                   },
+                   {
+                       "p":  "Assets/Prefabs/Characters/VascoJacket.prefab",
+                       "restored":  [
+                                        "RightUpLeg:m_LocalRotation.w",
+                                        "RightUpLeg:m_LocalRotation.y"
+                                    ]
+                   },
+                   {
+                       "idle":  "Assets/Animations/Mixamo/Fighter_Idle.anim",
+                       "isHumanMotion":  true,
+                       "curves":  130,
+                       "directBoneCurves":  0
+                   }
+               ],
+    "count":  4
+}

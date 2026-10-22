@@ -1,0 +1,24 @@
+﻿var scene=EditorSceneManager.NewPreviewScene();var rows=new List<object>();int samples=0;var failures=new List<string>();
+try{
+var paths=AssetDatabase.FindAssets("t:Model",new[]{"Assets/Animations/Mixamo","Assets/MeshyImports"}).Select(AssetDatabase.GUIDToAssetPath).ToArray();
+var clips=paths.Where(p=>p.StartsWith("Assets/Animations/Mixamo/")).SelectMany(p=>AssetDatabase.LoadAllAssetsAtPath(p).OfType<AnimationClip>()).Where(c=>!c.name.StartsWith("__preview__")).ToList();clips.Add(AssetDatabase.LoadAssetAtPath<AnimationClip>("Assets/Animations/Mixamo/Fighter_Idle.anim"));
+foreach(var p in paths.Where(p=>p.StartsWith("Assets/MeshyImports/")||!System.IO.Path.GetFileName(p).Contains("@")&&!p.EndsWith("Pulo pra frente.fbx"))){
+var model=AssetDatabase.LoadAssetAtPath<GameObject>(p);var go=(GameObject)PrefabUtility.InstantiatePrefab(model,scene);var a=go.GetComponent<Animator>();
+if(a==null||a.avatar==null||!a.avatar.isValid||!a.avatar.isHuman){failures.Add(p+": invalid avatar");continue;}
+a.applyRootMotion=false;a.cullingMode=AnimatorCullingMode.AlwaysAnimate;var mapped=Enumerable.Range(0,(int)HumanBodyBones.LastBone).Select(i=>a.GetBoneTransform((HumanBodyBones)i)).Where(t=>t!=null).ToArray();
+var lengths=mapped.Where(t=>t.name!="Hips"&&!t.name.EndsWith(":Hips")).ToDictionary(t=>t,t=>t.localPosition.magnitude);float maxDrift=0;float maxCoordinate=0;int checkedClips=0;
+foreach(var clip in clips){
+ if(!clip.isHumanMotion){failures.Add("Nonhuman clip "+clip.name);continue;}
+ var graph=UnityEngine.Playables.PlayableGraph.Create("RetargetValidation");try{graph.SetTimeUpdateMode(UnityEngine.Playables.DirectorUpdateMode.Manual);var play=UnityEngine.Animations.AnimationClipPlayable.Create(graph,clip);var output=UnityEngine.Animations.AnimationPlayableOutput.Create(graph,"Audit",a);UnityEngine.Playables.PlayableOutputExtensions.SetSourcePlayable(output,play);graph.Play();
+ foreach(var fraction in new[]{0f,.5f,.95f}){UnityEngine.Playables.PlayableExtensions.SetTime(play,clip.length*fraction);graph.Evaluate(.0001f);samples++;
+ foreach(var t in mapped){var v=t.position-a.GetBoneTransform(HumanBodyBones.Hips).position;if(float.IsNaN(v.x)||float.IsNaN(v.y)||float.IsNaN(v.z)||float.IsInfinity(v.sqrMagnitude)){failures.Add(p+": nonfinite pose "+clip.name);break;}maxCoordinate=Mathf.Max(maxCoordinate,v.magnitude);}
+ foreach(var entry in lengths){if(entry.Value>.001f)maxDrift=Mathf.Max(maxDrift,Mathf.Abs(entry.Key.localPosition.magnitude/entry.Value-1));}
+ }}finally{graph.Destroy();}checkedClips++;
+}
+if(maxDrift>.15f)failures.Add(p+": bone length drift "+maxDrift);if(maxCoordinate>4)failures.Add(p+": extreme coordinate "+maxCoordinate);
+rows.Add(new{p,valid=a.avatar.isValid,human=a.avatar.isHuman,mappedBones=mapped.Length,checkedClips,maxBoneLengthDrift=maxDrift,maxCoordinate});UnityEngine.Object.DestroyImmediate(go);
+}
+return new{models=rows.Count,clipCount=clips.Count,samples,failures,results=rows};
+}finally{EditorSceneManager.ClosePreviewScene(scene);}
+
+

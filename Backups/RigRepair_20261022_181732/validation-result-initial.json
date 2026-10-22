@@ -1,0 +1,226 @@
+﻿{
+    "success":  true,
+    "result":  {
+                   "models":  23,
+                   "clipCount":  39,
+                   "samples":  2691,
+                   "failures":  [
+                                    "Assets/Animations/Mixamo/enomoto.fbx: extreme coordinate 10,3249",
+                                    "Assets/Animations/Mixamo/gabutas.fbx: extreme coordinate 10,67549",
+                                    "Assets/Animations/Mixamo/isaac.fbx: extreme coordinate 10,51888",
+                                    "Assets/Animations/Mixamo/jompis.fbx: extreme coordinate 10,738",
+                                    "Assets/Animations/Mixamo/lusca.fbx: extreme coordinate 10,64238",
+                                    "Assets/Animations/Mixamo/ricardin.fbx: extreme coordinate 10,98709",
+                                    "Assets/Animations/Mixamo/tigas.fbx: extreme coordinate 10,69331"
+                                ],
+                   "results":  [
+                                   {
+                                       "p":  "Assets/Animations/Mixamo/enomoto.fbx",
+                                       "valid":  true,
+                                       "human":  true,
+                                       "mappedBones":  52,
+                                       "checkedClips":  39,
+                                       "maxBoneLengthDrift":  0.01660505,
+                                       "maxCoordinate":  10.3249044
+                                   },
+                                   {
+                                       "p":  "Assets/Animations/Mixamo/gabutas.fbx",
+                                       "valid":  true,
+                                       "human":  true,
+                                       "mappedBones":  52,
+                                       "checkedClips":  39,
+                                       "maxBoneLengthDrift":  0.031032661,
+                                       "maxCoordinate":  10.6754932
+                                   },
+                                   {
+                                       "p":  "Assets/Animations/Mixamo/isaac.fbx",
+                                       "valid":  true,
+                                       "human":  true,
+                                       "mappedBones":  52,
+                                       "checkedClips":  39,
+                                       "maxBoneLengthDrift":  0.0264489539,
+                                       "maxCoordinate":  10.5188828
+                                   },
+                                   {
+                                       "p":  "Assets/Animations/Mixamo/jompis.fbx",
+                                       "valid":  true,
+                                       "human":  true,
+                                       "mappedBones":  52,
+                                       "checkedClips":  39,
+                                       "maxBoneLengthDrift":  0.0310451388,
+                                       "maxCoordinate":  10.7380047
+                                   },
+                                   {
+                                       "p":  "Assets/Animations/Mixamo/lusca.fbx",
+                                       "valid":  true,
+                                       "human":  true,
+                                       "mappedBones":  52,
+                                       "checkedClips":  39,
+                                       "maxBoneLengthDrift":  0.0363588147,
+                                       "maxCoordinate":  10.6423836
+                                   },
+                                   {
+                                       "p":  "Assets/Animations/Mixamo/ricardin.fbx",
+                                       "valid":  true,
+                                       "human":  true,
+                                       "mappedBones":  52,
+                                       "checkedClips":  39,
+                                       "maxBoneLengthDrift":  0.0176801,
+                                       "maxCoordinate":  10.9870892
+                                   },
+                                   {
+                                       "p":  "Assets/Animations/Mixamo/tigas.fbx",
+                                       "valid":  true,
+                                       "human":  true,
+                                       "mappedBones":  52,
+                                       "checkedClips":  39,
+                                       "maxBoneLengthDrift":  0.0173888039,
+                                       "maxCoordinate":  10.6933107
+                                   },
+                                   {
+                                       "p":  "Assets/MeshyImports/Casual Smiling Man with Curly Hair_20260902_174546/Meshy_AI_Casual_Smiling_Man_wi_biped_Animation_Running_withSkin.fbx",
+                                       "valid":  true,
+                                       "human":  true,
+                                       "mappedBones":  22,
+                                       "checkedClips":  39,
+                                       "maxBoneLengthDrift":  0,
+                                       "maxCoordinate":  9.076696
+                                   },
+                                   {
+                                       "p":  "Assets/MeshyImports/Casual Smiling Man with Curly Hair_20260902_174548/Meshy_AI_Casual_Smiling_Man_wi_biped_Character_output.fbx",
+                                       "valid":  true,
+                                       "human":  true,
+                                       "mappedBones":  22,
+                                       "checkedClips":  39,
+                                       "maxBoneLengthDrift":  0,
+                                       "maxCoordinate":  9.00587749
+                                   },
+                                   {
+                                       "p":  "Assets/MeshyImports/Emerald Strength_20260902_201323/Meshy_AI_Emerald_Strength_biped_Animation_Running_withSkin.fbx",
+                                       "valid":  true,
+                                       "human":  true,
+                                       "mappedBones":  22,
+                                       "checkedClips":  39,
+                                       "maxBoneLengthDrift":  0,
+                                       "maxCoordinate":  8.709437
+                                   },
+                                   {
+                                       "p":  "Assets/MeshyImports/Emerald Strength_20260902_201325/Meshy_AI_Emerald_Strength_biped_Character_output.fbx",
+                                       "valid":  true,
+                                       "human":  true,
+                                       "mappedBones":  22,
+                                       "checkedClips":  39,
+                                       "maxBoneLengthDrift":  0,
+                                       "maxCoordinate":  8.598103
+                                   },
+                                   {
+                                       "p":  "Assets/MeshyImports/Man in Black_20260902_155135/Meshy_AI_Man_in_Black_biped_Animation_Running_withSkin.fbx",
+                                       "valid":  true,
+                                       "human":  true,
+                                       "mappedBones":  22,
+                                       "checkedClips":  39,
+                                       "maxBoneLengthDrift":  0,
+                                       "maxCoordinate":  9.2905
+                                   },
+                                   {
+                                       "p":  "Assets/MeshyImports/Man in Black_20260902_155137/Meshy_AI_Man_in_Black_biped_Character_output.fbx",
+                                       "valid":  true,
+                                       "human":  true,
+                                       "mappedBones":  22,
+                                       "checkedClips":  39,
+                                       "maxBoneLengthDrift":  0,
+                                       "maxCoordinate":  9.101734
+                                   },
+                                   {
+                                       "p":  "Assets/MeshyImports/Modern Gentleman poised_20260902_201744/Meshy_AI_Modern_Gentleman_pois_biped_Animation_01a05a9b-b701-7510-8e23-90b8faa3c118_withSkin.fbx",
+                                       "valid":  true,
+                                       "human":  true,
+                                       "mappedBones":  22,
+                                       "checkedClips":  39,
+                                       "maxBoneLengthDrift":  0,
+                                       "maxCoordinate":  8.777412
+                                   },
+                                   {
+                                       "p":  "Assets/MeshyImports/Modern Gentleman poised_20260902_201746/Meshy_AI_Modern_Gentleman_pois_biped_Character_output.fbx",
+                                       "valid":  true,
+                                       "human":  true,
+                                       "mappedBones":  22,
+                                       "checkedClips":  39,
+                                       "maxBoneLengthDrift":  0,
+                                       "maxCoordinate":  8.769084
+                                   },
+                                   {
+                                       "p":  "Assets/MeshyImports/Shadow Sentinel_20260902_201914/Meshy_AI_Shadow_Sentinel_biped_Animation_Running_withSkin.fbx",
+                                       "valid":  true,
+                                       "human":  true,
+                                       "mappedBones":  22,
+                                       "checkedClips":  39,
+                                       "maxBoneLengthDrift":  0,
+                                       "maxCoordinate":  8.628026
+                                   },
+                                   {
+                                       "p":  "Assets/MeshyImports/Shadow Sentinel_20260902_201916/Meshy_AI_Shadow_Sentinel_biped_Character_output.fbx",
+                                       "valid":  true,
+                                       "human":  true,
+                                       "mappedBones":  22,
+                                       "checkedClips":  39,
+                                       "maxBoneLengthDrift":  0,
+                                       "maxCoordinate":  8.521932
+                                   },
+                                   {
+                                       "p":  "Assets/MeshyImports/Studio Rocker Pose_20260902_200943/Meshy_AI_Studio_Rocker_Pose_biped_Animation_Running_withSkin.fbx",
+                                       "valid":  true,
+                                       "human":  true,
+                                       "mappedBones":  22,
+                                       "checkedClips":  39,
+                                       "maxBoneLengthDrift":  0,
+                                       "maxCoordinate":  8.273997
+                                   },
+                                   {
+                                       "p":  "Assets/MeshyImports/Studio Rocker Pose_20260902_200945/Meshy_AI_Studio_Rocker_Pose_biped_Character_output.fbx",
+                                       "valid":  true,
+                                       "human":  true,
+                                       "mappedBones":  22,
+                                       "checkedClips":  39,
+                                       "maxBoneLengthDrift":  0,
+                                       "maxCoordinate":  8.206217
+                                   },
+                                   {
+                                       "p":  "Assets/MeshyImports/The Watchful Executive_20260930_190805/Meshy_AI_The_Watchful_Executiv_biped_Animation_Running_withSkin.fbx",
+                                       "valid":  true,
+                                       "human":  true,
+                                       "mappedBones":  22,
+                                       "checkedClips":  39,
+                                       "maxBoneLengthDrift":  0,
+                                       "maxCoordinate":  8.237997
+                                   },
+                                   {
+                                       "p":  "Assets/MeshyImports/The Watchful Executive_20260930_190807/Meshy_AI_The_Watchful_Executiv_biped_Character_output.fbx",
+                                       "valid":  true,
+                                       "human":  true,
+                                       "mappedBones":  22,
+                                       "checkedClips":  39,
+                                       "maxBoneLengthDrift":  0,
+                                       "maxCoordinate":  8.106854
+                                   },
+                                   {
+                                       "p":  "Assets/MeshyImports/Vasco Jacket Avatar_20260902_201115/Meshy_AI_Vasco_Jacket_Avatar_biped_Animation_Running_withSkin.fbx",
+                                       "valid":  true,
+                                       "human":  true,
+                                       "mappedBones":  22,
+                                       "checkedClips":  39,
+                                       "maxBoneLengthDrift":  0,
+                                       "maxCoordinate":  8.788446
+                                   },
+                                   {
+                                       "p":  "Assets/MeshyImports/Vasco Jacket Avatar_20260902_201117/Meshy_AI_Vasco_Jacket_Avatar_biped_Character_output.fbx",
+                                       "valid":  true,
+                                       "human":  true,
+                                       "mappedBones":  22,
+                                       "checkedClips":  39,
+                                       "maxBoneLengthDrift":  0,
+                                       "maxCoordinate":  8.678586
+                                   }
+                               ]
+               }
+}

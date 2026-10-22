@@ -1,0 +1,13 @@
+﻿var dir="Backups/RigRepair_20261022_181732"; var stage="before";
+var scene=EditorSceneManager.NewPreviewScene(); var rows=new List<object>();
+try {
+var camGo=new GameObject("AuditCamera"); UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(camGo,scene);var cam=camGo.AddComponent<Camera>();cam.scene=scene;cam.clearFlags=CameraClearFlags.SolidColor;cam.backgroundColor=new Color(.15f,.17f,.2f);cam.orthographic=true;cam.orthographicSize=1.2f;cam.transform.position=new Vector3(0,1,4);cam.transform.LookAt(new Vector3(0,1,0));cam.cullingMask=1<<31;
+var lightGo=new GameObject("AuditLight");UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(lightGo,scene);var light=lightGo.AddComponent<Light>();light.type=LightType.Directional;light.intensity=2;light.transform.rotation=Quaternion.Euler(30,160,0);
+foreach(var p in AssetDatabase.FindAssets("t:Prefab",new[]{"Assets/Prefabs/Characters"}).Select(AssetDatabase.GUIDToAssetPath)) {
+ var go=(GameObject)PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(p),scene);foreach(var t in go.GetComponentsInChildren<Transform>(true))t.gameObject.layer=31;foreach(var m in go.GetComponentsInChildren<MonoBehaviour>(true))m.enabled=false;
+ var animator=go.GetComponent<Animator>();var graph=UnityEngine.Playables.PlayableGraph.Create("RigAudit");graph.SetTimeUpdateMode(UnityEngine.Playables.DirectorUpdateMode.Manual);var clip=AssetDatabase.LoadAllAssetsAtPath("Assets/Animations/Mixamo/X Bot@Bouncing Fight Idle.fbx").OfType<AnimationClip>().First(c=>!c.name.StartsWith("__preview__"));var playable=UnityEngine.Animations.AnimationClipPlayable.Create(graph,clip);var output=UnityEngine.Animations.AnimationPlayableOutput.Create(graph,"Audit",animator);UnityEngine.Playables.PlayableOutputExtensions.SetSourcePlayable(output,playable);graph.Play();UnityEngine.Playables.PlayableExtensions.SetTime(playable,.35);graph.Evaluate(0);
+ var rt=RenderTexture.GetTemporary(420,420,24);cam.targetTexture=rt;cam.Render();var prev=RenderTexture.active;RenderTexture.active=rt;var tex=new Texture2D(420,420,TextureFormat.RGB24,false);tex.ReadPixels(new Rect(0,0,420,420),0,0);tex.Apply();System.IO.File.WriteAllBytes(dir+"/"+stage+"-"+go.name+".png",tex.EncodeToPNG());RenderTexture.active=prev;cam.targetTexture=null;RenderTexture.ReleaseTemporary(rt);UnityEngine.Object.DestroyImmediate(tex);
+ rows.Add(new {p,head=animator.GetBoneTransform(HumanBodyBones.Head).position,leftHand=animator.GetBoneTransform(HumanBodyBones.LeftHand).position,rightHand=animator.GetBoneTransform(HumanBodyBones.RightHand).position});graph.Destroy();UnityEngine.Object.DestroyImmediate(go);
+}return rows;
+}finally {EditorSceneManager.ClosePreviewScene(scene);}
+
