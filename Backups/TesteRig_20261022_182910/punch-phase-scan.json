@@ -1,0 +1,211 @@
+﻿{
+    "success":  true,
+    "result":  [
+                   {
+                       "phase":  0,
+                       "leftAngle":  106.354881,
+                       "rightAngle":  125.512039
+                   },
+                   {
+                       "phase":  0.025,
+                       "leftAngle":  106.176781,
+                       "rightAngle":  125.384132
+                   },
+                   {
+                       "phase":  0.05,
+                       "leftAngle":  105.640793,
+                       "rightAngle":  125.353081
+                   },
+                   {
+                       "phase":  0.075,
+                       "leftAngle":  104.63295,
+                       "rightAngle":  125.369423
+                   },
+                   {
+                       "phase":  0.1,
+                       "leftAngle":  103.238518,
+                       "rightAngle":  125.383644
+                   },
+                   {
+                       "phase":  0.125,
+                       "leftAngle":  101.944168,
+                       "rightAngle":  125.346375
+                   },
+                   {
+                       "phase":  0.15,
+                       "leftAngle":  100.409821,
+                       "rightAngle":  125.510994
+                   },
+                   {
+                       "phase":  0.175,
+                       "leftAngle":  97.9372,
+                       "rightAngle":  125.996445
+                   },
+                   {
+                       "phase":  0.2,
+                       "leftAngle":  94.45763,
+                       "rightAngle":  126.55204
+                   },
+                   {
+                       "phase":  0.225,
+                       "leftAngle":  89.86357,
+                       "rightAngle":  127.255867
+                   },
+                   {
+                       "phase":  0.25,
+                       "leftAngle":  83.8749,
+                       "rightAngle":  128.975174
+                   },
+                   {
+                       "phase":  0.275,
+                       "leftAngle":  77.258255,
+                       "rightAngle":  131.564056
+                   },
+                   {
+                       "phase":  0.3,
+                       "leftAngle":  72.80003,
+                       "rightAngle":  133.867111
+                   },
+                   {
+                       "phase":  0.325,
+                       "leftAngle":  73.6952744,
+                       "rightAngle":  135.5289
+                   },
+                   {
+                       "phase":  0.35,
+                       "leftAngle":  80.20755,
+                       "rightAngle":  136.52417
+                   },
+                   {
+                       "phase":  0.375,
+                       "leftAngle":  91.6619339,
+                       "rightAngle":  136.827789
+                   },
+                   {
+                       "phase":  0.4,
+                       "leftAngle":  107.595078,
+                       "rightAngle":  136.94104
+                   },
+                   {
+                       "phase":  0.425,
+                       "leftAngle":  122.46804,
+                       "rightAngle":  138.631439
+                   },
+                   {
+                       "phase":  0.45,
+                       "leftAngle":  127.281464,
+                       "rightAngle":  143.545715
+                   },
+                   {
+                       "phase":  0.475,
+                       "leftAngle":  125.451424,
+                       "rightAngle":  133.425964
+                   },
+                   {
+                       "phase":  0.5,
+                       "leftAngle":  124.269539,
+                       "rightAngle":  77.95423
+                   },
+                   {
+                       "phase":  0.525,
+                       "leftAngle":  121.464577,
+                       "rightAngle":  22.30361
+                   },
+                   {
+                       "phase":  0.55,
+                       "leftAngle":  117.778366,
+                       "rightAngle":  12.8017159
+                   },
+                   {
+                       "phase":  0.575,
+                       "leftAngle":  115.528877,
+                       "rightAngle":  11.3468742
+                   },
+                   {
+                       "phase":  0.6,
+                       "leftAngle":  114.1447,
+                       "rightAngle":  46.894577
+                   },
+                   {
+                       "phase":  0.625,
+                       "leftAngle":  111.699577,
+                       "rightAngle":  95.18511
+                   },
+                   {
+                       "phase":  0.65,
+                       "leftAngle":  109.724625,
+                       "rightAngle":  117.026535
+                   },
+                   {
+                       "phase":  0.675,
+                       "leftAngle":  107.899918,
+                       "rightAngle":  122.033035
+                   },
+                   {
+                       "phase":  0.7,
+                       "leftAngle":  106.177567,
+                       "rightAngle":  125.710579
+                   },
+                   {
+                       "phase":  0.725,
+                       "leftAngle":  105.528137,
+                       "rightAngle":  127.934975
+                   },
+                   {
+                       "phase":  0.75,
+                       "leftAngle":  106.063637,
+                       "rightAngle":  128.219971
+                   },
+                   {
+                       "phase":  0.775,
+                       "leftAngle":  106.930817,
+                       "rightAngle":  127.335327
+                   },
+                   {
+                       "phase":  0.8,
+                       "leftAngle":  107.714935,
+                       "rightAngle":  126.622734
+                   },
+                   {
+                       "phase":  0.825,
+                       "leftAngle":  108.216362,
+                       "rightAngle":  126.468987
+                   },
+                   {
+                       "phase":  0.85,
+                       "leftAngle":  108.235016,
+                       "rightAngle":  126.752907
+                   },
+                   {
+                       "phase":  0.875,
+                       "leftAngle":  107.825714,
+                       "rightAngle":  126.861145
+                   },
+                   {
+                       "phase":  0.9,
+                       "leftAngle":  107.357849,
+                       "rightAngle":  126.787987
+                   },
+                   {
+                       "phase":  0.925,
+                       "leftAngle":  107.103981,
+                       "rightAngle":  126.579414
+                   },
+                   {
+                       "phase":  0.95,
+                       "leftAngle":  106.958626,
+                       "rightAngle":  126.281334
+                   },
+                   {
+                       "phase":  0.975,
+                       "leftAngle":  106.684158,
+                       "rightAngle":  125.939674
+                   },
+                   {
+                       "phase":  1,
+                       "leftAngle":  106.354858,
+                       "rightAngle":  125.512024
+                   }
+               ],
+    "count":  41
+}

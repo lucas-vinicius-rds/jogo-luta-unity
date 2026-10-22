@@ -1,0 +1,6 @@
+﻿var temporaryPath="Assets/Scenes/_TesteRig.unity";
+if(UnityEngine.SceneManagement.SceneManager.GetActiveScene().path!=temporaryPath)throw new Exception("Cena ativa inesperada; não remover.");
+var restored=EditorSceneManager.OpenScene("Assets/Scenes/RuaUrbana.unity",OpenSceneMode.Single);
+if(!AssetDatabase.DeleteAsset(temporaryPath))throw new Exception("Não foi possível remover a cena temporária");
+var sv=SceneView.lastActiveSceneView;if(sv!=null){sv.pivot=SessionState.GetVector3("RigTestPivot",Vector3.zero);sv.rotation=Quaternion.Euler(SessionState.GetVector3("RigTestRotation",Vector3.zero));sv.size=SessionState.GetFloat("RigTestSize",3);sv.orthographic=SessionState.GetBool("RigTestOrtho",false);sv.drawGizmos=SessionState.GetBool("RigTestGizmos",true);sv.Repaint();}
+return new{scene=restored.path,dirty=restored.isDirty,temporarySceneExists=System.IO.File.Exists(temporaryPath),temporaryMetaExists=System.IO.File.Exists(temporaryPath+".meta")};

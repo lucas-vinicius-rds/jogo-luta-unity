@@ -462,3 +462,30 @@ Referência dos assets de animação disponíveis em `Assets/Animations/Mixamo/`
 
 Com o Unity fora do Play Mode, copiar de `Backups/RigRepair_20261022_181732` para os mesmos caminhos do projeto os sete .fbx.meta alterados, os três prefabs e Fighter_Idle.anim, preservando seus .meta/GUIDs; solicitar AssetDatabase.Refresh no Unity. O manifest-sha256.json lista os originais. Não restaurar pastas inteiras por exclusão e não apagar os backups.
 - Verificação final de diff: removidos apenas espaços ao fim de linha do YAML de Fighter_Idle.anim gerado pelo Unity; reimportação confirmou Humanoid e 130 curvas. git diff --check sem erros após normalização.
+
+## 2026-10-22 — Reimportação solicitada dos sete rigs Meshy
+
+- Backup prévio dos sete .fbx.meta e do registro atual: `Backups/RigReimport_20261022_182532`.
+- Unity MCP (bridge HTTP local): os sete arquivos já estavam Humanoid/CreateFromThisModel. Configuração confirmada e reimportação explícita executada com AssetDatabase.ImportAsset(..., ImportAssetOptions.ForceUpdate). Não houve remapeamento manual nem substituição de Avatar.
+- Validação por Avatar.isValid, Avatar.isHuman e HumanTrait.RequiredBone/HumanTrait.BoneName; contagem inclui somente mapeamentos cujo Transform existe no modelo.
+
+| Arquivo | Avatar válido/Humanoid | Ossos mapeados | Obrigatórios ausentes |
+|---|---|---:|---|
+| `Assets/MeshyImports/Emerald Strength_20260902_201325/Meshy_AI_Emerald_Strength_biped_Character_output.fbx` | True/True | 22 | Nenhum |
+| `Assets/MeshyImports/Modern Gentleman poised_20260902_201746/Meshy_AI_Modern_Gentleman_pois_biped_Character_output.fbx` | True/True | 22 | Nenhum |
+| `Assets/MeshyImports/Shadow Sentinel_20260902_201916/Meshy_AI_Shadow_Sentinel_biped_Character_output.fbx` | True/True | 22 | Nenhum |
+| `Assets/MeshyImports/Studio Rocker Pose_20260902_200945/Meshy_AI_Studio_Rocker_Pose_biped_Character_output.fbx` | True/True | 22 | Nenhum |
+| `Assets/MeshyImports/The Watchful Executive_20260930_190805/Meshy_AI_The_Watchful_Executiv_biped_Animation_Running_withSkin.fbx` | True/True | 22 | Nenhum |
+| `Assets/MeshyImports/The Watchful Executive_20260930_190807/Meshy_AI_The_Watchful_Executiv_biped_Character_output.fbx` | True/True | 22 | Nenhum |
+| `Assets/MeshyImports/Vasco Jacket Avatar_20260902_201117/Meshy_AI_Vasco_Jacket_Avatar_biped_Character_output.fbx` | True/True | 22 | Nenhum |
+
+- Nenhuma falha nos sete Avatars; nenhum mapeamento foi forçado. Relatório detalhado e script em `Backups/RigReimport_20261022_182532/result.json` e `reimport-and-audit.cs.txt`. FBXs, prefabs, animações e demais configurações não foram editados nesta etapa.
+
+## 2026-10-22 — Comparação visual solicitada em _TesteRig
+
+- Backup prévio de RuaUrbana.unity, seu .meta e deste registro em `Backups/TesteRig_20261022_182910`; hashes em ruaurbana-hashes-before.json.
+- Cena temporária Assets/Scenes/_TesteRig.unity criada pelo Unity MCP com enomoto e Man in Black lado a lado. Enomoto não possui malha (zero Renderers); foi exibido seu esqueleto real animado em laranja, sem substituição de personagem. Isso limita a comparação de superfície à malha Meshy.
+- Mesmos clipes e tempos para os dois rigs: X Bot@Bouncing Fight Idle, X Bot@Cross Punch e X Bot@Walking. Doze poses, 24 capturas 1920x1080 das câmeras Game View/Scene View, guardadas fora de Assets em `Backups/TesteRig_20261022_182910`. Capturas finais com AlwaysAnimate/updateWhenOffscreen/forceMatrixRecalculationPerRender nas cópias para evitar skinning desatualizado na amostragem manual. Nenhum asset original de personagem foi editado.
+- Observações: sem deformação grave aparente de quadril/pernas nas amostras; leve achatamento de manga/axila no soco e perda de volume/ângulo no cotovelo muito flexionado. Sem prova de erro estrutural do rig. Meshy não reproduz o fechamento dos dedos, pois não há dedos mapeados. Não é possível avaliar skinning de enomoto sem sua malha.
+- Relatório completo, método, limitações e links de todas as imagens: `Backups/TesteRig_20261022_182910/RELATORIO_TESTE_RIG.md`. Scripts e respostas MCP preservados na mesma pasta.
+- Cena temporária e seu .meta apagados conforme autorização explícita desta solicitação. RuaUrbana reaberta com isDirty=false. SHA-256 da cena e .meta idênticos antes/depois; comprovação em ruaurbana-verification.json e cleanup-result.json. Nenhuma alteração de gameplay/rig foi aplicada nesta etapa.

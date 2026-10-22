@@ -1,0 +1,18 @@
+﻿if(EditorApplication.isPlaying)throw new Exception("Editor em Play Mode");
+if(Enumerable.Range(0,UnityEngine.SceneManagement.SceneManager.sceneCount).Any(i=>UnityEngine.SceneManagement.SceneManager.GetSceneAt(i).isDirty))throw new Exception("Há cena com alterações pendentes; não fechar.");
+if(System.IO.File.Exists("Assets/Scenes/_TesteRig.unity"))throw new Exception("Cena temporária já existe");
+var sv=SceneView.lastActiveSceneView;if(sv!=null){SessionState.SetVector3("RigTestPivot",sv.pivot);SessionState.SetVector3("RigTestRotation",sv.rotation.eulerAngles);SessionState.SetFloat("RigTestSize",sv.size);SessionState.SetBool("RigTestOrtho",sv.orthographic);SessionState.SetBool("RigTestGizmos",sv.drawGizmos);}
+var scene=EditorSceneManager.NewScene(NewSceneSetup.EmptyScene,NewSceneMode.Single);
+var paths=new[]{"Assets/Animations/Mixamo/enomoto.fbx","Assets/MeshyImports/Man in Black_20260902_155135/Meshy_AI_Man_in_Black_biped_Animation_Running_withSkin.fbx"};
+for(int i=0;i<2;i++){
+ var go=(GameObject)PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(paths[i]),scene);go.name=i==0?"Mixamo_enomoto":"Meshy_ManInBlack";go.transform.position=new Vector3(i==0?-1.1f:1.1f,0,0);var a=go.GetComponent<Animator>();a.applyRootMotion=false;a.cullingMode=AnimatorCullingMode.AlwaysAnimate;a.runtimeAnimatorController=null;
+ if(i==1){var mats=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Characters/ManInBlack.prefab").GetComponentInChildren<SkinnedMeshRenderer>(true).sharedMaterials;foreach(var r in go.GetComponentsInChildren<SkinnedMeshRenderer>())r.sharedMaterials=mats;}
+ var label=new GameObject("Label");label.transform.position=new Vector3(i==0?-1.1f:1.1f,2.12f,0);label.transform.rotation=Quaternion.Euler(0,180,0);var text=label.AddComponent<TextMesh>();text.text=i==0?"Mixamo: enomoto (52)":"Meshy: Man in Black (22)";text.anchor=TextAnchor.MiddleCenter;text.characterSize=.055f;text.fontSize=48;text.color=Color.white;
+}
+var cameraGo=new GameObject("RigTestCamera");cameraGo.tag="MainCamera";var cam=cameraGo.AddComponent<Camera>();cam.orthographic=true;cam.orthographicSize=1.45f;cam.transform.position=new Vector3(0,1.1f,7);cam.transform.rotation=Quaternion.Euler(0,180,0);cam.clearFlags=CameraClearFlags.SolidColor;cam.backgroundColor=new Color(.12f,.14f,.18f);
+var lightGo=new GameObject("KeyLight");var light=lightGo.AddComponent<Light>();light.type=LightType.Directional;light.intensity=1.4f;light.transform.rotation=Quaternion.Euler(35,150,0);RenderSettings.ambientMode=UnityEngine.Rendering.AmbientMode.Flat;RenderSettings.ambientLight=new Color(.65f,.65f,.65f);
+var floor=GameObject.CreatePrimitive(PrimitiveType.Cube);floor.name="TestFloor";floor.transform.position=new Vector3(0,-.06f,0);floor.transform.localScale=new Vector3(8,.1f,4);var material=new Material(Shader.Find("Universal Render Pipeline/Lit"));material.color=new Color(.22f,.25f,.3f);floor.GetComponent<Renderer>().sharedMaterial=material;
+if(sv!=null){sv.drawGizmos=false;sv.sceneLighting=true;sv.orthographic=true;sv.LookAtDirect(new Vector3(0,1,0),Quaternion.Euler(8,165,0),3.3f);sv.Repaint();}
+EditorSceneManager.SaveScene(scene,"Assets/Scenes/_TesteRig.unity");
+return new{scene=scene.path,characters=paths,camera=cam.name};
+

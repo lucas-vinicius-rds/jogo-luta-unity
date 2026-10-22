@@ -1,0 +1,15 @@
+﻿var paths=new string[]{"Assets/MeshyImports/Emerald Strength_20260902_201325/Meshy_AI_Emerald_Strength_biped_Character_output.fbx","Assets/MeshyImports/Modern Gentleman poised_20260902_201746/Meshy_AI_Modern_Gentleman_pois_biped_Character_output.fbx","Assets/MeshyImports/Shadow Sentinel_20260902_201916/Meshy_AI_Shadow_Sentinel_biped_Character_output.fbx","Assets/MeshyImports/Studio Rocker Pose_20260902_200945/Meshy_AI_Studio_Rocker_Pose_biped_Character_output.fbx","Assets/MeshyImports/The Watchful Executive_20260930_190805/Meshy_AI_The_Watchful_Executiv_biped_Animation_Running_withSkin.fbx","Assets/MeshyImports/The Watchful Executive_20260930_190807/Meshy_AI_The_Watchful_Executiv_biped_Character_output.fbx","Assets/MeshyImports/Vasco Jacket Avatar_20260902_201117/Meshy_AI_Vasco_Jacket_Avatar_biped_Character_output.fbx"};if(EditorApplication.isPlaying)throw new Exception("Editor em Play Mode; nenhuma alteração aplicada.");
+var rows=new List<object>();
+foreach(var p in paths){
+ try{
+ var importer=AssetImporter.GetAtPath(p) as ModelImporter;if(importer==null){rows.Add(new{path=p,error="ModelImporter não encontrado"});continue;}
+ var previousRig=importer.animationType.ToString();var previousSetup=importer.avatarSetup.ToString();
+ bool changed=importer.animationType!=ModelImporterAnimationType.Human||importer.avatarSetup!=ModelImporterAvatarSetup.CreateFromThisModel||importer.sourceAvatar!=null;
+ if(changed){importer.animationType=ModelImporterAnimationType.Human;importer.avatarSetup=ModelImporterAvatarSetup.CreateFromThisModel;importer.sourceAvatar=null;importer.SaveAndReimport();}else{AssetDatabase.ImportAsset(p,ImportAssetOptions.ForceUpdate);}
+ importer=(ModelImporter)AssetImporter.GetAtPath(p);var avatar=AssetDatabase.LoadAllAssetsAtPath(p).OfType<Avatar>().FirstOrDefault();var go=AssetDatabase.LoadAssetAtPath<GameObject>(p);var transforms=go.GetComponentsInChildren<Transform>(true).Select(t=>t.name).ToHashSet();var mapped=importer.humanDescription.human.Where(b=>!string.IsNullOrEmpty(b.boneName)&&transforms.Contains(b.boneName)).ToArray();
+ var missing=Enumerable.Range(0,HumanTrait.BoneCount).Where(i=>HumanTrait.RequiredBone(i)).Select(i=>HumanTrait.BoneName[i]).Where(name=>!mapped.Any(b=>b.humanName==name)).ToArray();
+ var reasons=new List<string>();if(avatar==null)reasons.Add("Avatar não foi gerado");else{if(!avatar.isValid)reasons.Add("Avatar.isValid=false");if(!avatar.isHuman)reasons.Add("Avatar.isHuman=false");}if(missing.Length>0)reasons.Add("Ossos obrigatórios ausentes: "+string.Join(", ",missing));
+ rows.Add(new{path=p,previousRig,previousSetup,configurationChanged=changed,rig=importer.animationType.ToString(),avatarSetup=importer.avatarSetup.ToString(),avatarValid=avatar!=null&&avatar.isValid,avatarHuman=avatar!=null&&avatar.isHuman,mappedBoneCount=mapped.Length,missingRequiredBones=missing,failureReasons=reasons,mapping=mapped.Select(b=>b.humanName+"="+b.boneName).ToArray()});
+ }catch(Exception ex){rows.Add(new{path=p,error=ex.Message});}
+}
+return rows;

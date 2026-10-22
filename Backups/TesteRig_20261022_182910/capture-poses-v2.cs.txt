@@ -1,0 +1,23 @@
+﻿if(UnityEngine.SceneManagement.SceneManager.GetActiveScene().path!="Assets/Scenes/_TesteRig.unity")throw new Exception("Wrong scene");
+var dir="Backups/TesteRig_20261022_182910";var rows=new List<object>();
+var toolsAssembly=AppDomain.CurrentDomain.GetAssemblies().First(a=>a.GetType("UnityMCP.Editor.MCPGraphicsCommands")!=null);var graphics=toolsAssembly.GetType("UnityMCP.Editor.MCPGraphicsCommands");
+var screenshots=toolsAssembly.GetType("UnityMCP.Editor.MCPScreenshotCommands");var names=new[]{"X Bot@Bouncing Fight Idle","X Bot@Cross Punch","X Bot@Walking"};var animators=new[]{GameObject.Find("Mixamo_enomoto").GetComponent<Animator>(),GameObject.Find("Meshy_ManInBlack").GetComponent<Animator>()};
+foreach(var skin in animators.SelectMany(a=>a.GetComponentsInChildren<SkinnedMeshRenderer>())){skin.updateWhenOffscreen=true;skin.forceMatrixRecalculationPerRender=true;}
+foreach(var name in names){
+ var clip=AssetDatabase.LoadAllAssetsAtPath("Assets/Animations/Mixamo/"+name+".fbx").OfType<AnimationClip>().First(c=>!c.name.StartsWith("__preview__"));
+ foreach(var fraction in new[]{.15f,.5f,.85f}){
+ var graph=UnityEngine.Playables.PlayableGraph.Create("RigCompare");try{graph.SetTimeUpdateMode(UnityEngine.Playables.DirectorUpdateMode.Manual);
+ for(int i=0;i<animators.Length;i++){var a=animators[i];a.transform.position=new Vector3(i==0?-1.1f:1.1f,0,0);a.transform.rotation=Quaternion.identity;a.applyRootMotion=false;a.cullingMode=AnimatorCullingMode.AlwaysAnimate;var playable=UnityEngine.Animations.AnimationClipPlayable.Create(graph,clip);UnityEngine.Playables.PlayableExtensions.SetTime(playable,clip.length*fraction);var output=UnityEngine.Animations.AnimationPlayableOutput.Create(graph,a.name,a);UnityEngine.Playables.PlayableOutputExtensions.SetSourcePlayable(output,playable);}
+ graph.Play();foreach(var outputIndex in Enumerable.Range(0,graph.GetOutputCount())){var op=graph.GetOutput(outputIndex);var play=UnityEngine.Playables.PlayableOutputExtensions.GetSourcePlayable(op);UnityEngine.Playables.PlayableExtensions.SetTime(play,clip.length*fraction);}graph.Evaluate(.0001f); for(int i=0;i<2;i++)animators[i].transform.position=new Vector3(i==0?-1.1f:1.1f,0,0); SceneView.RepaintAll();var sv=SceneView.lastActiveSceneView;sv.camera.transform.rotation=Quaternion.Euler(8,135,0);sv.camera.transform.position=new Vector3(0,1,0)-sv.camera.transform.forward*7;sv.camera.orthographic=true;sv.camera.orthographicSize=1.55f;sv.camera.nearClipPlane=.01f;sv.camera.farClipPlane=100f;
+  var debug=new GameObject("SkeletonDebug");var mat=new Material(Shader.Find("Universal Render Pipeline/Unlit"));mat.color=new Color(1f,.6f,.1f);var a0=animators[0];var humanBones=Enumerable.Range(0,(int)HumanBodyBones.LastBone).Select(i=>a0.GetBoneTransform((HumanBodyBones)i)).Where(t=>t!=null).ToHashSet();
+ foreach(var bone in humanBones){var parent=bone.parent;while(parent!=null&&!humanBones.Contains(parent))parent=parent.parent;if(parent==null)continue;var segment=new GameObject(bone.name);segment.transform.parent=debug.transform;var line=segment.AddComponent<LineRenderer>();line.sharedMaterial=mat;line.positionCount=2;line.startWidth=.016f;line.endWidth=.016f;line.useWorldSpace=true;line.SetPosition(0,parent.position);line.SetPosition(1,bone.position);}
+ var prefix=name.Replace("X Bot@","").Replace(" ","_")+"_"+((int)(fraction*100)).ToString("00");
+ var args=new Dictionary<string,object>{{"width",1920},{"height",1080},{"cameraName","RigTestCamera"}};var result=(Dictionary<string,object>)graphics.GetMethod("CaptureGameView").Invoke(null,new object[]{args});System.IO.File.WriteAllBytes(dir+"/"+prefix+"_GameView.png",Convert.FromBase64String((string)result["base64"]));args["path"]=dir+"/"+prefix+"_SceneView.png";screenshots.GetMethod("CaptureSceneView").Invoke(null,new object[]{args});UnityEngine.Object.DestroyImmediate(debug);UnityEngine.Object.DestroyImmediate(mat);
+ rows.Add(new{clip=name,fraction,time=clip.length*fraction,game=prefix+"_GameView.png",scene=prefix+"_SceneView.png",pose=animators.Select(a=>new{model=a.name,head=a.GetBoneTransform(HumanBodyBones.Head).position,leftHand=a.GetBoneTransform(HumanBodyBones.LeftHand).position,rightHand=a.GetBoneTransform(HumanBodyBones.RightHand).position,leftFoot=a.GetBoneTransform(HumanBodyBones.LeftFoot).position,rightFoot=a.GetBoneTransform(HumanBodyBones.RightFoot).position}).ToArray()});
+ }finally{graph.Destroy();}
+ }
+}
+return rows;
+
+
+
