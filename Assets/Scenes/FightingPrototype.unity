@@ -229,6 +229,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Hurtbox
   owner: {fileID: 2010430996}
+  showDebugGizmos: 1
 --- !u!136 &17951984
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -284,6 +285,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 2
   owner: {fileID: 2010430996}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &25406550
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -707,6 +710,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 3
   owner: {fileID: 493737161}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &84962453
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -1149,6 +1154,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 2
   owner: {fileID: 1690419203}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &136616363
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -1601,6 +1608,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Hurtbox
   owner: {fileID: 584346196}
+  showDebugGizmos: 1
 --- !u!136 &188569650
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -1720,6 +1728,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 4
   owner: {fileID: 2010430996}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &194589340
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -2282,6 +2292,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 0
   owner: {fileID: 1299729474}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &244321528
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -2450,6 +2462,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 3
   owner: {fileID: 1293666139}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &262188002
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -2560,6 +2574,19 @@ MonoBehaviour:
   defaultHitStunDuration: 0.55
   defaultHitstopDuration: 0.08
   attackActionReference: {fileID: 1120369429361536294, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  inputConfig:
+    playerIndex: 1
+    moveUp: 37
+    moveDown: 33
+    moveLeft: 15
+    moveRight: 18
+    punchKey: 20
+    punchKeyAlt: 1
+    attack2Key: 21
+    attack2KeyAlt: 0
+    enableGamepad: 1
+    gamepadIndex: 0
+  hitStunInputBufferDuration: 0.15
   neutralAnimName: Idle
   attackAnimName: Attack
   attack2AnimName: Attack2
@@ -2596,6 +2623,19 @@ MonoBehaviour:
   impulseDrag: 9
   maxAttackRootMotionSpeed: 8
   moveActionReference: {fileID: -1680190386980627800, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  inputConfig:
+    playerIndex: 1
+    moveUp: 37
+    moveDown: 33
+    moveLeft: 15
+    moveRight: 18
+    punchKey: 20
+    punchKeyAlt: 1
+    attack2Key: 21
+    attack2KeyAlt: 0
+    enableGamepad: 1
+    gamepadIndex: 0
+  turnSpeed: 720
 --- !u!114 &262506023
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2726,6 +2766,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Hurtbox
   owner: {fileID: 904760234}
+  showDebugGizmos: 1
 --- !u!136 &262820471
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -2813,6 +2854,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 4
   owner: {fileID: 493737161}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &269299678
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -3102,6 +3145,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 0
   owner: {fileID: 2010430996}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &297423696
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -3184,6 +3229,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Hurtbox
   owner: {fileID: 731026444}
+  showDebugGizmos: 1
 --- !u!136 &313324956
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -4034,6 +4080,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 4
   owner: {fileID: 1293666139}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &375455619
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -4134,6 +4182,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 0
   owner: {fileID: 1690419203}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &382027113
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -4783,6 +4833,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 1
   owner: {fileID: 1493395357}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &418389919
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -4818,6 +4870,56 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1493395362}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &422217480
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 422217482}
+  - component: {fileID: 422217481}
+  m_Layer: 0
+  m_Name: StageBinding
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &422217481
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 422217480}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a4df782c96f2aa748aea62652fad38a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StageSceneBinding
+  legacyEnvironment:
+  - {fileID: 410087039}
+  - {fileID: 832575517}
+  - {fileID: 1692759841}
+  - {fileID: 1592281332}
+  - {fileID: 2022239235}
+--- !u!4 &422217482
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 422217480}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &424644472
 GameObject:
@@ -5008,6 +5110,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 0
   owner: {fileID: 1770593910}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &441676963
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -5383,6 +5487,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 3
   owner: {fileID: 731026444}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &485467914
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -5633,6 +5739,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 4
   owner: {fileID: 584346196}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &488196697
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -5743,6 +5851,19 @@ MonoBehaviour:
   defaultHitStunDuration: 0.55
   defaultHitstopDuration: 0.08
   attackActionReference: {fileID: 1120369429361536294, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  inputConfig:
+    playerIndex: 1
+    moveUp: 37
+    moveDown: 33
+    moveLeft: 15
+    moveRight: 18
+    punchKey: 20
+    punchKeyAlt: 1
+    attack2Key: 21
+    attack2KeyAlt: 0
+    enableGamepad: 1
+    gamepadIndex: 0
+  hitStunInputBufferDuration: 0.15
   neutralAnimName: Idle
   attackAnimName: Attack
   attack2AnimName: Attack2
@@ -5779,6 +5900,19 @@ MonoBehaviour:
   impulseDrag: 9
   maxAttackRootMotionSpeed: 8
   moveActionReference: {fileID: -1680190386980627800, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  inputConfig:
+    playerIndex: 1
+    moveUp: 37
+    moveDown: 33
+    moveLeft: 15
+    moveRight: 18
+    punchKey: 20
+    punchKeyAlt: 1
+    attack2Key: 21
+    attack2KeyAlt: 0
+    enableGamepad: 1
+    gamepadIndex: 0
+  turnSpeed: 720
 --- !u!114 &493737163
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6116,6 +6250,19 @@ MonoBehaviour:
   defaultHitStunDuration: 0.55
   defaultHitstopDuration: 0.08
   attackActionReference: {fileID: 1120369429361536294, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  inputConfig:
+    playerIndex: 1
+    moveUp: 37
+    moveDown: 33
+    moveLeft: 15
+    moveRight: 18
+    punchKey: 20
+    punchKeyAlt: 1
+    attack2Key: 21
+    attack2KeyAlt: 0
+    enableGamepad: 1
+    gamepadIndex: 0
+  hitStunInputBufferDuration: 0.15
   neutralAnimName: Idle
   attackAnimName: Attack
   attack2AnimName: Attack2
@@ -6152,6 +6299,19 @@ MonoBehaviour:
   impulseDrag: 9
   maxAttackRootMotionSpeed: 8
   moveActionReference: {fileID: -1680190386980627800, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  inputConfig:
+    playerIndex: 1
+    moveUp: 37
+    moveDown: 33
+    moveLeft: 15
+    moveRight: 18
+    punchKey: 20
+    punchKeyAlt: 1
+    attack2Key: 21
+    attack2KeyAlt: 0
+    enableGamepad: 1
+    gamepadIndex: 0
+  turnSpeed: 720
 --- !u!114 &508842499
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6460,6 +6620,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 3
   owner: {fileID: 1690419203}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &544291648
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -6638,6 +6800,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Hurtbox
   owner: {fileID: 493737161}
+  showDebugGizmos: 1
 --- !u!136 &582178783
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -6693,6 +6856,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 0
   owner: {fileID: 584346196}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &583506382
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -6803,6 +6968,19 @@ MonoBehaviour:
   defaultHitStunDuration: 0.55
   defaultHitstopDuration: 0.08
   attackActionReference: {fileID: 1120369429361536294, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  inputConfig:
+    playerIndex: 1
+    moveUp: 37
+    moveDown: 33
+    moveLeft: 15
+    moveRight: 18
+    punchKey: 20
+    punchKeyAlt: 1
+    attack2Key: 21
+    attack2KeyAlt: 0
+    enableGamepad: 1
+    gamepadIndex: 0
+  hitStunInputBufferDuration: 0.15
   neutralAnimName: Idle
   attackAnimName: Attack
   attack2AnimName: Attack2
@@ -6839,6 +7017,19 @@ MonoBehaviour:
   impulseDrag: 9
   maxAttackRootMotionSpeed: 8
   moveActionReference: {fileID: -1680190386980627800, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  inputConfig:
+    playerIndex: 1
+    moveUp: 37
+    moveDown: 33
+    moveLeft: 15
+    moveRight: 18
+    punchKey: 20
+    punchKeyAlt: 1
+    attack2Key: 21
+    attack2KeyAlt: 0
+    enableGamepad: 1
+    gamepadIndex: 0
+  turnSpeed: 720
 --- !u!114 &584346198
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7035,6 +7226,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Hurtbox
   owner: {fileID: 1493395357}
+  showDebugGizmos: 1
 --- !u!136 &588336340
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -7274,6 +7466,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 0
   owner: {fileID: 493737161}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &608289589
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -7376,6 +7570,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 4
   owner: {fileID: 904760234}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &617677378
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -7585,6 +7781,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Hurtbox
   owner: {fileID: 1293666139}
+  showDebugGizmos: 1
 --- !u!136 &656482501
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -7671,6 +7868,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 3
   owner: {fileID: 904760234}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &663517230
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -7753,6 +7952,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Hurtbox
   owner: {fileID: 1770593910}
+  showDebugGizmos: 1
 --- !u!136 &674265027
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -8108,6 +8308,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 4
   owner: {fileID: 508842497}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &708735024
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -8613,6 +8815,19 @@ MonoBehaviour:
   defaultHitStunDuration: 0.55
   defaultHitstopDuration: 0.08
   attackActionReference: {fileID: 1120369429361536294, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  inputConfig:
+    playerIndex: 1
+    moveUp: 37
+    moveDown: 33
+    moveLeft: 15
+    moveRight: 18
+    punchKey: 20
+    punchKeyAlt: 1
+    attack2Key: 21
+    attack2KeyAlt: 0
+    enableGamepad: 1
+    gamepadIndex: 0
+  hitStunInputBufferDuration: 0.15
   neutralAnimName: Idle
   attackAnimName: Attack
   attack2AnimName: Attack2
@@ -8649,6 +8864,19 @@ MonoBehaviour:
   impulseDrag: 9
   maxAttackRootMotionSpeed: 8
   moveActionReference: {fileID: -1680190386980627800, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  inputConfig:
+    playerIndex: 1
+    moveUp: 37
+    moveDown: 33
+    moveLeft: 15
+    moveRight: 18
+    punchKey: 20
+    punchKeyAlt: 1
+    attack2Key: 21
+    attack2KeyAlt: 0
+    enableGamepad: 1
+    gamepadIndex: 0
+  turnSpeed: 720
 --- !u!114 &731026446
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9059,6 +9287,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 0
   owner: {fileID: 1293666139}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &768897333
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -9160,6 +9390,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 2
   owner: {fileID: 493737161}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &779310718
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -9228,6 +9460,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 4
   owner: {fileID: 1690419203}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &780883638
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -9296,6 +9530,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 4
   owner: {fileID: 731026444}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &785433922
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -9555,6 +9791,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 2
   owner: {fileID: 1293666139}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &803944055
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -10306,6 +10544,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 0
   owner: {fileID: 508842497}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &851761039
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -10597,6 +10837,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 4
   owner: {fileID: 1299729474}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &890833041
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -10803,6 +11045,19 @@ MonoBehaviour:
   defaultHitStunDuration: 0.55
   defaultHitstopDuration: 0.08
   attackActionReference: {fileID: 1120369429361536294, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  inputConfig:
+    playerIndex: 1
+    moveUp: 37
+    moveDown: 33
+    moveLeft: 15
+    moveRight: 18
+    punchKey: 20
+    punchKeyAlt: 1
+    attack2Key: 21
+    attack2KeyAlt: 0
+    enableGamepad: 1
+    gamepadIndex: 0
+  hitStunInputBufferDuration: 0.15
   neutralAnimName: Idle
   attackAnimName: Attack
   attack2AnimName: Attack2
@@ -10839,6 +11094,19 @@ MonoBehaviour:
   impulseDrag: 9
   maxAttackRootMotionSpeed: 8
   moveActionReference: {fileID: -1680190386980627800, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  inputConfig:
+    playerIndex: 1
+    moveUp: 37
+    moveDown: 33
+    moveLeft: 15
+    moveRight: 18
+    punchKey: 20
+    punchKeyAlt: 1
+    attack2Key: 21
+    attack2KeyAlt: 0
+    enableGamepad: 1
+    gamepadIndex: 0
+  turnSpeed: 720
 --- !u!114 &904760236
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11432,6 +11700,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 4
   owner: {fileID: 1770593910}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &962484888
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -11811,6 +12081,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 1
   owner: {fileID: 1293666139}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &1020857824
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -11943,6 +12215,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 2
   owner: {fileID: 904760234}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &1042657066
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -12011,6 +12285,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 3
   owner: {fileID: 584346196}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &1050869295
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -12213,6 +12489,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Hurtbox
   owner: {fileID: 1690419203}
+  showDebugGizmos: 1
 --- !u!136 &1069823053
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -12300,6 +12577,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 1
   owner: {fileID: 262506021}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &1078290898
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -12510,6 +12789,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Hurtbox
   owner: {fileID: 262506021}
+  showDebugGizmos: 1
 --- !u!136 &1098787011
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -12723,6 +13003,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 3
   owner: {fileID: 1493395357}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &1154855535
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -13159,6 +13441,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 3
   owner: {fileID: 2010430996}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &1217074708
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -13325,6 +13609,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 0
   owner: {fileID: 1493395357}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &1245628707
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -13456,6 +13742,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 0
   owner: {fileID: 904760234}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &1260588582
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -13524,6 +13812,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 4
   owner: {fileID: 262506021}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &1266637978
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -13764,6 +14054,19 @@ MonoBehaviour:
   defaultHitStunDuration: 0.55
   defaultHitstopDuration: 0.08
   attackActionReference: {fileID: 1120369429361536294, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  inputConfig:
+    playerIndex: 1
+    moveUp: 37
+    moveDown: 33
+    moveLeft: 15
+    moveRight: 18
+    punchKey: 20
+    punchKeyAlt: 1
+    attack2Key: 21
+    attack2KeyAlt: 0
+    enableGamepad: 1
+    gamepadIndex: 0
+  hitStunInputBufferDuration: 0.15
   neutralAnimName: Idle
   attackAnimName: Attack
   attack2AnimName: Attack2
@@ -13800,6 +14103,19 @@ MonoBehaviour:
   impulseDrag: 9
   maxAttackRootMotionSpeed: 8
   moveActionReference: {fileID: -1680190386980627800, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  inputConfig:
+    playerIndex: 1
+    moveUp: 37
+    moveDown: 33
+    moveLeft: 15
+    moveRight: 18
+    punchKey: 20
+    punchKeyAlt: 1
+    attack2Key: 21
+    attack2KeyAlt: 0
+    enableGamepad: 1
+    gamepadIndex: 0
+  turnSpeed: 720
 --- !u!114 &1293666141
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13958,6 +14274,19 @@ MonoBehaviour:
   defaultHitStunDuration: 0.55
   defaultHitstopDuration: 0.08
   attackActionReference: {fileID: 1120369429361536294, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  inputConfig:
+    playerIndex: 1
+    moveUp: 37
+    moveDown: 33
+    moveLeft: 15
+    moveRight: 18
+    punchKey: 20
+    punchKeyAlt: 1
+    attack2Key: 21
+    attack2KeyAlt: 0
+    enableGamepad: 1
+    gamepadIndex: 0
+  hitStunInputBufferDuration: 0.15
   neutralAnimName: Idle
   attackAnimName: Attack
   attack2AnimName: Attack2
@@ -13994,6 +14323,19 @@ MonoBehaviour:
   impulseDrag: 9
   maxAttackRootMotionSpeed: 8
   moveActionReference: {fileID: -1680190386980627800, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  inputConfig:
+    playerIndex: 1
+    moveUp: 37
+    moveDown: 33
+    moveLeft: 15
+    moveRight: 18
+    punchKey: 20
+    punchKeyAlt: 1
+    attack2Key: 21
+    attack2KeyAlt: 0
+    enableGamepad: 1
+    gamepadIndex: 0
+  turnSpeed: 720
 --- !u!114 &1299729476
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14142,6 +14484,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 4
   owner: {fileID: 1493395357}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &1318289917
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -14393,6 +14737,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e4b7d7a9d0348f4b1b7eb59cb1f3a21, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameFlowController
+  stageRegistry: {fileID: 11400000, guid: 003eeebc5b306e644b811205843d345c, type: 2}
+  menuBackground: {fileID: 2800000, guid: 56c24618520fca3458965a91b669f665, type: 3}
+  menuMusic: {fileID: 8300000, guid: 4ba13acc7b8e88545a471b00d43988e9, type: 3}
   characterPrefabs:
   - {fileID: 8106386166891990150, guid: 83dc30129c0be3940b1b69d9b95fe193, type: 3}
   - {fileID: 8160613871406468271, guid: c955273e9cbcb3a46ab0c5e61b0dbb5c, type: 3}
@@ -14411,6 +14758,8 @@ MonoBehaviour:
   - {fileID: -203655887218126122, guid: 6697cff7e5f12e148be703bd71338e17, type: 3}
   - {fileID: -203655887218126122, guid: c6fd2d343bd430449a2d88ae33a5e768, type: 3}
   defeatedClip: {fileID: -203655887218126122, guid: 6d3c35d6abfd27b478267ae3689554db, type: 3}
+  targetFrameRate: 60
+  enableVSync: 1
 --- !u!4 &1336410282
 Transform:
   m_ObjectHideFlags: 0
@@ -14553,6 +14902,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 1
   owner: {fileID: 1770593910}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &1360137985
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -14815,6 +15166,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Hurtbox
   owner: {fileID: 1299729474}
+  showDebugGizmos: 1
 --- !u!136 &1371853150
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -14997,6 +15349,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 1
   owner: {fileID: 2010430996}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &1400219226
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -15111,6 +15465,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Hurtbox
   owner: {fileID: 508842497}
+  showDebugGizmos: 1
 --- !u!136 &1416820703
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -15669,6 +16024,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 2
   owner: {fileID: 508842497}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &1472535915
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -15810,6 +16167,19 @@ MonoBehaviour:
   defaultHitStunDuration: 0.55
   defaultHitstopDuration: 0.08
   attackActionReference: {fileID: 1120369429361536294, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  inputConfig:
+    playerIndex: 1
+    moveUp: 37
+    moveDown: 33
+    moveLeft: 15
+    moveRight: 18
+    punchKey: 20
+    punchKeyAlt: 1
+    attack2Key: 21
+    attack2KeyAlt: 0
+    enableGamepad: 1
+    gamepadIndex: 0
+  hitStunInputBufferDuration: 0.15
   neutralAnimName: Idle
   attackAnimName: Attack
   attack2AnimName: Attack2
@@ -15846,6 +16216,19 @@ MonoBehaviour:
   impulseDrag: 9
   maxAttackRootMotionSpeed: 8
   moveActionReference: {fileID: -1680190386980627800, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  inputConfig:
+    playerIndex: 1
+    moveUp: 37
+    moveDown: 33
+    moveLeft: 15
+    moveRight: 18
+    punchKey: 20
+    punchKeyAlt: 1
+    attack2Key: 21
+    attack2KeyAlt: 0
+    enableGamepad: 1
+    gamepadIndex: 0
+  turnSpeed: 720
 --- !u!114 &1493395359
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15962,6 +16345,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 2
   owner: {fileID: 1493395357}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &1510839546
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -16191,6 +16576,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 1
   owner: {fileID: 731026444}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &1531506683
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -16380,6 +16767,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 1
   owner: {fileID: 493737161}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &1573614747
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -17108,6 +17497,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 1
   owner: {fileID: 1690419203}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &1645183334
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -17432,6 +17823,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 2
   owner: {fileID: 262506021}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &1676836629
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -17542,6 +17935,19 @@ MonoBehaviour:
   defaultHitStunDuration: 0.55
   defaultHitstopDuration: 0.08
   attackActionReference: {fileID: 1120369429361536294, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  inputConfig:
+    playerIndex: 1
+    moveUp: 37
+    moveDown: 33
+    moveLeft: 15
+    moveRight: 18
+    punchKey: 20
+    punchKeyAlt: 1
+    attack2Key: 21
+    attack2KeyAlt: 0
+    enableGamepad: 1
+    gamepadIndex: 0
+  hitStunInputBufferDuration: 0.15
   neutralAnimName: Idle
   attackAnimName: Attack
   attack2AnimName: Attack2
@@ -17578,6 +17984,19 @@ MonoBehaviour:
   impulseDrag: 9
   maxAttackRootMotionSpeed: 8
   moveActionReference: {fileID: -1680190386980627800, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  inputConfig:
+    playerIndex: 1
+    moveUp: 37
+    moveDown: 33
+    moveLeft: 15
+    moveRight: 18
+    punchKey: 20
+    punchKeyAlt: 1
+    attack2Key: 21
+    attack2KeyAlt: 0
+    enableGamepad: 1
+    gamepadIndex: 0
+  turnSpeed: 720
 --- !u!114 &1690419205
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17694,6 +18113,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 2
   owner: {fileID: 731026444}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &1690637745
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -18099,6 +18520,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 3
   owner: {fileID: 1770593910}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &1717207420
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -18255,6 +18678,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 1
   owner: {fileID: 904760234}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &1733088145
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -18589,6 +19014,19 @@ MonoBehaviour:
   defaultHitStunDuration: 0.55
   defaultHitstopDuration: 0.08
   attackActionReference: {fileID: 1120369429361536294, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  inputConfig:
+    playerIndex: 1
+    moveUp: 37
+    moveDown: 33
+    moveLeft: 15
+    moveRight: 18
+    punchKey: 20
+    punchKeyAlt: 1
+    attack2Key: 21
+    attack2KeyAlt: 0
+    enableGamepad: 1
+    gamepadIndex: 0
+  hitStunInputBufferDuration: 0.15
   neutralAnimName: Idle
   attackAnimName: Attack
   attack2AnimName: Attack2
@@ -18625,6 +19063,19 @@ MonoBehaviour:
   impulseDrag: 9
   maxAttackRootMotionSpeed: 8
   moveActionReference: {fileID: -1680190386980627800, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  inputConfig:
+    playerIndex: 1
+    moveUp: 37
+    moveDown: 33
+    moveLeft: 15
+    moveRight: 18
+    punchKey: 20
+    punchKeyAlt: 1
+    attack2Key: 21
+    attack2KeyAlt: 0
+    enableGamepad: 1
+    gamepadIndex: 0
+  turnSpeed: 720
 --- !u!114 &1770593912
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -18804,6 +19255,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 1
   owner: {fileID: 508842497}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &1797416393
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -18872,6 +19325,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 3
   owner: {fileID: 262506021}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &1806397762
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -18940,6 +19395,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 3
   owner: {fileID: 1299729474}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &1807128490
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -19295,6 +19752,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 2
   owner: {fileID: 1770593910}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &1892271150
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -19363,6 +19822,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 0
   owner: {fileID: 262506021}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &1903130334
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -19559,6 +20020,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 0
   owner: {fileID: 731026444}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &1931135767
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -19627,6 +20090,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 1
   owner: {fileID: 1299729474}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &1932541809
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -19824,6 +20289,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 2
   owner: {fileID: 584346196}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &1952210163
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -19956,6 +20423,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 1
   owner: {fileID: 584346196}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &1977298644
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -20161,6 +20630,19 @@ MonoBehaviour:
   defaultHitStunDuration: 0.55
   defaultHitstopDuration: 0.08
   attackActionReference: {fileID: 1120369429361536294, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  inputConfig:
+    playerIndex: 1
+    moveUp: 37
+    moveDown: 33
+    moveLeft: 15
+    moveRight: 18
+    punchKey: 20
+    punchKeyAlt: 1
+    attack2Key: 21
+    attack2KeyAlt: 0
+    enableGamepad: 1
+    gamepadIndex: 0
+  hitStunInputBufferDuration: 0.15
   neutralAnimName: Idle
   attackAnimName: Attack
   attack2AnimName: Attack2
@@ -20197,6 +20679,19 @@ MonoBehaviour:
   impulseDrag: 9
   maxAttackRootMotionSpeed: 8
   moveActionReference: {fileID: -1680190386980627800, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  inputConfig:
+    playerIndex: 1
+    moveUp: 37
+    moveDown: 33
+    moveLeft: 15
+    moveRight: 18
+    punchKey: 20
+    punchKeyAlt: 1
+    attack2Key: 21
+    attack2KeyAlt: 0
+    enableGamepad: 1
+    gamepadIndex: 0
+  turnSpeed: 720
 --- !u!114 &2010430998
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20508,6 +21003,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 3
   owner: {fileID: 508842497}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &2049150593
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -20885,6 +21382,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 2
   owner: {fileID: 1299729474}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!135 &2082830057
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -21380,3 +21879,4 @@ SceneRoots:
   - {fileID: 584346201}
   - {fileID: 1293666144}
   - {fileID: 731026449}
+  - {fileID: 422217482}

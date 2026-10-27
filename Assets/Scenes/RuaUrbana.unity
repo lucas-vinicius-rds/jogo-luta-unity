@@ -253,6 +253,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e4b7d7a9d0348f4b1b7eb59cb1f3a21, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameFlowController
+  stageRegistry: {fileID: 11400000, guid: 003eeebc5b306e644b811205843d345c, type: 2}
+  menuBackground: {fileID: 2800000, guid: 56c24618520fca3458965a91b669f665, type: 3}
+  menuMusic: {fileID: 8300000, guid: 4ba13acc7b8e88545a471b00d43988e9, type: 3}
   characterPrefabs:
   - {fileID: 8106386166891990150, guid: 83dc30129c0be3940b1b69d9b95fe193, type: 3}
   - {fileID: 8160613871406468271, guid: c955273e9cbcb3a46ab0c5e61b0dbb5c, type: 3}
@@ -271,6 +274,8 @@ MonoBehaviour:
   - {fileID: -203655887218126122, guid: 6697cff7e5f12e148be703bd71338e17, type: 3}
   - {fileID: -203655887218126122, guid: c6fd2d343bd430449a2d88ae33a5e768, type: 3}
   defeatedClip: {fileID: -203655887218126122, guid: 6d3c35d6abfd27b478267ae3689554db, type: 3}
+  targetFrameRate: 60
+  enableVSync: 1
 --- !u!1 &33047380
 GameObject:
   m_ObjectHideFlags: 0
@@ -541,6 +546,57 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 63857421}
   m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &73916487
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 73916489}
+  - component: {fileID: 73916488}
+  m_Layer: 0
+  m_Name: StageBinding
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &73916488
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 73916487}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a4df782c96f2aa748aea62652fad38a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StageSceneBinding
+  legacyEnvironment:
+  - {fileID: 1487947412}
+  - {fileID: 980311157}
+  - {fileID: 363321126}
+  - {fileID: 2018553160}
+  - {fileID: 1701426842}
+  - {fileID: 794992871}
+--- !u!4 &73916489
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 73916487}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &74891283
 GameObject:
   m_ObjectHideFlags: 0
@@ -8691,8 +8747,10 @@ MonoBehaviour:
   recordTelemetry: 1
   captureScreenshots: 1
   settleTime: 0.25
-  player1: {fileID: 0}
-  player2: {fileID: 0}
+  singleCharacterIndex: -1
+  singleCharacterNameFilter: 
+  sideFilter: 0
+  neutralOpponentPrefab: {fileID: 0}
 --- !u!4 &794992873
 Transform:
   m_ObjectHideFlags: 0
@@ -23902,3 +23960,4 @@ SceneRoots:
   - {fileID: 2039016843}
   - {fileID: 236615309}
   - {fileID: 794992873}
+  - {fileID: 73916489}

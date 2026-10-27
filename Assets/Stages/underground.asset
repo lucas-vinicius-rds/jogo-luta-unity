@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dfbf02d1ac636ad45acc26be82a7ad28, type: 3}
+  m_Name: underground
+  m_EditorClassIdentifier: Assembly-CSharp::StageDefinition
+  stableId: underground
+  displayName: Underground
+  description: "A plataforma esquecida. A cidade continua acima de n\xF3s."
+  preview: {fileID: 2800000, guid: 2a2dd4b11ef8f2149bee77fb92cd55a8, type: 3}
+  environmentPrefab: {fileID: 8652451023466651130, guid: b663f21d798fbbd4b9f2307c4d1fc800, type: 3}
+  ambience: {fileID: 8300000, guid: 19b6ef83339ff2a458035381b61bf876, type: 3}
+  available: 1
+  sortOrder: 2
+  ambient: {r: 0.23, g: 0.28, b: 0.31, a: 1}
+  fogColor: {r: 0.21, g: 0.24, b: 0.26, a: 1}
+  fog: 1
+  fogDensity: 0.018
+  skybox: {fileID: 0}
+  volume: 0.3

@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dfbf02d1ac636ad45acc26be82a7ad28, type: 3}
+  m_Name: rua-urbana-test
+  m_EditorClassIdentifier: Assembly-CSharp::StageDefinition
+  stableId: rua-urbana-test
+  displayName: Rua Urbana / Teste
+  description: "Arena original exportada sem c\xE2meras ou lutadores."
+  preview: {fileID: 2800000, guid: b6aee51267a24194f92e9dfe71464a1e, type: 3}
+  environmentPrefab: {fileID: 5827738544262074171, guid: 263215e9b6a73e44888e544a358e6dcc, type: 3}
+  ambience: {fileID: 0}
+  available: 1
+  sortOrder: 999
+  ambient: {r: 0.4, g: 0.4, b: 0.4, a: 1}
+  fogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  fog: 0
+  fogDensity: 0.012
+  skybox: {fileID: 0}
+  volume: 0.3

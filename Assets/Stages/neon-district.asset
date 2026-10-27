@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dfbf02d1ac636ad45acc26be82a7ad28, type: 3}
+  m_Name: neon-district
+  m_EditorClassIdentifier: Assembly-CSharp::StageDefinition
+  stableId: neon-district
+  displayName: Neon District
+  description: "Com\xE9rcio noturno, asfalto molhado e letreiros sob a chuva."
+  preview: {fileID: 2800000, guid: 6e92d3e252927084c8e518bf2705fefa, type: 3}
+  environmentPrefab: {fileID: 228947908248039128, guid: 822f3a9dbaac74a4d8043880d0831de8, type: 3}
+  ambience: {fileID: 8300000, guid: 434b7b055f8d22548bb41d9f64399511, type: 3}
+  available: 1
+  sortOrder: 0
+  ambient: {r: 0.15, g: 0.18, b: 0.25, a: 1}
+  fogColor: {r: 0.02, g: 0.035, b: 0.08, a: 1}
+  fog: 1
+  fogDensity: 0.009
+  skybox: {fileID: 0}
+  volume: 0.3
