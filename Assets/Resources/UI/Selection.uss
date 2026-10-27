@@ -1,0 +1,25 @@
+.selection { flex-grow: 1; background-color: rgb(17,17,20); color: rgb(242,239,230); padding: 36px 44px; }
+.masthead { height: 150px; flex-shrink: 0; border-left-width: 10px; border-left-color: rgb(239,41,51); padding-left: 24px; }
+.eyebrow { color: rgb(244,200,53); font-size: 22px; letter-spacing: 5px; }
+.heading { font-size: 64px; -unity-font-style: bold; height: 90px; }
+.body { flex-grow: 1; flex-direction: row; min-height: 0; margin-top: 20px; margin-bottom: 25px; }
+.hero { width: 34%; background-color: rgb(24,24,28); transition-property: opacity; transition-duration: .16s; }
+.browser { width: 46%; margin-left: 25px; margin-right: 25px; }
+.cards { flex-direction: row; flex-wrap: wrap; }
+.card { width: 30%; height: 255px; margin: 5px; padding: 0; border-width: 2px; border-color: rgb(52,52,58); border-radius: 0; background-color: rgb(28,28,32); color: rgb(240,238,230); transition-property: border-color, background-color; transition-duration: .09s; }
+.card Image { flex-grow: 1; width: 100%; }
+.card Label { font-size: 20px; height: 40px; padding-left: 8px; -unity-text-align: middle-left; }
+.card.focused { border-color: rgb(245,201,50); background-color: rgb(184,31,40); }
+.rival { flex-grow: 1; background-color: rgb(24,24,28); }
+.footer { min-height: 170px; flex-shrink: 0; flex-direction: row; align-items: center; border-top-width: 2px; border-top-color: rgb(61,61,66); }
+.identity { flex-grow: 1; width: 38%; }
+.name { font-size: 54px; -unity-font-style: bold; }
+.description { font-size: 23px; white-space: normal; max-width: 650px; }
+.footer Button { font-size: 20px; min-height: 65px; padding: 12px; margin-left: 12px; border-width: 0; border-radius: 0; background-color: rgb(45,45,50); color: rgb(242,239,230); }
+.footer .confirm { background-color: rgb(222,35,47); }
+.stage .browser { width: 27%; order: 0; }
+.stage .hero { width: 70%; }
+.stage .rival { display: none; }
+.stage .card { width: 95%; height: 105px; flex-direction: row; }
+.stage .card Image { width: 42%; }
+.stage .card Label { flex-grow: 1; white-space: normal; }

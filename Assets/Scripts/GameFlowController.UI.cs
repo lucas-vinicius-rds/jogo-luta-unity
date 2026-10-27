@@ -44,6 +44,8 @@ public sealed partial class GameFlowController
 
     private void OnGUI()
     {
+        if (modernMenu != null && modernMenu.IsReady && IsModernMenuVisible) return;
+        if (selectionPresenter != null && selectionPresenter.IsReady && (IsSelecting || IsStageSelecting || IsStageLoading)) return;
         if (screen == FlowScreen.Fight) return;
         BuildStyles();
         DrawBackdrop();

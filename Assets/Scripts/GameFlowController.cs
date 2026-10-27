@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public sealed partial class GameFlowController : MonoBehaviour
 {
-    private enum FlowScreen { Main, Mode, Select, VS, Fight, Victory }
+    private enum FlowScreen { Main, Mode, Select, VS, Fight, Victory, Options, StageSelect, Loading }
     private enum GameMode { Cpu, Local }
 
     [SerializeField] private GameObject[] characterPrefabs;
@@ -107,6 +107,7 @@ public sealed partial class GameFlowController : MonoBehaviour
         instance = this;
         DontDestroyOnLoad(gameObject);
         ApplyQualitySettings();
+        InitializePresentation();
         SceneManager.sceneLoaded += OnSceneLoaded;
         screen = pendingFight ? FlowScreen.VS : FlowScreen.Main;
         if (!pendingFight) RemoveSceneFighters();
@@ -141,7 +142,8 @@ public sealed partial class GameFlowController : MonoBehaviour
     private void Update()
     {
         if (playerOneConfirmed) confirmationPulse += Time.unscaledDeltaTime;
-        if (screen == FlowScreen.VS && Time.unscaledTime >= vsUntil) screen = FlowScreen.Fight;
+        if (screen == FlowScreen.VS && !stageTransition && Time.unscaledTime >= vsUntil) screen = FlowScreen.Fight;
+        if (musicSource != null) musicSource.mute = screen == FlowScreen.Fight || screen == FlowScreen.VS || screen == FlowScreen.Loading || screen == FlowScreen.Victory;
         if (screen == FlowScreen.Fight && !victoryShown)
         {
             FighterController defeated = GetDefeatedFighter();
@@ -159,6 +161,7 @@ public sealed partial class GameFlowController : MonoBehaviour
             return;
         }
         if (screen != FlowScreen.Select) return;
+        if (selectionPresenter != null && selectionPresenter.IsReady) { RefreshPreviews(); return; }
 
         if (Input.GetKeyDown(KeyCode.Escape))
         {
@@ -235,6 +238,7 @@ public sealed partial class GameFlowController : MonoBehaviour
         pendingPlayer = playerSelection;
         pendingOpponent = focusedSelection;
         pendingFight = true;
+        if (Stages.Registry != null && selectionPresenter != null && selectionPresenter.IsReady) { screen = FlowScreen.StageSelect; return; }
         DestroyPreview(ref previewPlayerObject, ref previewPlayerCamera, ref previewPlayerTexture);
         DestroyPreview(ref previewOpponentObject, ref previewOpponentCamera, ref previewOpponentTexture);
         DestroyCardPreviews();
@@ -299,6 +303,17 @@ public sealed partial class GameFlowController : MonoBehaviour
 
         FighterMovement pm = player.GetComponent<FighterMovement>();
         FighterMovement om = opponent.GetComponent<FighterMovement>();
+        if (!Stages.Prepare(SceneManager.GetActiveScene(), pm, out string stageError))
+        {
+            Debug.LogError(stageError); Destroy(player); Destroy(opponent); screen = FlowScreen.StageSelect; return;
+        }
+        if (Stages.Loaded != null)
+        {
+            player.transform.SetPositionAndRotation(Stages.Loaded.playerSpawn.position, Stages.Loaded.playerSpawn.rotation);
+            opponent.transform.SetPositionAndRotation(Stages.Loaded.opponentSpawn.position, Stages.Loaded.opponentSpawn.rotation);
+            initialPlayerPosition = player.transform.position; initialPlayerRotation = player.transform.rotation;
+            initialOpponentPosition = opponent.transform.position; initialOpponentRotation = opponent.transform.rotation;
+        }
         currentPlayer = player.GetComponent<FighterController>();
         currentOpponent = opponent.GetComponent<FighterController>();
 

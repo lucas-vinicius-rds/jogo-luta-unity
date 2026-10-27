@@ -6,6 +6,8 @@ using UnityEngine.InputSystem;
 [DisallowMultipleComponent]
 public class FighterMovement : MonoBehaviour
 {
+    public Bounds StageBounds => new Bounds(new Vector3(0,0,laneZ), new Vector3(arenaHalfWidth * 2,2,laneDepth * 2));
+    public bool MatchesStageBounds(Bounds bounds) => Mathf.Abs(bounds.min.x + arenaHalfWidth) < .01f && Mathf.Abs(bounds.max.x - arenaHalfWidth) < .01f && Mathf.Abs(bounds.center.z - laneZ) < .01f && Mathf.Abs(bounds.extents.z - laneDepth) < .01f;
     [SerializeField] private Transform opponent;
     [SerializeField] private bool isPlayerControlled = true;
     [SerializeField, Min(0f)] private float forwardSpeed = 4.5f;
