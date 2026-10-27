@@ -4,6 +4,8 @@ public sealed class FightHudState : IDisposable
 {
     public float PlayerRatio { get; private set; }
     public float OpponentRatio { get; private set; }
+    public string PlayerName { get; private set; }
+    public string OpponentName { get; private set; }
     public event Action<bool> Damaged;
     HealthSystem player, opponent;
     public void Bind(FighterController p1,FighterController p2)
@@ -11,6 +13,8 @@ public sealed class FightHudState : IDisposable
         var a = p1 != null ? p1.HealthSystem : null; var b = p2 != null ? p2.HealthSystem : null;
         if(player == a && opponent == b) return;
         Dispose(); player = a; opponent = b;
+        PlayerName=p1!=null?p1.name.Replace("Player1_","P1  "):"";
+        OpponentName=p2!=null?p2.name.Replace("Player2_","P2  ").Replace("CPU_","CPU  "):"";
         if(player != null) { player.OnHealthChanged += PlayerChanged; player.OnDamageTaken += PlayerDamaged; PlayerChanged(player.CurrentHealth,player.MaxHealth); }
         if(opponent != null) { opponent.OnHealthChanged += OpponentChanged; opponent.OnDamageTaken += OpponentDamaged; OpponentChanged(opponent.CurrentHealth,opponent.MaxHealth); }
     }

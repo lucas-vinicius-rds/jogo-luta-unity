@@ -125,6 +125,7 @@ public sealed partial class GameFlowController : MonoBehaviour
         if (instance != this) return;
         if (modernMenu != null) Destroy(modernMenu.gameObject);
         if (selectionPresenter != null) Destroy(selectionPresenter.gameObject);
+        ReleaseVictoryControllers();
         Time.timeScale = 1;
         SceneManager.sceneLoaded -= OnSceneLoaded;
         DestroyPreview(ref previewPlayerObject, ref previewPlayerCamera, ref previewPlayerTexture);
@@ -242,7 +243,7 @@ public sealed partial class GameFlowController : MonoBehaviour
         pendingPlayer = playerSelection;
         pendingOpponent = focusedSelection;
         pendingFight = true;
-        if (Stages.Registry != null && selectionPresenter != null && selectionPresenter.IsReady) { screen = FlowScreen.StageSelect; return; }
+        if (Stages.Registry != null && Stages.Registry.Validate(out _) && selectionPresenter != null && selectionPresenter.IsReady) { screen = FlowScreen.StageSelect; return; }
         DestroyPreview(ref previewPlayerObject, ref previewPlayerCamera, ref previewPlayerTexture);
         DestroyPreview(ref previewOpponentObject, ref previewOpponentCamera, ref previewOpponentTexture);
         DestroyCardPreviews();
@@ -320,6 +321,11 @@ public sealed partial class GameFlowController : MonoBehaviour
         }
         currentPlayer = player.GetComponent<FighterController>();
         currentOpponent = opponent.GetComponent<FighterController>();
+        // Refresh the native CharacterController pose after spawning/environment creation.
+        // Assigning Transform alone can leave its first Move using the prefab's origin.
+        ResetFighterPhysicsAndState(currentPlayer, initialPlayerPosition, initialPlayerRotation);
+        ResetFighterPhysicsAndState(currentOpponent, initialOpponentPosition, initialOpponentRotation);
+        Physics.SyncTransforms();
 
         originalPlayerAnimator = currentPlayer != null && currentPlayer.Animator != null ? currentPlayer.Animator.runtimeAnimatorController : null;
         originalOpponentAnimator = currentOpponent != null && currentOpponent.Animator != null ? currentOpponent.Animator.runtimeAnimatorController : null;

@@ -10,6 +10,7 @@ public sealed class StageRegistry : ScriptableObject
     public IEnumerable<StageDefinition> Available => stages.Where(s => s != null && s.available).OrderBy(s => s.sortOrder).ThenBy(s => s.stableId);
     public bool Validate(out string error)
     {
+        if(stages.Count==0) { error="Catálogo sem arenas"; return false; }
         var ids = new HashSet<string>(StringComparer.Ordinal);
         foreach(var s in stages)
         {

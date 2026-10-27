@@ -37,9 +37,16 @@ public sealed class SelectionPresenter : MonoBehaviour
         panel.scaleMode = PanelScaleMode.ScaleWithScreenSize; panel.referenceResolution = new Vector2Int(1920,1080); panel.match = 1;
         document.panelSettings = panel; document.sortingOrder = 30; document.visualTreeAsset = tree;
         page = document.rootVisualElement; page.style.flexGrow = 1;
+        // This view uses the shared polling reader; prevent a second UI Toolkit submit/navigation path.
+        page.RegisterCallback<NavigationMoveEvent>(evt=>evt.StopImmediatePropagation(),TrickleDown.TrickleDown);
+        page.RegisterCallback<NavigationSubmitEvent>(evt=>evt.StopImmediatePropagation(),TrickleDown.TrickleDown);
+        page.RegisterCallback<NavigationCancelEvent>(evt=>evt.StopImmediatePropagation(),TrickleDown.TrickleDown);
         var style = Resources.Load<StyleSheet>("UI/Selection"); if(style != null) page.styleSheets.Add(style);
         cards = page.Q("cards"); hero = page.Q<Image>("hero"); rival = page.Q<Image>("rival"); title = page.Q<Label>("name"); description = page.Q<Label>("description"); heading = page.Q<Label>("heading");
         browser=page.Q<ScrollView>();
+        rival.scaleMode=ScaleMode.ScaleAndCrop;
+        ((ScrollView)browser).verticalScrollerVisibility=ScrollerVisibility.Hidden;
+        ((ScrollView)browser).horizontalScrollerVisibility=ScrollerVisibility.Hidden;
         confirm = page.Q<Button>("confirm"); confirm.clicked += Confirm;
         page.Q<Button>("back").clicked += () => flow.BackSelection();
         page.Q<Button>("random").clicked += Random;
@@ -86,7 +93,7 @@ public sealed class SelectionPresenter : MonoBehaviour
         if(state == "character") { hero.image = flow.PlayerPreview; rival.image = flow.OpponentPreview; }
         if(lastFocus == focus && (state != "character" || lastChoosing == flow.ChoosingOpponent)) return;
         for(int i = 0; i < buttons.Count; i++) buttons[i].EnableInClassList("focused",i == focus);
-        if(state == "character") { title.text = GameFlowController.CharacterDisplayNames[focus].ToUpperInvariant(); description.text = (flow.ChoosingOpponent ? "P2 / " : "P1 / ") + flow.FocusedDescription; }
+        if(state == "character") { title.text = GameFlowController.CharacterDisplayNames[focus].ToUpperInvariant(); description.text = (flow.ChoosingOpponent ? "P2 / " : "P1 / ") + flow.FocusedDescription; page.Q<Label>("stats").text=flow.FocusedStats; }
         else if(stages.Count > 0) { hero.image = stages[focus].preview; title.text = stages[focus].displayName.ToUpperInvariant(); description.text = stages[focus].description; }
         if(lastFocus != focus) { hero.style.opacity = .4f; hero.schedule.Execute(() => hero.style.opacity = 1).StartingIn(20); if(lastFocus>=0) feedback.PlayOneShot(tick); if(focus < buttons.Count) page.Q<ScrollView>().ScrollTo(buttons[focus]); }
         lastFocus = focus; lastChoosing=flow.ChoosingOpponent;

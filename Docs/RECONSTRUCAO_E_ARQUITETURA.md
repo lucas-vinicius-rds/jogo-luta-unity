@@ -6,7 +6,7 @@ A base `origin/bugfix/test` foi incorporada no commit `9a5829f`. Em 26/10/2026 f
 
 O stash `backup-local-before-bugfix-ui-integration-20261026` continua preservado. Dele foram recuperados ModernMenuPresenter, FightHud e recursos do menu. A reconstrução tem checkpoints locais no Git. Nenhuma implementação foi enviada ao remoto.
 
-Validação usa **cópia física** em `%LOCALAPPDATA%/UnDFightValidation/Project`, feita com robocopy `/E /XJ`, sem `/MIR`, sem junctions e sem remover pastas. Nunca excluir recursivamente projetos de validação com vínculos para arquivos originais.
+A primeira validação usou **cópia física** em `%LOCALAPPDATA%/UnDFightValidation/Project`, feita com robocopy `/E /XJ`, sem `/MIR`, sem junctions e sem remover pastas. As validações finais executaram o Editor em batch no próprio projeto, com o Editor interativo fechado. Nunca excluir recursivamente projetos de validação com vínculos para arquivos originais.
 
 ## Arquitetura encontrada
 

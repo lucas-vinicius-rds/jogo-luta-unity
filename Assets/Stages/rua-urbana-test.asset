@@ -21,6 +21,9 @@ MonoBehaviour:
   available: 1
   sortOrder: 999
   ambient: {r: 0.4, g: 0.4, b: 0.4, a: 1}
+  ambientIntensity: 1
+  atmosphereEnabled: 1
+  animationSpeed: 1
   fogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   fog: 0
   fogDensity: 0.012

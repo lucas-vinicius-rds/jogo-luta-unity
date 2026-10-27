@@ -81,3 +81,6 @@ Thumbs.db
 
 # VS Code
 .vscode/
+
+# Local Unity verification logs; curated reports and screenshots stay versioned.
+Docs/validation/*.log

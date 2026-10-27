@@ -69,6 +69,7 @@ public class FighterSparringAI : MonoBehaviour
 
     private void Update()
     {
+        if(!GameFlowController.AllowsCombat) { if(movement!=null) movement.ExternalInput=Vector2.zero; return; }
         if (!autoSparring || controller == null || movement == null) return;
 
         // Se o lutador estiver atordoado, atacando ou derrotado, não toma decisões

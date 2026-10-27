@@ -54,7 +54,7 @@ public static partial class StageTools
     {
         for(int x=-6;x<=6;x++) for(int z=0;z<6;z++) Box("RoofExpansionJoint",new Vector3(x*2,.008f,z*2-5),new Vector3(.025f,.015f,1.95f),metal,"GameplaySurface");
         Rail(0,5.7f,27); Box("Parapet",new Vector3(0,.28f,6),new Vector3(28,.55f,.4f),stone);
-        for(int i=0;i<5;i++) { HVAC(new Vector3(-10+i*1.6f,.8f,4.8f)); Box("PlantSupport",new Vector3(-10+i*1.6f,.28f,4.8f),new Vector3(1.1f,.5f,.7f),metal); }
+        for(int i=0;i<5;i++) { var position=new Vector3(-10+i*1.6f,.8f,4.8f); HVAC(position); RoofFan(position+Vector3.up*.36f); Box("PlantSupport",new Vector3(-10+i*1.6f,.28f,4.8f),new Vector3(1.1f,.5f,.7f),metal); }
         Box("ServiceEntrance",new Vector3(9,2.1f,8),new Vector3(4,4.2f,4),stone); Box("RoofDoor",new Vector3(9,1.2f,5.96f),new Vector3(1.25f,2.4f,.08f),metal); Sign("ROOF / 48",new Vector3(9,3,5.85f),2.8f,glow);
         for(int i=0;i<36;i++) { int row=i/12; float x=(i%12-5.5f)*5.2f; float h=5+(i*7%13); float z=22+row*14; Box("Skyline",new Vector3(x,h/2-3,z),new Vector3(3.4f,h,4),i%2==0?glass:stone); for(int f=0;f<h;f++) Box("CurtainWallFloor",new Vector3(x,f-3,z-2.02f),new Vector3(3.45f,.08f,.04f),metal); }
         for(int i=-1;i<=1;i+=2) { Pipe(new Vector3(i*12,0,4),new Vector3(i*12,5,4),.045f,metal); var flag=Box("WindFlag",new Vector3(i*12+1,4.5f,4),new Vector3(2,.7f,.035f),paint,"AmbientAnimation"); flag.AddComponent<StageAmbientMotion>().sway = true; }
@@ -63,7 +63,9 @@ public static partial class StageTools
     static void Underground()
     {
         var tiles=Material("Ceramic",new Color(.38f,.42f,.4f),.1f,.5f,2);
-        Box("StationBackWall",new Vector3(0,3.5f,10),new Vector3(30,7,.7f),tiles);
+        Box("StationBackWall",new Vector3(0,3.5f,18),new Vector3(36,7,.7f),tiles);
+        Box("StationCeiling",new Vector3(0,6.1f,9),new Vector3(36,.5f,19),stone);
+        Box("TrackBallast",new Vector3(0,-.5f,12),new Vector3(34,.5f,9),metal);
         for(int i=-3;i<=3;i++) { float x=i*4.2f; Box("RivetedColumn",new Vector3(x,2.8f,6),new Vector3(.65f,5.6f,.65f),metal); Box("ColumnBase",new Vector3(x,.3f,6),new Vector3(1,.6f,1),stone); Box("ColumnCapital",new Vector3(x,5.4f,6),new Vector3(1.2f,.3f,1),metal); for(int h=1;h<5;h++) Box("ColumnRivet",new Vector3(x-.23f,h,5.65f),new Vector3(.08f,.08f,.06f),paint); Box("Fluorescent",new Vector3(x,5.6f,4),new Vector3(2.6f,.12f,.18f),glow); }
         for(int i=-3;i<=3;i++) Arch(new Vector3(i*4.3f,2.2f,8),2.1f,2.9f,metal);
         for(int i=0;i<24;i++) { Box("PlatformWarning",new Vector3(i*1.1f-13,.015f,4.7f),new Vector3(.9f,.025f,.5f),paint,"GameplaySurface"); Box("TrackSleeper",new Vector3(i*1.2f-14,-.25f,12),new Vector3(.3f,.25f,3),wood); }
@@ -72,12 +74,19 @@ public static partial class StageTools
         for(int side=-1;side<=1;side+=2) { Box("BenchSeat",new Vector3(side*7,.65f,8),new Vector3(3,.14f,.6f),wood); Box("BenchBack",new Vector3(side*7,1,8.3f),new Vector3(3,.65f,.1f),wood); for(int i=0;i<12;i++) Box("Stair",new Vector3(side*12,i*.2f,8+i*.35f),new Vector3(2,.2f,.4f),stone); }
         Point(new Vector3(0,4,3),new Color(.45f,.8f,.8f),10,15); Weather("StationDust",new Vector3(0,3,6),26,3,new Vector3(.05f,.08f,0),new Color(.6f,.7f,.7f,.2f),.06f);
     }
+    static void RoofFan(Vector3 position)
+    {
+        string path=Folder+"/Art/"+id+"-fan.asset"; var mesh=AssetDatabase.LoadAssetAtPath<Mesh>(path);
+        if(mesh==null) { var combine=new CombineInstance[6]; for(int i=0;i<6;i++) { var rotation=Quaternion.Euler(0,i*60,0); combine[i]=new CombineInstance {mesh=panelMesh,transform=Matrix4x4.TRS(rotation*Vector3.right*.17f,rotation,new Vector3(.3f,.02f,.09f))}; } mesh=new Mesh(); mesh.CombineMeshes(combine,true,true); mesh=Asset(mesh,path); }
+        var fan=new GameObject("RoofFan",typeof(MeshFilter),typeof(MeshRenderer),typeof(StageAmbientMotion)); fan.transform.SetParent(Group("AmbientAnimation")); fan.transform.position=position; fan.GetComponent<MeshFilter>().sharedMesh=mesh; fan.GetComponent<Renderer>().sharedMaterial=metal;
+    }
     static void Arch(Vector3 origin,float radius,float rise,Material material)
     {
         for(int i=0;i<18;i++) { float a=i/18f*Mathf.PI, b=(i+1)/18f*Mathf.PI; var p=origin+new Vector3(Mathf.Cos(a)*radius,Mathf.Sin(a)*rise,0); var q=origin+new Vector3(Mathf.Cos(b)*radius,Mathf.Sin(b)*rise,0); Pipe(p,q,.12f,material); }
     }
     static void Temple()
     {
+        Box("GardenGround",new Vector3(0,-.3f,22),new Vector3(100,.5f,70),Material("GardenEarth",new Color(.19f,.24f,.13f),0,.1f,0),"MidgroundEnvironment");
         var courtyard=Material("Courtyard",new Color(.38f,.39f,.35f),0,.22f,2);
         for(int x=-9;x<=9;x++) for(int z=-3;z<=3;z++) Box("CourtyardSlab",new Vector3(x*1.4f,.025f,z*1.4f),new Vector3(1.37f,.05f,1.37f),courtyard,"GameplaySurface");
         Box("TempleFoundation",new Vector3(0,.5f,9),new Vector3(18,1,7),stone);
@@ -95,10 +104,13 @@ public static partial class StageTools
     static void Roof(Vector3 at,float width,float depth)
     {
         var vertices=new List<Vector3>(); var triangles=new List<int>();
-        for(int i=0;i<=12;i++) { float x=i/12f*2-1; float y=(1-Mathf.Abs(x))*1.2f+Mathf.Pow(Mathf.Abs(x),5)*.35f; vertices.Add(new Vector3(x*width/2,y,-depth/2)); vertices.Add(new Vector3(x*width/2,y,depth/2)); if(i>0) { int n=i*2; triangles.AddRange(new[]{n-2,n-1,n,n,n-1,n+1,n,n-1,n-2,n+1,n-1,n}); } }
+        for(int i=0;i<=12;i++) { float z=i/12f*2-1; float y=(1-Mathf.Abs(z))*1.2f+Mathf.Pow(Mathf.Abs(z),5)*.35f; vertices.Add(new Vector3(-width/2,y,z*depth/2)); vertices.Add(new Vector3(width/2,y,z*depth/2)); if(i>0) { int n=i*2; triangles.AddRange(new[]{n-2,n,n-1,n-1,n,n+1}); } }
         var mesh=new Mesh(); mesh.SetVertices(vertices); mesh.SetTriangles(triangles,0); mesh.RecalculateNormals(); mesh=Asset(mesh,Folder+"/Art/"+id+"-roof-"+width+".asset");
-        var roof=new GameObject("CurvedTileRoof",typeof(MeshFilter),typeof(MeshRenderer)); roof.transform.SetParent(Group("BackgroundArchitecture")); roof.transform.position=at; roof.GetComponent<MeshFilter>().sharedMesh=mesh; roof.GetComponent<Renderer>().sharedMaterial=metal;
-        for(int i=0;i<=20;i++) Pipe(at+new Vector3(-width/2+i*width/20,.35f,-depth/2),at+new Vector3(-width/2+i*width/20,.35f,depth/2),.035f,metal);
+        mesh.uv=vertices.ConvertAll(v=>new Vector2(v.x*.7f,v.z*.7f)).ToArray(); EditorUtility.SetDirty(mesh);
+        var tiles=AssetDatabase.LoadAssetAtPath<Material>(Folder+"/Art/"+id+"-RoofTiles.mat"); if(tiles==null) { tiles=Material("RoofTiles",new Color(.18f,.23f,.24f),.2f,.3f,2); tiles.SetFloat("_Cull",0); EditorUtility.SetDirty(tiles); }
+        var roof=new GameObject("CurvedTileRoof",typeof(MeshFilter),typeof(MeshRenderer)); roof.transform.SetParent(Group("BackgroundArchitecture")); roof.transform.position=at; roof.GetComponent<MeshFilter>().sharedMesh=mesh; roof.GetComponent<Renderer>().sharedMaterial=tiles;
+        for(int i=0;i<=20;i++) for(int segment=0;segment<6;segment++) { float z=segment/6f*2-1,z2=(segment+1)/6f*2-1; float y=(1-Mathf.Abs(z))*1.2f+Mathf.Pow(Mathf.Abs(z),5)*.35f; float y2=(1-Mathf.Abs(z2))*1.2f+Mathf.Pow(Mathf.Abs(z2),5)*.35f; Pipe(at+new Vector3(-width/2+i*width/20,y+.045f,z*depth/2),at+new Vector3(-width/2+i*width/20,y2+.045f,z2*depth/2),.035f,tiles); }
+        Box("EaveTimber",at+new Vector3(0,.28f,-depth/2),new Vector3(width,.18f,.18f),wood);
     }
     static void Tree(Vector3 at,float height)
     {
@@ -123,6 +135,8 @@ public static partial class StageTools
     }
     static void Ironworks()
     {
+        Box("MillHall",new Vector3(0,6,21),new Vector3(42,12,.65f),metal);
+        for(int rib=-7;rib<=7;rib++) { Box("HallRib",new Vector3(rib*2.8f,6,20.6f),new Vector3(.12f,12,.25f),stone); }
         for(int x=-6;x<=6;x++) for(int z=-2;z<=2;z++) { Box("SteelDeckPlate",new Vector3(x*2,.03f,z*2),new Vector3(1.97f,.06f,1.97f),metal,"GameplaySurface"); foreach(float offset in new[]{-.8f,.8f}) Box("DeckBolt",new Vector3(x*2+offset,.07f,z*2+.8f),new Vector3(.07f,.025f,.07f),paint,"GameplaySurface"); }
         for(int i=-2;i<=2;i++) { float x=i*6; Box("GantryColumn",new Vector3(x,5,9),new Vector3(.5f,10,.6f),metal); Box("ColumnFoot",new Vector3(x,.25f,9),new Vector3(1.1f,.5f,1.2f),stone); Pipe(new Vector3(x,3,9),new Vector3(x+5.7f,8,9),.11f,metal); }
         Box("CraneRunway",new Vector3(0,9,9),new Vector3(29,.6f,1.2f),paint); Box("CraneCarriage",new Vector3(2,8.7f,8.3f),new Vector3(3,.8f,2),metal); Pipe(new Vector3(2,8.4f,8),new Vector3(2,5.5f,8),.035f,metal);
@@ -137,6 +151,9 @@ public static partial class StageTools
             Weather("FurnaceSparks",new Vector3(side*4,1.5f,9),30,5,new Vector3(.08f,1.1f,0),new Color(1,.38f,.04f,.9f),.045f);
         }
         Box("Catwalk",new Vector3(0,5.5f,15),new Vector3(26,.2f,2),metal); Rail(0,5.8f,27);
+        for(int post=-12;post<=12;post+=2) Pipe(new Vector3(post,5.6f,14),new Vector3(post,6.65f,14),.035f,metal);
+        Pipe(new Vector3(-13,6.65f,14),new Vector3(13,6.65f,14),.045f,metal);
+        for(int step=0;step<18;step++) Box("ServiceStair",new Vector3(-12,.15f+step*.3f,7+step*.42f),new Vector3(1.5f,.16f,.45f),metal);
         Sign("IRONWORKS / BAY 07",new Vector3(0,6.8f,10),7,glow);
         Weather("PressureSteam",new Vector3(-10,4,10),35,4,new Vector3(.1f,.6f,0),new Color(.65f,.67f,.7f,.17f),.6f);
     }

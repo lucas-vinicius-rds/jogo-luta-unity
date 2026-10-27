@@ -10,6 +10,8 @@ public sealed class ModernMenuPresenter : MonoBehaviour
     private VisualElement root;
     private VisualElement canvas;
     private string renderedScreen;
+    private PanelSettings ownedPanel;
+    private Texture2D appliedBackground;
     public bool IsReady { get; private set; }
 
     public void Initialize(GameFlowController owner)
@@ -25,6 +27,7 @@ public sealed class ModernMenuPresenter : MonoBehaviour
         if (document.panelSettings == null)
         {
             PanelSettings panel = ScriptableObject.CreateInstance<PanelSettings>();
+            ownedPanel=panel;
             panel.themeStyleSheet = Resources.Load<ThemeStyleSheet>("UI/RuntimeTheme");
             document.panelSettings = panel;
         }
@@ -57,7 +60,7 @@ public sealed class ModernMenuPresenter : MonoBehaviour
 
     private void ApplyBackground()
     {
-        if (root == null || flow == null || flow.MenuBackground == null) return;
+        if (root == null || flow == null || flow.MenuBackground == null || appliedBackground == flow.MenuBackground) return;
         // O UXML possui um filho que preenche o painel. Aplicar no root do
         // UIDocument nao o desenha por cima desse filho; por isso a textura
         // precisa ficar no elemento visual que realmente ocupa a tela.
@@ -66,7 +69,9 @@ public sealed class ModernMenuPresenter : MonoBehaviour
         canvas.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Cover);
         canvas.style.backgroundPositionX = new BackgroundPosition(BackgroundPositionKeyword.Center);
         canvas.style.backgroundPositionY = new BackgroundPosition(BackgroundPositionKeyword.Center);
+        appliedBackground=flow.MenuBackground;
     }
+    private void OnDestroy() { if(ownedPanel!=null) Destroy(ownedPanel); }
 
     private void Render(string screen)
     {

@@ -29,14 +29,17 @@ public sealed class StageEnvironmentController : MonoBehaviour
     {
         RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
         RenderSettings.ambientLight = stage.ambient;
+        RenderSettings.ambientIntensity = stage.ambientIntensity;
         RenderSettings.fog = stage.fog;
         RenderSettings.fogColor = stage.fogColor;
         RenderSettings.fogDensity = stage.fogDensity;
         RenderSettings.skybox = stage.skybox;
+        if(effectsRoot!=null) effectsRoot.SetActive(stage.atmosphereEnabled);
+        foreach(var motion in GetComponentsInChildren<StageAmbientMotion>(true)) motion.speed=stage.animationSpeed;
         foreach(var light in GetComponentsInChildren<Light>()) if(light.type == LightType.Directional) { RenderSettings.sun=light; break; }
         if(stage.ambience != null && Application.isPlaying)
         {
-            var audio = gameObject.AddComponent<AudioSource>();
+            var audio = GetComponent<AudioSource>(); if(audio==null) audio=gameObject.AddComponent<AudioSource>();
             audio.clip = stage.ambience; audio.loop = true; audio.volume = stage.volume; audio.spatialBlend = 0; audio.Play();
         }
     }

@@ -14,8 +14,6 @@ public sealed class FightHud : MonoBehaviour
     private GUIStyle controlStyle;
     private GUIStyle pauseTitleStyle;
     private GUIStyle pauseButtonStyle;
-    private float lastP1Health = -1f;
-    private float lastP2Health = -1f;
     private float hitFlashUntil;
     private AudioSource feedbackAudio;
     private AudioClip lightHitClip;
@@ -42,18 +40,6 @@ public sealed class FightHud : MonoBehaviour
     }
     private void OnDamaged(bool knockout) { hitFlashUntil = Time.unscaledTime + .12f; if(feedbackAudio != null) feedbackAudio.PlayOneShot(knockout ? koClip : lightHitClip); }
     private void OnDestroy() { model.Dispose(); model.Damaged -= OnDamaged; if(lightHitClip != null) Destroy(lightHitClip); if(koClip != null) Destroy(koClip); }
-
-    private void TrackHealth(FighterController fighter, ref float previous)
-    {
-        if (fighter == null || fighter.HealthSystem == null) { previous = -1f; return; }
-        float current = fighter.HealthSystem.CurrentHealth;
-        if (previous >= 0f && current < previous)
-        {
-            hitFlashUntil = Time.unscaledTime + .12f;
-            if (feedbackAudio != null) feedbackAudio.PlayOneShot(current <= 0f ? koClip : lightHitClip);
-        }
-        previous = current;
-    }
 
     private static AudioClip CreateTone(string clipName, float frequency, float duration, float volume)
     {
@@ -84,8 +70,8 @@ public sealed class FightHud : MonoBehaviour
     {
         if (flow == null || !flow.IsCombatScreen || flow.CurrentPlayer == null || flow.CurrentOpponent == null) return;
         BuildStyles();
-        DrawFighterBar(flow.CurrentPlayer, flow.CurrentPlayer.name.Replace("Player1_", "P1  "), new Rect(CanvasWidth * .045f, CanvasHeight * .07f, CanvasWidth * .34f, CanvasHeight * .035f), false);
-        DrawFighterBar(flow.CurrentOpponent, flow.CurrentOpponent.name.Replace("Player2_", "P2  ").Replace("CPU_", "CPU  "), new Rect(CanvasWidth * .615f, CanvasHeight * .07f, CanvasWidth * .34f, CanvasHeight * .035f), true);
+        DrawFighterBar(flow.CurrentPlayer, model.PlayerName, new Rect(CanvasWidth * .045f, CanvasHeight * .07f, CanvasWidth * .34f, CanvasHeight * .035f), false);
+        DrawFighterBar(flow.CurrentOpponent, model.OpponentName, new Rect(CanvasWidth * .615f, CanvasHeight * .07f, CanvasWidth * .34f, CanvasHeight * .035f), true);
 
         GUI.Label(new Rect(0f, CanvasHeight - 50f, CanvasWidth, 46f),
             "P1  A/D mover · W salto · S agachar · F soco · G chute · SHIFT defesa\nP2  SETAS mover · J soco · K chute · L defesa     |     ESC pausa", controlStyle);

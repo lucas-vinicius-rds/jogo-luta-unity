@@ -20,6 +20,7 @@ public sealed partial class GameFlowController
     private GameObject[] cardPreviewObjects;
     private Camera[] cardPreviewCameras;
     private RenderTexture[] cardPreviewTextures;
+    private readonly List<AnimatorOverrideController> ownedVictoryControllers = new List<AnimatorOverrideController>();
 
     private void RefreshPreviews()
     {
@@ -74,7 +75,7 @@ public sealed partial class GameFlowController
         camera.orthographic = true;
         camera.orthographicSize = portrait ? radius : Mathf.Clamp(radius, 1f, 2.35f);
         camera.clearFlags = CameraClearFlags.SolidColor;
-        camera.backgroundColor = new Color(.015f, .08f, .18f, 1f);
+        camera.backgroundColor = new Color(.07f, .07f, .085f, 1f);
         camera.cullingMask = 1 << previewLayer;
         texture = new RenderTexture(512, 512, 16, RenderTextureFormat.ARGB32);
         texture.Create();
@@ -116,8 +117,14 @@ public sealed partial class GameFlowController
     /// </summary>
     private void DestroyVictoryDisplays()
     {
+        ReleaseVictoryControllers();
         DestroyPreview(ref victoryWinnerObject, ref victoryWinnerCamera, ref victoryWinnerTexture);
         DestroyPreview(ref victoryLoserObject, ref victoryLoserCamera, ref victoryLoserTexture);
+    }
+    private void ReleaseVictoryControllers()
+    {
+        foreach(var controller in ownedVictoryControllers) if(controller!=null) Destroy(controller);
+        ownedVictoryControllers.Clear();
     }
 
     private void CreateVictoryDisplays(FighterController winner, FighterController loser)
@@ -157,6 +164,8 @@ public sealed partial class GameFlowController
     {
         if (animator == null || clip == null || animator.runtimeAnimatorController == null) return;
         var overrideController = new AnimatorOverrideController(animator.runtimeAnimatorController);
+        overrideController.name="VictoryPresentationOverride";
+        ownedVictoryControllers.Add(overrideController);
         var overrides = new List<KeyValuePair<AnimationClip, AnimationClip>>();
         overrideController.GetOverrides(overrides);
         for (int i = 0; i < overrides.Count; i++)

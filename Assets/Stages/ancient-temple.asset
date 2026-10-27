@@ -21,8 +21,11 @@ MonoBehaviour:
   available: 1
   sortOrder: 3
   ambient: {r: 0.38, g: 0.39, b: 0.42, a: 1}
+  ambientIntensity: 1
+  atmosphereEnabled: 1
+  animationSpeed: 1
   fogColor: {r: 0.21, g: 0.24, b: 0.26, a: 1}
   fog: 1
   fogDensity: 0.009
-  skybox: {fileID: 0}
+  skybox: {fileID: 2100000, guid: 89e489a04f5894345892466b82af229e, type: 2}
   volume: 0.3

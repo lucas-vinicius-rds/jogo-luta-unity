@@ -29,6 +29,9 @@ public sealed partial class GameFlowController
     public Texture OpponentPreview => previewOpponentTexture;
     public Texture CardPreview(int index) => cardPreviewTextures != null && index < cardPreviewTextures.Length ? cardPreviewTextures[index] : null;
     public string FocusedDescription => FighterDescriptions[focusedSelection];
+    public string FocusedStats => $"FORÇA {FighterStats[focusedSelection,0]}/5   VEL. {FighterStats[focusedSelection,1]}/5   DEF. {FighterStats[focusedSelection,2]}/5   ALC. {FighterStats[focusedSelection,3]}/5   TÉC. {FighterStats[focusedSelection,4]}/5";
+    public static Vector3 StagePlayerSpawn => DefaultP1Position;
+    public static Vector3 StageOpponentSpawn => DefaultP2Position;
     void InitializePresentation()
     {
         Stages = gameObject.AddComponent<StageManager>(); Stages.Initialize(stageRegistry);
@@ -70,7 +73,7 @@ public sealed partial class GameFlowController
         DestroyPreview(ref previewPlayerObject, ref previewPlayerCamera, ref previewPlayerTexture);
         DestroyPreview(ref previewOpponentObject, ref previewOpponentCamera, ref previewOpponentTexture); DestroyCardPreviews();
         yield return new WaitForSecondsRealtime(1.2f);
-        screen = FlowScreen.Loading; yield return null;
+        screen = FlowScreen.Loading; yield return null; yield return null;
         SetupFight(); pendingFight = false;
         if(screen == FlowScreen.Loading) screen = FlowScreen.Fight;
         stageTransition = false;

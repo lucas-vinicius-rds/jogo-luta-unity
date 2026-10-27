@@ -1,7 +1,7 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
   <ui:VisualElement name="selection" class="selection">
     <ui:VisualElement class="masthead"><ui:Label text="UNDFIGHT / VERSUS" class="eyebrow"/><ui:Label name="heading" class="heading"/></ui:VisualElement>
-    <ui:VisualElement class="body"><ui:Image name="hero" class="hero"/><ui:ScrollView class="browser"><ui:VisualElement name="cards" class="cards"/></ui:ScrollView><ui:Image name="rival" class="rival"/></ui:VisualElement>
-    <ui:VisualElement class="footer"><ui:VisualElement class="identity"><ui:Label name="name" class="name"/><ui:Label name="description" class="description"/></ui:VisualElement><ui:Button name="random" text="ALEATÓRIO / R / △"/><ui:Button name="back" text="VOLTAR / ESC / ○"/><ui:Button name="confirm" text="CONFIRMAR / ENTER / ×" class="confirm"/></ui:VisualElement>
+    <ui:VisualElement class="body"><ui:Image name="hero" class="hero"/><ui:ScrollView class="browser"><ui:VisualElement name="cards" class="cards"/></ui:ScrollView><ui:VisualElement class="rival-panel"><ui:Label text="VS / OPONENTE" class="rival-label"/><ui:Image name="rival" class="rival"/></ui:VisualElement></ui:VisualElement>
+    <ui:VisualElement class="footer"><ui:VisualElement class="identity"><ui:Label name="name" class="name"/><ui:Label name="description" class="description"/><ui:Label name="stats" class="stats"/></ui:VisualElement><ui:Button name="random" text="ALEATÓRIO / R / Y / △"/><ui:Button name="back" text="VOLTAR / ESC / B / ○"/><ui:Button name="confirm" text="CONFIRMAR / ENTER / A / ×" class="confirm"/></ui:VisualElement>
   </ui:VisualElement>
 </ui:UXML>
