@@ -16,8 +16,9 @@ public sealed partial class GameFlowController
 
     private IEnumerator LoadMenuAssets()
     {
+        backgroundTexture = menuBackground != null ? menuBackground : Resources.Load<Texture2D>("UI/ArenaBackdrop");
         string imagePath = Path.Combine(Application.dataPath, "telaInicial.png");
-        if (File.Exists(imagePath))
+        if (backgroundTexture == null && File.Exists(imagePath))
         {
             byte[] data = File.ReadAllBytes(imagePath);
             backgroundTexture = new Texture2D(2, 2, TextureFormat.RGBA32, false);
@@ -25,6 +26,7 @@ public sealed partial class GameFlowController
         }
 
         string musicPath = Path.Combine(Application.dataPath, "eltema.mp3");
+        if(menuMusic != null) { musicSource=gameObject.AddComponent<AudioSource>(); musicSource.clip=menuMusic; musicSource.loop=true; musicSource.volume=.35f; musicSource.Play(); yield break; }
         if (File.Exists(musicPath))
         {
             using (UnityWebRequest request = UnityWebRequestMultimedia.GetAudioClip("file:///" + musicPath.Replace("\\", "/"), AudioType.MPEG))

@@ -117,7 +117,7 @@ public class FighterMovement : MonoBehaviour
 
     private void Update()
     {
-        CurrentInput = ReadMovementInput();
+        CurrentInput = GameFlowController.AllowsCombat ? ReadMovementInput() : Vector2.zero;
         HandleJumpAndCrouch(CurrentInput);
         UpdateMovementAnimation(CurrentInput);
         // Mantém a orientação do início do salto. A orientação é atualizada

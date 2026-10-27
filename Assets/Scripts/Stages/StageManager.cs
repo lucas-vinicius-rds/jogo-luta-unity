@@ -7,6 +7,7 @@ public sealed class StageManager : MonoBehaviour
     public StageRegistry Registry { get; private set; }
     public StageDefinition Selected { get; private set; }
     public StageEnvironmentController Loaded { get; private set; }
+    public double LastLoadMilliseconds { get; private set; }
     readonly Dictionary<GameObject,bool> legacy = new Dictionary<GameObject,bool>();
     Color ambient, fogColor;
     bool fog, captured;
@@ -37,9 +38,10 @@ public sealed class StageManager : MonoBehaviour
             if(binding == null) continue;
             foreach(var item in binding.legacyEnvironment) if(item != null) { legacy[item] = item.activeSelf; item.SetActive(false); }
         }
+        var watch=System.Diagnostics.Stopwatch.StartNew();
         Loaded = Instantiate(Selected.environmentPrefab, Vector3.zero, Quaternion.identity);
         SceneManager.MoveGameObjectToScene(Loaded.gameObject, scene);
-        Loaded.Apply(Selected); return true;
+        Loaded.Apply(Selected); watch.Stop(); LastLoadMilliseconds=watch.Elapsed.TotalMilliseconds; return true;
     }
     public void UseLegacy() { Unload(); Selected = null; }
     public void Unload()

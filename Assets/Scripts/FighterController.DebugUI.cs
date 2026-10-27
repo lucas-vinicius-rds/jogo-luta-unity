@@ -7,6 +7,7 @@ public partial class FighterController
 
     private void OnGUI()
     {
+        if (GameFlowController.Instance != null) return;
         // Só renderiza o painel no lutador controlado pelo jogador 1 para evitar sobreposição dupla
         if (!showOnScreenControls) return;
         if (movement == null || !movement.IsPlayerControlled) return;

@@ -18,10 +18,18 @@ public sealed class SelectionPresenter : MonoBehaviour
     List<StageDefinition> stages;
     string rendered;
     int focusedStage, lastFocus = -1;
+    bool lastChoosing;
+    AudioSource feedback;
+    AudioClip tick, accepted;
+    VisualElement browser;
     public bool IsReady => page != null;
+    public int FocusedStageIndex => focusedStage;
+    public void FocusStage(string id) { if(stages == null) return; int i=stages.FindIndex(s=>s.stableId==id); if(i>=0) focusedStage=i; }
     public void Initialize(GameFlowController owner)
     {
         flow = owner;
+        feedback=gameObject.AddComponent<AudioSource>(); feedback.playOnAwake=false; feedback.volume=.15f;
+        tick=Tone(460,.035f); accepted=Tone(740,.075f);
         var tree = Resources.Load<VisualTreeAsset>("UI/Selection"); if(tree == null) return;
         document = gameObject.AddComponent<UIDocument>();
         panel = ScriptableObject.CreateInstance<PanelSettings>();
@@ -31,6 +39,7 @@ public sealed class SelectionPresenter : MonoBehaviour
         page = document.rootVisualElement; page.style.flexGrow = 1;
         var style = Resources.Load<StyleSheet>("UI/Selection"); if(style != null) page.styleSheets.Add(style);
         cards = page.Q("cards"); hero = page.Q<Image>("hero"); rival = page.Q<Image>("rival"); title = page.Q<Label>("name"); description = page.Q<Label>("description"); heading = page.Q<Label>("heading");
+        browser=page.Q<ScrollView>();
         confirm = page.Q<Button>("confirm"); confirm.clicked += Confirm;
         page.Q<Button>("back").clicked += () => flow.BackSelection();
         page.Q<Button>("random").clicked += Random;
@@ -39,7 +48,7 @@ public sealed class SelectionPresenter : MonoBehaviour
     {
         if(!IsReady || flow == null) return;
         string state = flow.IsSelecting ? "character" : flow.IsStageSelecting ? "stage" : flow.IsStageLoading ? "loading" : "hidden";
-        page.style.display = state == "hidden" ? DisplayStyle.None : DisplayStyle.Flex;
+        if(state != rendered) page.style.display = state == "hidden" ? DisplayStyle.None : DisplayStyle.Flex;
         if(state == "hidden") { rendered = state; return; }
         if(state != rendered) { Build(state); rendered = state; }
         if(state == "loading") return;
@@ -54,6 +63,8 @@ public sealed class SelectionPresenter : MonoBehaviour
         cards.Clear(); buttons.Clear(); lastFocus = -1;
         heading.text = state == "character" ? "ESCOLHA SEU LUTADOR" : state == "stage" ? "ESCOLHA SEU TERRITÓRIO" : "PREPARANDO A ARENA";
         page.EnableInClassList("stage", state != "character");
+        if(state == "character") hero.PlaceBehind(browser); else browser.PlaceBehind(hero);
+        hero.scaleMode=state == "character" ? ScaleMode.ScaleToFit : ScaleMode.ScaleAndCrop;
         confirm.SetEnabled(state != "loading");
         if(state == "loading") return;
         if(state == "stage") { stages = flow.Stages.Registry.Available.ToList(); focusedStage = Mathf.Clamp(stages.FindIndex(s => s == flow.Stages.Selected),0,stages.Count-1); }
@@ -73,14 +84,15 @@ public sealed class SelectionPresenter : MonoBehaviour
     {
         int focus = state == "character" ? flow.FocusedCharacter : focusedStage;
         if(state == "character") { hero.image = flow.PlayerPreview; rival.image = flow.OpponentPreview; }
-        if(lastFocus == focus && state != "character") return;
+        if(lastFocus == focus && (state != "character" || lastChoosing == flow.ChoosingOpponent)) return;
         for(int i = 0; i < buttons.Count; i++) buttons[i].EnableInClassList("focused",i == focus);
         if(state == "character") { title.text = GameFlowController.CharacterDisplayNames[focus].ToUpperInvariant(); description.text = (flow.ChoosingOpponent ? "P2 / " : "P1 / ") + flow.FocusedDescription; }
         else if(stages.Count > 0) { hero.image = stages[focus].preview; title.text = stages[focus].displayName.ToUpperInvariant(); description.text = stages[focus].description; }
-        if(lastFocus != focus) { hero.style.opacity = .4f; hero.schedule.Execute(() => hero.style.opacity = 1).StartingIn(20); }
-        lastFocus = focus;
+        if(lastFocus != focus) { hero.style.opacity = .4f; hero.schedule.Execute(() => hero.style.opacity = 1).StartingIn(20); if(lastFocus>=0) feedback.PlayOneShot(tick); if(focus < buttons.Count) page.Q<ScrollView>().ScrollTo(buttons[focus]); }
+        lastFocus = focus; lastChoosing=flow.ChoosingOpponent;
     }
-    void Confirm() { if(flow.IsSelecting) flow.ConfirmCharacter(); else if(flow.IsStageSelecting && stages.Count > 0) flow.ConfirmStage(stages[focusedStage].stableId); }
+    void Confirm() { if(flow.IsSelecting) { feedback.PlayOneShot(accepted); flow.ConfirmCharacter(); } else if(flow.IsStageSelecting && stages.Count > 0 && flow.ConfirmStage(stages[focusedStage].stableId)) feedback.PlayOneShot(accepted); }
     void Random() { if(flow.IsSelecting) flow.RandomCharacter(); else if(stages != null && stages.Count > 1) focusedStage = (focusedStage + UnityEngine.Random.Range(1,stages.Count))%stages.Count; }
-    void OnDestroy() { if(panel != null) Destroy(panel); }
+    static AudioClip Tone(float hz,float seconds) { int count=Mathf.RoundToInt(seconds*22050); var data=new float[count]; for(int i=0;i<count;i++) data[i]=Mathf.Sin(i*hz*2*Mathf.PI/22050)*.3f*(1-i/(float)count); var clip=AudioClip.Create("SelectionFeedback",count,1,22050,false); clip.SetData(data,0); return clip; }
+    void OnDestroy() { if(panel != null) Destroy(panel); if(tick!=null) Destroy(tick); if(accepted!=null) Destroy(accepted); }
 }

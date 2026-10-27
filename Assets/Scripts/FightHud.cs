@@ -21,11 +21,13 @@ public sealed class FightHud : MonoBehaviour
     private AudioClip lightHitClip;
     private AudioClip koClip;
     private int styleHeight;
+    private readonly FightHudState model = new FightHudState();
 
     public void Initialize(GameFlowController owner) => flow = owner;
 
     private void Awake()
     {
+        model.Damaged += OnDamaged;
         feedbackAudio = gameObject.AddComponent<AudioSource>();
         feedbackAudio.playOnAwake = false;
         feedbackAudio.volume = .32f;
@@ -36,9 +38,10 @@ public sealed class FightHud : MonoBehaviour
     private void Update()
     {
         if (flow == null) return;
-        TrackHealth(flow.CurrentPlayer, ref lastP1Health);
-        TrackHealth(flow.CurrentOpponent, ref lastP2Health);
+        model.Bind(flow.CurrentPlayer, flow.CurrentOpponent);
     }
+    private void OnDamaged(bool knockout) { hitFlashUntil = Time.unscaledTime + .12f; if(feedbackAudio != null) feedbackAudio.PlayOneShot(knockout ? koClip : lightHitClip); }
+    private void OnDestroy() { model.Dispose(); model.Damaged -= OnDamaged; if(lightHitClip != null) Destroy(lightHitClip); if(koClip != null) Destroy(koClip); }
 
     private void TrackHealth(FighterController fighter, ref float previous)
     {
@@ -112,11 +115,11 @@ public sealed class FightHud : MonoBehaviour
     private void DrawFighterBar(FighterController fighter, string label, Rect rect, bool rightAligned)
     {
         HealthSystem health = fighter.HealthSystem;
-        float hp = health != null ? health.HealthNormalized : 0f;
-        Color fill = hp > .5f ? new Color(.08f, .75f, 1f) : (hp > .25f ? new Color(1f, .72f, .12f) : new Color(1f, .16f, .14f));
+        float hp = rightAligned ? model.OpponentRatio : model.PlayerRatio;
+        Color fill = hp > .25f ? new Color(1f, .78f, .16f) : new Color(1f, .16f, .14f);
         nameStyle.alignment = rightAligned ? TextAnchor.MiddleRight : TextAnchor.MiddleLeft;
         float labelHeight = Mathf.Max(30f, nameStyle.fontSize + 8f);
-        GUI.Label(new Rect(rect.x, rect.y - labelHeight, rect.width, labelHeight), label + (fighter.IsGuarding ? "  • GUARDA" : ""), nameStyle);
+        GUI.Label(new Rect(rect.x, rect.y - labelHeight, rect.width, labelHeight), label, nameStyle);
         GUI.color = new Color(.01f, .03f, .08f, .94f);
         GUI.DrawTexture(rect, Texture2D.whiteTexture);
         float width = Mathf.Max(0f, rect.width - 8f) * Mathf.Clamp01(hp);

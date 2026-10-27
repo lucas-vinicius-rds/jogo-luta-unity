@@ -122,6 +122,10 @@ public sealed partial class GameFlowController : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (instance != this) return;
+        if (modernMenu != null) Destroy(modernMenu.gameObject);
+        if (selectionPresenter != null) Destroy(selectionPresenter.gameObject);
+        Time.timeScale = 1;
         SceneManager.sceneLoaded -= OnSceneLoaded;
         DestroyPreview(ref previewPlayerObject, ref previewPlayerCamera, ref previewPlayerTexture);
         DestroyPreview(ref previewOpponentObject, ref previewOpponentCamera, ref previewOpponentTexture);
@@ -326,7 +330,7 @@ public sealed partial class GameFlowController : MonoBehaviour
         pm.IsPlayerControlled = true; om.IsPlayerControlled = false;
         pm.Opponent = opponent.transform; om.Opponent = player.transform;
 
-        if (pendingMode == GameMode.Cpu) opponent.AddComponent<FighterSparringAI>().Difficulty = AIDifficulty.Easy;
+        if (pendingMode == GameMode.Cpu) opponent.AddComponent<FighterSparringAI>().Difficulty = CurrentCpuDifficulty;
         else opponent.AddComponent<LocalPlayerTwoInput>();
 
         TekkenCamera camera = FindAnyObjectByType<TekkenCamera>();

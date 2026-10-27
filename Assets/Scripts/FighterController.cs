@@ -271,6 +271,7 @@ public partial class FighterController : MonoBehaviour
 
     private void Update()
     {
+        if (!GameFlowController.AllowsCombat) return;
         CurrentState?.Update(this);
     }
 
@@ -340,6 +341,7 @@ public partial class FighterController : MonoBehaviour
 
     public void TriggerAttack(FighterAttackType attackType)
     {
+        if (!GameFlowController.AllowsCombat) return;
         if (healthSystem != null && healthSystem.IsDead) return;
 
         if (CurrentState is NeutralState)

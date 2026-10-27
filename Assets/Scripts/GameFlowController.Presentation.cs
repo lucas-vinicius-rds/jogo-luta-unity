@@ -4,6 +4,8 @@ using UnityEngine;
 public sealed partial class GameFlowController
 {
     [SerializeField] StageRegistry stageRegistry;
+    [SerializeField] Texture2D menuBackground;
+    [SerializeField] AudioClip menuMusic;
     ModernMenuPresenter modernMenu;
     SelectionPresenter selectionPresenter;
     bool stageTransition;
@@ -35,6 +37,10 @@ public sealed partial class GameFlowController
         var selection = new GameObject("SelectionUI"); DontDestroyOnLoad(selection);
         selectionPresenter = selection.AddComponent<SelectionPresenter>(); selectionPresenter.Initialize(this);
         gameObject.AddComponent<FightHud>().Initialize(this);
+    }
+    void LateUpdate()
+    {
+        if (IsFightScreen && UnityEngine.InputSystem.Keyboard.current?.escapeKey.wasPressedThisFrame == true) SetFightPaused(!IsFightPaused);
     }
     public void BeginCpuSelection() => BeginSelection(GameMode.Cpu);
     public void BeginLocalSelection() => BeginSelection(GameMode.Local);
