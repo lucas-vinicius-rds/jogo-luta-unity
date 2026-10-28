@@ -56,6 +56,10 @@ public class FighterMovement : MonoBehaviour
     private FighterController fighterController;
     private InputAction runtimeMoveAction;
     private float verticalVelocity;
+    private float planarVelocity;
+    private bool hasParamGrounded;
+    public float VerticalVelocity => verticalVelocity;
+    public float ExpectedAirTime => 2f * Mathf.Sqrt(2f * jumpHeight / Mathf.Max(.01f, -gravity));
     private bool wasJumpHeld;
     private float standingHeight;
     private Vector3 standingCenter;
@@ -129,11 +133,14 @@ public class FighterMovement : MonoBehaviour
 
         float moveSpeed = CurrentMoveDirection >= 0 ? forwardSpeed : backwardSpeed;
         if (!characterController.isGrounded) moveSpeed *= airControl;
-        if (IsCrouching) moveSpeed *= crouchSpeedMultiplier;
-        Vector3 locomotion = Vector3.right * (CurrentInput.x * moveSpeed * Time.deltaTime);
-        Vector3 impulseMovement = horizontalImpulse * Time.deltaTime;
+        if (IsCrouching) moveSpeed = 0f;
+        float targetVelocity = CurrentInput.x * moveSpeed;
+        planarVelocity = IsCrouching || !CanMove ? 0f : Mathf.MoveTowards(planarVelocity, targetVelocity, 14f * Time.deltaTime);
+        Vector3 locomotion = Vector3.right * (planarVelocity * Time.deltaTime);
+        Vector3 impulseMovement = IsCrouching ? Vector3.zero : horizontalImpulse * Time.deltaTime;
         horizontalImpulse = Vector3.MoveTowards(horizontalImpulse, Vector3.zero, impulseDrag * Time.deltaTime);
         MoveSafely(locomotion + impulseMovement + CalculateVerticalMovement(), true);
+        if (hasParamGrounded) animator.SetBool("Grounded", characterController.isGrounded);
         wasGroundedLastFrame = characterController.isGrounded;
     }
 
@@ -178,7 +185,7 @@ public class FighterMovement : MonoBehaviour
             float targetHeight = IsCrouching ? standingHeight * 0.62f : standingHeight;
             characterController.height = targetHeight;
             Vector3 targetCenter = IsCrouching
-                ? new Vector3(standingCenter.x, standingCenter.y * 0.62f, standingCenter.z)
+                ? new Vector3(standingCenter.x, standingCenter.y - (standingHeight - targetHeight) * .5f, standingCenter.z)
                 : standingCenter;
             characterController.center = targetCenter;
             if (bodyHurtbox != null) bodyHurtbox.SetBounds(targetHeight, targetCenter);
@@ -197,7 +204,7 @@ public class FighterMovement : MonoBehaviour
     private void UpdateMovementAnimation(Vector2 input)
     {
         if (animator == null) return;
-        CurrentMoveDirection = GetRelativeMoveDirection(input.x);
+        CurrentMoveDirection = IsCrouching ? 0 : GetRelativeMoveDirection(input.x);
         if (hasParamCrouch) animator.SetBool(CrouchHash, IsCrouching);
         if (hasParamCrouchDirection) animator.SetInteger(CrouchDirectionHash, CurrentMoveDirection);
         if (hasParamMoveDirection) animator.SetInteger(MoveDirectionHash, CurrentMoveDirection);
@@ -216,6 +223,7 @@ public class FighterMovement : MonoBehaviour
     /// </summary>
     public void CacheAnimatorParameters()
     {
+        hasParamGrounded = false;
         hasParamCrouch = false;
         hasParamCrouchDirection = false;
         hasParamMoveDirection = false;
@@ -227,6 +235,7 @@ public class FighterMovement : MonoBehaviour
         for (int i = 0; i < parameters.Length; i++)
         {
             int hash = parameters[i].nameHash;
+            if (parameters[i].name == "Grounded") hasParamGrounded = true;
             if (hash == CrouchHash) hasParamCrouch = true;
             else if (hash == CrouchDirectionHash) hasParamCrouchDirection = true;
             else if (hash == MoveDirectionHash) hasParamMoveDirection = true;
@@ -270,14 +279,15 @@ public class FighterMovement : MonoBehaviour
         delta.z = 0f;
         float maxDelta = maxAttackRootMotionSpeed * Time.deltaTime;
         if (Mathf.Abs(delta.x) > maxDelta) delta.x = Mathf.Sign(delta.x) * maxDelta;
-        // Usa o delta Y atual (já acumulado no Update) para manter o personagem no chão
-        Vector3 withGravity = new Vector3(delta.x, GetCurrentVerticalDelta(), delta.z);
+        // Gravidade já foi aplicada no Update: esta passagem só consome deslocamento planar.
+        Vector3 withGravity = new Vector3(delta.x, 0f, delta.z);
         MoveSafely(withGravity, true);
     }
 
     public void ResetMotion()
     {
         horizontalImpulse = Vector3.zero;
+        planarVelocity = 0f;
         verticalVelocity = groundedGravity;
         IsCrouching = false;
         if (characterController != null)

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -12,11 +13,19 @@ public sealed class ModernMenuPresenter : MonoBehaviour
     private string renderedScreen;
     private PanelSettings ownedPanel;
     private Texture2D appliedBackground;
+    private Texture2D homeBackground, modeBackground, logo;
+    readonly MenuNavigationInput navigation = new MenuNavigationInput();
+    readonly List<Button> buttons = new List<Button>();
+    readonly List<System.Action> actions = new List<System.Action>();
+    int focusIndex;
     public bool IsReady { get; private set; }
 
     public void Initialize(GameFlowController owner)
     {
         flow = owner;
+        homeBackground = Resources.Load<Texture2D>("UI/Brand/HomeBackground");
+        modeBackground = Resources.Load<Texture2D>("UI/Brand/ModeBackground");
+        logo = Resources.Load<Texture2D>("UI/Brand/UnDFightLogo");
         ApplyBackground();
     }
 
@@ -40,6 +49,10 @@ public sealed class ModernMenuPresenter : MonoBehaviour
         document.visualTreeAsset = layout;
         root = document.rootVisualElement;
         root.style.flexGrow = 1;
+        // Polling owns directional/submit input; mouse clicks remain native.
+        root.RegisterCallback<NavigationMoveEvent>(evt => evt.StopImmediatePropagation(), TrickleDown.TrickleDown);
+        root.RegisterCallback<NavigationSubmitEvent>(evt => evt.StopImmediatePropagation(), TrickleDown.TrickleDown);
+        root.RegisterCallback<NavigationCancelEvent>(evt => evt.StopImmediatePropagation(), TrickleDown.TrickleDown);
         canvas = root.Q("undfight-menu");
         renderedScreen = null;
         StyleSheet style = Resources.Load<StyleSheet>("UI/ModernMenu");
@@ -56,26 +69,36 @@ public sealed class ModernMenuPresenter : MonoBehaviour
         ApplyBackground();
         string current = flow.CurrentMenuScreen;
         if (visible && current != renderedScreen) Render(current);
+        if (!visible) return;
+        navigation.Read(out int x, out int y, out bool accept, out bool back, out bool random);
+        if (y != 0 && buttons.Count > 0) { focusIndex = (focusIndex + y + buttons.Count) % buttons.Count; buttons[focusIndex].Focus(); }
+        if (back && current != "Main") flow.OpenMainMenu();
+        else if (accept && actions.Count > 0) actions[focusIndex]();
     }
 
     private void ApplyBackground()
     {
-        if (root == null || flow == null || flow.MenuBackground == null || appliedBackground == flow.MenuBackground) return;
+        if (root == null || flow == null) return;
+        Texture2D background = flow.CurrentMenuScreen == "Main" ? homeBackground : modeBackground;
+        if (background == null) background = flow.MenuBackground;
+        if (background == null || appliedBackground == background) return;
         // O UXML possui um filho que preenche o painel. Aplicar no root do
         // UIDocument nao o desenha por cima desse filho; por isso a textura
         // precisa ficar no elemento visual que realmente ocupa a tela.
         if (canvas == null) return;
-        canvas.style.backgroundImage = new StyleBackground(flow.MenuBackground);
+        canvas.style.backgroundImage = new StyleBackground(background);
         canvas.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Cover);
         canvas.style.backgroundPositionX = new BackgroundPosition(BackgroundPositionKeyword.Center);
         canvas.style.backgroundPositionY = new BackgroundPosition(BackgroundPositionKeyword.Center);
-        appliedBackground=flow.MenuBackground;
+        appliedBackground=background;
     }
     private void OnDestroy() { if(ownedPanel!=null) Destroy(ownedPanel); }
 
     private void Render(string screen)
     {
+        if (renderedScreen != screen) focusIndex = 0;
         renderedScreen = screen;
+        buttons.Clear(); actions.Clear();
         canvas.Clear();
         ScrollView scroll = new ScrollView(ScrollViewMode.Vertical);
         scroll.style.flexGrow = 1;
@@ -86,31 +109,33 @@ public sealed class ModernMenuPresenter : MonoBehaviour
         if (screen == "Main") DrawMain(page);
         else if (screen == "Mode") DrawMode(page);
         else DrawOptions(page);
-        page.Q<Button>()?.Focus();
+        focusIndex = Mathf.Clamp(focusIndex, 0, buttons.Count - 1);
+        if (buttons.Count > 0) buttons[focusIndex].Focus();
     }
 
     private void DrawMain(VisualElement page)
     {
-        page.Add(Title("UNDFIGHT", "RIVALIDADE NA FLORESTA"));
+        if (logo != null) { var brand = new Image { image = logo, scaleMode = ScaleMode.ScaleToFit }; brand.AddToClassList("brand-logo"); page.Add(brand); }
+        page.Add(Title("", "UNIVERSIDADE DO DISTRITO FEDERAL"));
         VisualElement actions = Actions();
         actions.Add(Button("ENTRAR NA ARENA", "primary", flow.OpenVersusMode));
         actions.Add(Button("OPÇÕES", "secondary", flow.OpenOptionsScreen));
         actions.Add(Button("SAIR", "ghost", Application.Quit));
         page.Add(actions);
-        page.Add(Footer("PALAFITA • AMAZÔNIA\nVERSUS LOCAL  /  DESAFIO CPU"));
+        page.Add(Footer("DO CAMPUS PARA A ARENA\nVERSUS LOCAL  /  DESAFIO CPU"));
     }
 
     private void DrawMode(VisualElement page)
     {
-        page.Add(Title("VERSUS", "ESCOLHA O FORMATO DA LUTA"));
+        page.Add(Title("ESCOLHA SUA LUTA", "01 / DESAFIO CPU     02 / VERSUS LOCAL"));
         VisualElement actions = Actions();
-        actions.Add(Button("JOGADOR VS CPU", "primary", flow.BeginCpuSelection));
+        actions.Add(Button("01   DESAFIO CPU", "primary", flow.BeginCpuSelection));
         VisualElement difficulty = new VisualElement(); difficulty.AddToClassList("difficulty-row");
         difficulty.Add(Button("−", "small", () => { flow.ChangeCpuDifficulty(-1); renderedScreen = null; }));
         Label level = new Label("CPU: " + flow.CurrentCpuDifficulty); level.AddToClassList("difficulty-label"); difficulty.Add(level);
         difficulty.Add(Button("+", "small", () => { flow.ChangeCpuDifficulty(1); renderedScreen = null; }));
         actions.Add(difficulty);
-        actions.Add(Button("JOGADOR VS JOGADOR", "secondary", flow.BeginLocalSelection));
+        actions.Add(Button("02   VERSUS LOCAL", "secondary", flow.BeginLocalSelection));
         actions.Add(Button("VOLTAR", "ghost", flow.OpenMainMenu));
         page.Add(actions);
     }
@@ -121,6 +146,8 @@ public sealed class ModernMenuPresenter : MonoBehaviour
         VisualElement actions = Actions();
         Label volume = new Label("VOLUME GERAL  " + Mathf.RoundToInt(flow.MasterVolume * 100f) + "%"); volume.AddToClassList("setting-label"); actions.Add(volume);
         Slider slider = new Slider(0f, 1f) { value = flow.MasterVolume }; slider.AddToClassList("volume-slider"); slider.RegisterValueChangedCallback(evt => { flow.SetMasterVolume(evt.newValue); volume.text = "VOLUME GERAL  " + Mathf.RoundToInt(evt.newValue * 100f) + "%"; }); actions.Add(slider);
+        actions.Add(Button("VOLUME −", "secondary", () => { flow.SetMasterVolume(flow.MasterVolume - .1f); renderedScreen = null; }));
+        actions.Add(Button("VOLUME +", "secondary", () => { flow.SetMasterVolume(flow.MasterVolume + .1f); renderedScreen = null; }));
         actions.Add(Button(flow.IsFullscreen ? "TELA CHEIA: ATIVA" : "TELA CHEIA: DESATIVADA", "secondary", () => { flow.ToggleFullscreenOption(); renderedScreen = null; }));
         Vector2Int resolution = flow.CurrentResolution;
         actions.Add(Button("RESOLUCAO: " + resolution.x + " × " + resolution.y, "secondary", () => { flow.CycleResolutionOption(); renderedScreen = null; }));
@@ -132,15 +159,18 @@ public sealed class ModernMenuPresenter : MonoBehaviour
     private static VisualElement Title(string heading, string caption)
     {
         VisualElement title = new VisualElement(); title.AddToClassList("title-group");
-        Label headingLabel = new Label(heading); headingLabel.AddToClassList("title"); title.Add(headingLabel);
+        Label headingLabel = new Label(heading); headingLabel.AddToClassList("title"); if (!string.IsNullOrEmpty(heading)) title.Add(headingLabel);
         Label captionLabel = new Label(caption); captionLabel.AddToClassList("caption"); title.Add(captionLabel);
         return title;
     }
 
     private static VisualElement Actions() { VisualElement actions = new VisualElement(); actions.AddToClassList("actions"); return actions; }
     private static Label Footer(string value) { Label footer = new Label(value); footer.AddToClassList("footer"); return footer; }
-    private static Button Button(string label, string style, System.Action action)
+    private Button Button(string label, string style, System.Action action)
     {
-        Button button = new Button(action) { text = label }; button.AddToClassList("button"); button.AddToClassList(style); return button;
+        Button button = new Button(action) { text = label }; button.AddToClassList("button"); button.AddToClassList(style);
+        int index = buttons.Count; buttons.Add(button); actions.Add(action);
+        button.RegisterCallback<FocusInEvent>(evt => focusIndex = index);
+        return button;
     }
 }

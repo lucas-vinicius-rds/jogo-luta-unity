@@ -3553,10 +3553,10 @@ MonoBehaviour:
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
   m_RenderPostProcessing: 1
-  m_Antialiasing: 0
+  m_Antialiasing: 2
   m_AntialiasingQuality: 2
   m_StopNaN: 0
-  m_Dithering: 0
+  m_Dithering: 1
   m_ClearDepth: 1
   m_AllowXRRendering: 1
   m_AllowHDROutput: 1
@@ -3590,6 +3590,10 @@ MonoBehaviour:
   baseDistance: 5
   height: 1.6
   lookAtHeight: 1.1
+  presentationHeightMultiplier: 1.5
+  presentationZoomMultiplier: 0.6
+  safeMinimumOrthographicSize: 1.92
+  framingSafeMargin: 1.12
   zoomFactor: 0.6
   followDamping: 8
   rotationDamping: 10

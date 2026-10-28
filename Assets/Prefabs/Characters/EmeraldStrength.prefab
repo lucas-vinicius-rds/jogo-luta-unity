@@ -69,6 +69,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Hurtbox
   owner: {fileID: 1346530334033861592}
+  showDebugGizmos: 1
 --- !u!1 &4504563984973646667
 GameObject:
   m_ObjectHideFlags: 0
@@ -137,6 +138,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 2
   owner: {fileID: 1346530334033861592}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!1 &5195486417488564954
 GameObject:
   m_ObjectHideFlags: 0
@@ -205,6 +208,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 3
   owner: {fileID: 1346530334033861592}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!1 &6668345226145255534
 GameObject:
   m_ObjectHideFlags: 0
@@ -273,6 +278,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 0
   owner: {fileID: 1346530334033861592}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!1 &6744483204684571608
 GameObject:
   m_ObjectHideFlags: 0
@@ -341,6 +348,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 4
   owner: {fileID: 1346530334033861592}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!1 &7017346729678001696
 GameObject:
   m_ObjectHideFlags: 0
@@ -409,6 +418,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 1
   owner: {fileID: 1346530334033861592}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!1 &8160613871406468271
 GameObject:
   m_ObjectHideFlags: 0
@@ -424,6 +435,7 @@ GameObject:
   - component: {fileID: 680364208959564693}
   - component: {fileID: 1346530334033861592}
   - component: {fileID: 400000000000000002}
+  - component: {fileID: 8103258966074566323}
   m_Layer: 0
   m_Name: EmeraldStrength
   m_TagString: Untagged
@@ -488,7 +500,7 @@ Animator:
   m_GameObject: {fileID: 8160613871406468271}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: 5b497f099b4caf84480947cfecca7cff, type: 3}
-  m_Controller: {fileID: 22100000, guid: 36ede11c4a752214995c52237caab20f, type: 2}
+  m_Controller: {fileID: 9100000, guid: 15ab7f81af0d39d42a1e3a75903e7a8a, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -529,13 +541,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FighterMovement
   opponent: {fileID: 0}
   isPlayerControlled: 0
-  forwardSpeed: 4.5
-  backwardSpeed: 3.5
+  forwardSpeed: 1.55
+  backwardSpeed: 1.2
   minDistanceToOpponent: 0.75
   arenaHalfWidth: 9
   gravity: -20
   groundedGravity: -2
-  jumpHeight: 2.2
+  jumpHeight: 1.45
   laneZ: 0
   laneDepth: 0.35
   airControl: 0.62
@@ -543,6 +555,19 @@ MonoBehaviour:
   impulseDrag: 9
   maxAttackRootMotionSpeed: 8
   moveActionReference: {fileID: -1680190386980627800, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  inputConfig:
+    playerIndex: 1
+    moveUp: 37
+    moveDown: 33
+    moveLeft: 15
+    moveRight: 18
+    punchKey: 20
+    punchKeyAlt: 1
+    attack2Key: 21
+    attack2KeyAlt: 0
+    enableGamepad: 1
+    gamepadIndex: 0
+  turnSpeed: 720
 --- !u!114 &1346530334033861592
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -565,23 +590,36 @@ MonoBehaviour:
   defaultAttackDamage: 10
   secondaryAttackDamage: 15
   defaultKnockbackForce: 4
-  attackDuration: 0.85
-  secondaryAttackDuration: 1
+  attackDuration: 0.92
+  secondaryAttackDuration: 1.18
   primaryAttackTiming:
-    activeStartNormalized: 0.31
+    activeStartNormalized: 0.39
     activeEndNormalized: 0.43
-    recoveryEndNormalized: 0.82
-    playbackSpeed: 1.3
+    recoveryEndNormalized: 1
+    playbackSpeed: 1
     hitboxLimb: 0
   secondaryAttackTiming:
-    activeStartNormalized: 0.42
-    activeEndNormalized: 0.54
-    recoveryEndNormalized: 0.82
-    playbackSpeed: 1.3
+    activeStartNormalized: 0.46
+    activeEndNormalized: 0.5
+    recoveryEndNormalized: 1
+    playbackSpeed: 1
     hitboxLimb: 2
   defaultHitStunDuration: 0.55
   defaultHitstopDuration: 0.08
   attackActionReference: {fileID: 1120369429361536294, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  inputConfig:
+    playerIndex: 1
+    moveUp: 37
+    moveDown: 33
+    moveLeft: 15
+    moveRight: 18
+    punchKey: 20
+    punchKeyAlt: 1
+    attack2Key: 21
+    attack2KeyAlt: 0
+    enableGamepad: 1
+    gamepadIndex: 0
+  hitStunInputBufferDuration: 0.15
   neutralAnimName: Idle
   attackAnimName: Attack
   attack2AnimName: Attack2
@@ -603,6 +641,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FighterAppearance
   characterMaterial: {fileID: 2100000, guid: 4c599bec53dd6754eb83bdd89b87eb9a, type: 2}
+--- !u!114 &8103258966074566323
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8160613871406468271}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c40c2d8bdc74a2fa20a137151fe74d3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AuthoredFighterGrounding
 --- !u!1001 &3190183096953597308
 PrefabInstance:
   m_ObjectHideFlags: 0

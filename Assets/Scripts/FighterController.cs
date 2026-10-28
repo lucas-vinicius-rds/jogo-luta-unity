@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -163,7 +163,12 @@ public partial class FighterController : MonoBehaviour
             float fallback = ActiveAttackType == FighterAttackType.Attack2 ? secondaryAttackDuration : attackDuration;
             if (animator == null || !animator.isActiveAndEnabled) return fallback;
             AnimatorStateInfo state = animator.GetCurrentAnimatorStateInfo(0);
-            return state.length > 0.05f ? state.length : fallback;
+            if (animator.IsInTransition(0))
+            {
+                var next = animator.GetNextAnimatorStateInfo(0);
+                if (next.shortNameHash == CurrentAttackAnimHash) state = next;
+            }
+            return state.shortNameHash == CurrentAttackAnimHash && state.length > 0.05f ? state.length : fallback;
         }
     }
     public FighterAttackTiming CurrentAttackTiming => ActiveAttackType == FighterAttackType.Attack2
@@ -323,7 +328,7 @@ public partial class FighterController : MonoBehaviour
     {
         if (animator != null && animator.isActiveAndEnabled)
         {
-            animator.Play(animHash, 0, 0f);
+            animator.CrossFadeInFixedTime(animHash, transitionDuration, 0, 0f);
         }
     }
 
@@ -443,6 +448,11 @@ public partial class FighterController : MonoBehaviour
         if (animator == null || !animator.isActiveAndEnabled) return false;
 
         AnimatorStateInfo state = animator.GetCurrentAnimatorStateInfo(0);
+        if (animator.IsInTransition(0))
+        {
+            var next = animator.GetNextAnimatorStateInfo(0);
+            if (next.shortNameHash == CurrentAttackAnimHash) state = next;
+        }
         if (state.shortNameHash != CurrentAttackAnimHash) return false;
         normalizedTime = state.normalizedTime;
         return true;

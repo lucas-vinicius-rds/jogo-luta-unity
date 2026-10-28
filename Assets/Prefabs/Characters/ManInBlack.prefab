@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 1930951815750881724}
   - component: {fileID: 3045974398802380672}
   - component: {fileID: 8677823397779585987}
+  - component: {fileID: 4455243320016313656}
   m_Layer: 0
   m_Name: ManInBlack
   m_TagString: Untagged
@@ -79,7 +80,7 @@ Animator:
   m_GameObject: {fileID: 267151322858990802}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: 22211d24f2634f54796dd6f710e438b5, type: 3}
-  m_Controller: {fileID: 22100000, guid: 17f3e00342e7ef34d864a535a2bb9fad, type: 2}
+  m_Controller: {fileID: 9100000, guid: 15ab7f81af0d39d42a1e3a75903e7a8a, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -120,13 +121,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FighterMovement
   opponent: {fileID: 0}
   isPlayerControlled: 0
-  forwardSpeed: 4.5
-  backwardSpeed: 3.5
+  forwardSpeed: 1.55
+  backwardSpeed: 1.2
   minDistanceToOpponent: 0.75
   arenaHalfWidth: 9
   gravity: -20
   groundedGravity: -2
-  jumpHeight: 2.2
+  jumpHeight: 1.45
   laneZ: 0
   laneDepth: 0.35
   airControl: 0.62
@@ -134,6 +135,19 @@ MonoBehaviour:
   impulseDrag: 9
   maxAttackRootMotionSpeed: 8
   moveActionReference: {fileID: -1680190386980627800, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  inputConfig:
+    playerIndex: 1
+    moveUp: 37
+    moveDown: 33
+    moveLeft: 15
+    moveRight: 18
+    punchKey: 20
+    punchKeyAlt: 1
+    attack2Key: 21
+    attack2KeyAlt: 0
+    enableGamepad: 1
+    gamepadIndex: 0
+  turnSpeed: 720
 --- !u!114 &3045974398802380672
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -156,23 +170,36 @@ MonoBehaviour:
   defaultAttackDamage: 10
   secondaryAttackDamage: 15
   defaultKnockbackForce: 4
-  attackDuration: 0.85
-  secondaryAttackDuration: 1
+  attackDuration: 0.92
+  secondaryAttackDuration: 1.18
   primaryAttackTiming:
-    activeStartNormalized: 0.28
-    activeEndNormalized: 0.42
-    recoveryEndNormalized: 0.6
-    playbackSpeed: 1.2
+    activeStartNormalized: 0.39
+    activeEndNormalized: 0.43
+    recoveryEndNormalized: 1
+    playbackSpeed: 1
     hitboxLimb: 0
   secondaryAttackTiming:
-    activeStartNormalized: 0.45
-    activeEndNormalized: 0.56
-    recoveryEndNormalized: 0.75
+    activeStartNormalized: 0.46
+    activeEndNormalized: 0.5
+    recoveryEndNormalized: 1
     playbackSpeed: 1
-    hitboxLimb: 4
+    hitboxLimb: 2
   defaultHitStunDuration: 0.55
   defaultHitstopDuration: 0.08
   attackActionReference: {fileID: 1120369429361536294, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  inputConfig:
+    playerIndex: 1
+    moveUp: 37
+    moveDown: 33
+    moveLeft: 15
+    moveRight: 18
+    punchKey: 20
+    punchKeyAlt: 1
+    attack2Key: 21
+    attack2KeyAlt: 0
+    enableGamepad: 1
+    gamepadIndex: 0
+  hitStunInputBufferDuration: 0.15
   neutralAnimName: Idle
   attackAnimName: Attack
   attack2AnimName: Attack2
@@ -194,6 +221,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FighterAppearance
   characterMaterial: {fileID: 2100000, guid: a55a2acb49445cb44bea75c170214c01, type: 2}
+--- !u!114 &4455243320016313656
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 267151322858990802}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c40c2d8bdc74a2fa20a137151fe74d3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AuthoredFighterGrounding
 --- !u!1 &361951161814843049
 GameObject:
   m_ObjectHideFlags: 0
@@ -262,6 +301,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 4
   owner: {fileID: 3045974398802380672}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!1 &2898098003335926331
 GameObject:
   m_ObjectHideFlags: 0
@@ -331,6 +372,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Hurtbox
   owner: {fileID: 3045974398802380672}
+  showDebugGizmos: 1
 --- !u!1 &6233900643847011564
 GameObject:
   m_ObjectHideFlags: 0
@@ -399,6 +441,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 0
   owner: {fileID: 3045974398802380672}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!1 &6422476973416744767
 GameObject:
   m_ObjectHideFlags: 0
@@ -467,6 +511,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 2
   owner: {fileID: 3045974398802380672}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!1 &6524428698813681638
 GameObject:
   m_ObjectHideFlags: 0
@@ -535,6 +581,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 3
   owner: {fileID: 3045974398802380672}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!1 &6696328346001572320
 GameObject:
   m_ObjectHideFlags: 0
@@ -603,6 +651,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Hitbox
   limbType: 1
   owner: {fileID: 3045974398802380672}
+  followAnimatedBone: 1
+  showDebugGizmos: 1
 --- !u!1001 &3602415050083150449
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -650,6 +700,22 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 22211d24f2634f54796dd6f710e438b5, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -653992566022304585, guid: 22211d24f2634f54796dd6f710e438b5, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.3738832
+      objectReference: {fileID: 0}
+    - target: {fileID: -653992566022304585, guid: 22211d24f2634f54796dd6f710e438b5, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.6010208
+      objectReference: {fileID: 0}
+    - target: {fileID: -653992566022304585, guid: 22211d24f2634f54796dd6f710e438b5, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.54640156
+      objectReference: {fileID: 0}
+    - target: {fileID: -653992566022304585, guid: 22211d24f2634f54796dd6f710e438b5, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.44769502
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 22211d24f2634f54796dd6f710e438b5, type: 3}
       propertyPath: m_Name

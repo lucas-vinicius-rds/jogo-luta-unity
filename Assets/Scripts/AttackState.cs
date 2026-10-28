@@ -14,20 +14,8 @@ public class AttackState : FighterStateBase
 
     public override void Enter(FighterController fighter)
     {
-        // Se o lutador estava avançando em direção ao oponente, aplica um
-        // pequeno impulso forward para não parar bruscamente longe do alvo
-        if (fighter.Movement != null)
-        {
-            int moveDir = fighter.Movement.CurrentMoveDirection;
-            if (moveDir > 0) // avançando (em direção ao oponente)
-            {
-                // Impulso de 1.5 unidades na direção do oponente — dá sensação de lunge
-                Vector3 lunge = fighter.transform.forward * 1.5f;
-                fighter.Movement.ApplyImpulse(lunge);
-            }
-            fighter.Movement.CanMove = false;
-        }
-        fighter.SetAttackRootMotion(true);
+        if (fighter.Movement != null) fighter.Movement.CanMove = false;
+        fighter.SetAttackRootMotion(false);
 
         elapsedTime = 0f;
         hitboxesEnabled = false;
@@ -37,11 +25,11 @@ public class AttackState : FighterStateBase
         fighter.CrossFadeAnimation(fighter.CurrentAttackAnimHash, 0.05f);
         
         // Ajusta a velocidade da animação respeitando a configuração do golpe
-        // (limitada entre 0.85f e 1.6f para garantir fluidez natural sem acelerar excessivamente)
+        // (limitada entre 0.75f e 1.1f; o gerador autoral configura 1f)
         currentTiming = fighter.CurrentAttackTiming;
         currentAttackDuration = fighter.CurrentAttackDuration;
         float targetSpeed = currentTiming != null && currentTiming.playbackSpeed > 0f ? currentTiming.playbackSpeed : 1f;
-        fighter.SetAnimatorSpeed(Mathf.Clamp(targetSpeed, 0.85f, 1.6f));
+        fighter.SetAnimatorSpeed(Mathf.Clamp(targetSpeed, 0.75f, 1.1f));
     }
 
     public override void Update(FighterController fighter)
@@ -53,7 +41,7 @@ public class AttackState : FighterStateBase
             ? progress
             : elapsedTime / Mathf.Max(0.05f, currentAttackDuration);
 
-        if (!windowOpened && attackProgress >= timing.activeStartNormalized)
+        if (!windowOpened && attackProgress >= timing.activeStartNormalized && attackProgress < timing.activeEndNormalized)
         {
             fighter.EnableCurrentAttackHitboxes();
             hitboxesEnabled = true;

@@ -28,3 +28,20 @@
 .stage .card { width: 95%; height: 105px; flex-direction: row; }
 .stage .card Image { width: 42%; }
 .stage .card Label { flex-grow: 1; white-space: normal; }
+.selection-background, .selection-shade { position: absolute; left: 0; top: 0; right: 0; bottom: 0; }
+.selection-shade { background-color: rgba(8,10,16,.80); }
+.selection { padding: 26px 40px; }
+.masthead { border-left-color: rgb(47,207,247); height: 130px; }
+.heading { font-size: 64px; }
+.eyebrow { color: rgb(255,175,58); }
+.hero, .rival, .rival-panel { background-color: rgba(15,19,27,.8); }
+.card { background-color: rgba(20,26,35,.95); border-color: rgb(54,77,94); }
+.card Label { font-size: 22px; white-space: normal; height: 54px; }
+.card.focused, .card:hover { border-color: rgb(50,213,251); background-color: rgb(37,69,90); }
+.footer { min-height: 180px; }
+.identity { width: 36%; }
+.name { font-size: 52px; }
+.description { font-size: 23px; }
+.footer Button { font-size: 22px; max-width: 20%; white-space: normal; border-width: 1px; border-color: rgb(65,91,112); }
+.footer Button:hover, .footer Button:focus { border-color: rgb(255,208,100); background-color: rgb(37,77,99); }
+.footer .confirm { background-color: rgb(196,49,27); border-color: rgb(255,165,59); }

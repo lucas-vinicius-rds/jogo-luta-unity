@@ -21,13 +21,16 @@ public sealed class SelectionPresenter : MonoBehaviour
     bool lastChoosing;
     AudioSource feedback;
     AudioClip tick, accepted;
-    VisualElement browser;
+    VisualElement browser, backdrop;
+    Texture2D characterBackground, stageBackground;
     public bool IsReady => page != null;
     public int FocusedStageIndex => focusedStage;
     public void FocusStage(string id) { if(stages == null) return; int i=stages.FindIndex(s=>s.stableId==id); if(i>=0) focusedStage=i; }
     public void Initialize(GameFlowController owner)
     {
         flow = owner;
+        characterBackground = Resources.Load<Texture2D>("UI/Brand/CharacterBackground");
+        stageBackground = Resources.Load<Texture2D>("UI/Brand/StageBackground");
         feedback=gameObject.AddComponent<AudioSource>(); feedback.playOnAwake=false; feedback.volume=.15f;
         tick=Tone(460,.035f); accepted=Tone(740,.075f);
         var tree = Resources.Load<VisualTreeAsset>("UI/Selection"); if(tree == null) return;
@@ -43,6 +46,7 @@ public sealed class SelectionPresenter : MonoBehaviour
         page.RegisterCallback<NavigationCancelEvent>(evt=>evt.StopImmediatePropagation(),TrickleDown.TrickleDown);
         var style = Resources.Load<StyleSheet>("UI/Selection"); if(style != null) page.styleSheets.Add(style);
         cards = page.Q("cards"); hero = page.Q<Image>("hero"); rival = page.Q<Image>("rival"); title = page.Q<Label>("name"); description = page.Q<Label>("description"); heading = page.Q<Label>("heading");
+        backdrop = page.Q("selection-background");
         browser=page.Q<ScrollView>();
         rival.scaleMode=ScaleMode.ScaleAndCrop;
         ((ScrollView)browser).verticalScrollerVisibility=ScrollerVisibility.Hidden;
@@ -57,7 +61,7 @@ public sealed class SelectionPresenter : MonoBehaviour
         string state = flow.IsSelecting ? "character" : flow.IsStageSelecting ? "stage" : flow.IsStageLoading ? "loading" : "hidden";
         if(state != rendered) page.style.display = state == "hidden" ? DisplayStyle.None : DisplayStyle.Flex;
         if(state == "hidden") { rendered = state; return; }
-        if(state != rendered) { Build(state); rendered = state; }
+        if(state != rendered) { Build(state); rendered = state; if(state != "loading") Refresh(state); return; }
         if(state == "loading") return;
         navigation.Read(out int x,out int y,out bool accept,out bool back,out bool random);
         if(state == "character") { if(x != 0 || y != 0) flow.NavigateCharacter(x,y); }
@@ -68,6 +72,9 @@ public sealed class SelectionPresenter : MonoBehaviour
     void Build(string state)
     {
         cards.Clear(); buttons.Clear(); lastFocus = -1;
+        Texture2D background = state == "character" ? characterBackground : stageBackground;
+        if (background == null) background = flow.MenuBackground;
+        if (background != null) { backdrop.style.backgroundImage = new StyleBackground(background); backdrop.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Cover); }
         heading.text = state == "character" ? "ESCOLHA SEU LUTADOR" : state == "stage" ? "ESCOLHA SEU TERRITÓRIO" : "PREPARANDO A ARENA";
         page.EnableInClassList("stage", state != "character");
         if(state == "character") hero.PlaceBehind(browser); else browser.PlaceBehind(hero);
