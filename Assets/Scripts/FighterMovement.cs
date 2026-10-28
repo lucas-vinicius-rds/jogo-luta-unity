@@ -62,6 +62,7 @@ public class FighterMovement : MonoBehaviour
     public float ExpectedAirTime => 2f * Mathf.Sqrt(2f * jumpHeight / Mathf.Max(.01f, -gravity));
     private bool wasJumpHeld;
     private float standingHeight;
+    private float crouchAmount;
     private Vector3 standingCenter;
     private Vector3 horizontalImpulse;
     private float lastFacingDirection = 1f;
@@ -69,6 +70,7 @@ public class FighterMovement : MonoBehaviour
     // Além de ficar visualmente estranho, a troca de direção no meio do salto
     // fazia o Animator cair na locomoção antes do pouso.
     private bool wasGroundedLastFrame;
+    private CharacterController crossingOpponent;
 
     public Transform Opponent { get => opponent; set => opponent = value; }
     public bool IsPlayerControlled { get => isPlayerControlled; set => isPlayerControlled = value; }
@@ -83,6 +85,7 @@ public class FighterMovement : MonoBehaviour
     public Vector2 ExternalInput { get; set; }
     public bool IsFacingAway => false;
     public bool IsCrouching { get; private set; }
+    public bool IsCrouchTransitioning => crouchAmount > .001f;
     public float TurnSpeed { get => turnSpeed; set => turnSpeed = value; }
 
     private void Awake()
@@ -124,20 +127,17 @@ public class FighterMovement : MonoBehaviour
         CurrentInput = GameFlowController.AllowsCombat ? ReadMovementInput() : Vector2.zero;
         HandleJumpAndCrouch(CurrentInput);
         UpdateMovementAnimation(CurrentInput);
-        // Mantém a orientação do início do salto. A orientação é atualizada
-        // novamente assim que o CharacterController detectar o pouso.
-        if (characterController.isGrounded || wasGroundedLastFrame)
-        {
-            FaceOpponent();
-        }
+        // Rotation follows side changes without replacing the airborne clip.
+        FaceOpponent();
+        UpdateAirborneBodyCollision();
 
         float moveSpeed = CurrentMoveDirection >= 0 ? forwardSpeed : backwardSpeed;
         if (!characterController.isGrounded) moveSpeed *= airControl;
-        if (IsCrouching) moveSpeed = 0f;
+        if (IsCrouching || IsCrouchTransitioning) moveSpeed = 0f;
         float targetVelocity = CurrentInput.x * moveSpeed;
-        planarVelocity = IsCrouching || !CanMove ? 0f : Mathf.MoveTowards(planarVelocity, targetVelocity, 14f * Time.deltaTime);
+        planarVelocity = IsCrouching || IsCrouchTransitioning || !CanMove ? 0f : Mathf.MoveTowards(planarVelocity, targetVelocity, 14f * Time.deltaTime);
         Vector3 locomotion = Vector3.right * (planarVelocity * Time.deltaTime);
-        Vector3 impulseMovement = IsCrouching ? Vector3.zero : horizontalImpulse * Time.deltaTime;
+        Vector3 impulseMovement = IsCrouching || IsCrouchTransitioning ? Vector3.zero : horizontalImpulse * Time.deltaTime;
         horizontalImpulse = Vector3.MoveTowards(horizontalImpulse, Vector3.zero, impulseDrag * Time.deltaTime);
         MoveSafely(locomotion + impulseMovement + CalculateVerticalMovement(), true);
         if (hasParamGrounded) animator.SetBool("Grounded", characterController.isGrounded);
@@ -171,7 +171,8 @@ public class FighterMovement : MonoBehaviour
         Vector2 input = Vector2.zero;
         if (inputConfig != null) input = inputConfig.ReadMovement();
 
-        if (input.sqrMagnitude < 0.001f && runtimeMoveAction?.enabled == true)
+        // A configured second player must not inherit the fallback WASD/stick.
+        if (inputConfig == null && runtimeMoveAction?.enabled == true)
             input = runtimeMoveAction.ReadValue<Vector2>();
         return Vector2.ClampMagnitude(input, 1f);
     }
@@ -179,14 +180,16 @@ public class FighterMovement : MonoBehaviour
     private void HandleJumpAndCrouch(Vector2 input)
     {
         bool newCrouch = input.y < -0.5f && characterController.isGrounded;
-        if (newCrouch != IsCrouching)
+        IsCrouching = newCrouch;
+        float targetAmount = newCrouch ? 1f : 0f;
+        float nextAmount = Mathf.MoveTowards(crouchAmount,targetAmount,Time.deltaTime/(newCrouch?.28f:.32f));
+        if (!Mathf.Approximately(nextAmount,crouchAmount))
         {
-            IsCrouching = newCrouch;
-            float targetHeight = IsCrouching ? standingHeight * 0.62f : standingHeight;
+            crouchAmount = nextAmount;
+            float blend = Mathf.SmoothStep(0,1,crouchAmount);
+            float targetHeight = Mathf.Lerp(standingHeight,standingHeight*.62f,blend);
             characterController.height = targetHeight;
-            Vector3 targetCenter = IsCrouching
-                ? new Vector3(standingCenter.x, standingCenter.y - (standingHeight - targetHeight) * .5f, standingCenter.z)
-                : standingCenter;
+            Vector3 targetCenter = new Vector3(standingCenter.x,standingCenter.y-(standingHeight-targetHeight)*.5f,standingCenter.z);
             characterController.center = targetCenter;
             if (bodyHurtbox != null) bodyHurtbox.SetBounds(targetHeight, targetCenter);
         }
@@ -204,7 +207,7 @@ public class FighterMovement : MonoBehaviour
     private void UpdateMovementAnimation(Vector2 input)
     {
         if (animator == null) return;
-        CurrentMoveDirection = IsCrouching ? 0 : GetRelativeMoveDirection(input.x);
+        CurrentMoveDirection = IsCrouching || IsCrouchTransitioning ? 0 : GetRelativeMoveDirection(input.x);
         if (hasParamCrouch) animator.SetBool(CrouchHash, IsCrouching);
         if (hasParamCrouchDirection) animator.SetInteger(CrouchDirectionHash, CurrentMoveDirection);
         if (hasParamMoveDirection) animator.SetInteger(MoveDirectionHash, CurrentMoveDirection);
@@ -290,6 +293,7 @@ public class FighterMovement : MonoBehaviour
         planarVelocity = 0f;
         verticalVelocity = groundedGravity;
         IsCrouching = false;
+        crouchAmount = 0;
         if (characterController != null)
         {
             characterController.height = standingHeight;
@@ -309,7 +313,8 @@ public class FighterMovement : MonoBehaviour
         // A distância mínima é uma regra de combate no chão. Aplicá-la no ar
         // impedia atravessar o oponente durante um salto e deixava o estado de
         // animação preso na caminhada ao trocar de lado.
-        if (respectOpponentSpacing && opponent != null && characterController.isGrounded)
+        if (respectOpponentSpacing && opponent != null && characterController.isGrounded &&
+            Mathf.Abs(transform.position.y-opponent.position.y)<standingHeight*.6f)
         {
             float diff = transform.position.x - opponent.position.x;
             // Usa epsilon para evitar side=0 quando personagens se sobrepõem exatamente
@@ -331,16 +336,13 @@ public class FighterMovement : MonoBehaviour
         // Ignora virada durante ataque, reação a golpe (hitstun) ou nocaute
         if (fighterController != null && fighterController.IsInAttackOrHitStun) return;
 
-        // Ignora virada enquanto estiver no ar
-        if (characterController != null && !characterController.isGrounded) return;
-
         float desiredDirection = opponent.position.x >= transform.position.x ? 1f : -1f;
 
         // Dispara TriggerTurn180 uma única vez quando o oponente cruzar para o lado oposto
         if (desiredDirection != lastFacingDirection)
         {
             lastFacingDirection = desiredDirection;
-            if (fighterController != null)
+            if (fighterController != null && characterController.isGrounded)
             {
                 fighterController.TriggerTurn180();
             }
@@ -349,5 +351,24 @@ public class FighterMovement : MonoBehaviour
         // Rotação suave em direção ao oponente para evitar virada instantânea
         Quaternion targetRotation = desiredDirection > 0f ? RotFacingRight : RotFacingLeft;
         transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, turnSpeed * Time.deltaTime);
+    }
+
+    private void UpdateAirborneBodyCollision()
+    {
+        if(opponent==null || !characterController.enabled) return;
+        if(crossingOpponent==null || crossingOpponent.transform!=opponent)
+            crossingOpponent=opponent.GetComponent<CharacterController>();
+        if(crossingOpponent==null || !crossingOpponent.enabled) return;
+        var own=characterController.bounds;
+        var other=crossingOpponent.bounds;
+        bool highEnough=Mathf.Abs(own.min.y-other.min.y)>Mathf.Min(own.size.y,other.size.y)*.6f;
+        bool ignoring=Physics.GetIgnoreCollision(characterController,crossingOpponent);
+        bool overlappingHorizontally=Mathf.Abs(own.center.x-other.center.x)<own.extents.x+other.extents.x+.08f;
+        // Once above the upper body, pass through the body capsule rather than
+        // landing on its head. Hurtboxes remain enabled, including aerial hits.
+        bool keepPassing=ignoring && overlappingHorizontally &&
+            (!characterController.isGrounded || !crossingOpponent.isGrounded || Mathf.Abs(own.min.y-other.min.y)>.25f);
+        bool shouldIgnore=highEnough || keepPassing;
+        if(ignoring!=shouldIgnore) Physics.IgnoreCollision(characterController,crossingOpponent,shouldIgnore);
     }
 }

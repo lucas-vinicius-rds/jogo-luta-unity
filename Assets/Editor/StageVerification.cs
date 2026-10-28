@@ -227,6 +227,8 @@ public static class StageVerification
     static void CaptureFight(string id)
     {
         var camera=Camera.main; var target=RenderTexture.GetTemporary(1280,720,24); var old=camera.targetTexture;
+        var flow=GameFlowController.Instance;
+        File.WriteAllText("Docs/validation/camera-"+id+".txt","camera="+camera.transform.position+" rotation="+camera.transform.eulerAngles+" size="+camera.orthographicSize+" P1="+flow.CurrentPlayer.transform.position+" P2="+flow.CurrentOpponent.transform.position+" viewport="+camera.WorldToViewportPoint(flow.CurrentPlayer.transform.position+Vector3.up));
         try { camera.targetTexture=target; camera.Render(); WriteImage(target,"Docs/validation/fight-"+id+".png"); }
         finally { camera.targetTexture=old; RenderTexture.ReleaseTemporary(target); }
     }

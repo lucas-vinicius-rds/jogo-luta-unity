@@ -11,6 +11,7 @@ public sealed class ModernMenuPresenter : MonoBehaviour
     private VisualElement root;
     private VisualElement canvas;
     private string renderedScreen;
+    private bool refreshRequested;
     private PanelSettings ownedPanel;
     private Texture2D appliedBackground;
     private Texture2D homeBackground, modeBackground, logo;
@@ -68,7 +69,7 @@ public sealed class ModernMenuPresenter : MonoBehaviour
         root.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
         ApplyBackground();
         string current = flow.CurrentMenuScreen;
-        if (visible && current != renderedScreen) Render(current);
+        if (visible && (current != renderedScreen || refreshRequested)) Render(current);
         if (!visible) return;
         navigation.Read(out int x, out int y, out bool accept, out bool back, out bool random);
         if (y != 0 && buttons.Count > 0) { focusIndex = (focusIndex + y + buttons.Count) % buttons.Count; buttons[focusIndex].Focus(); }
@@ -98,6 +99,7 @@ public sealed class ModernMenuPresenter : MonoBehaviour
     {
         if (renderedScreen != screen) focusIndex = 0;
         renderedScreen = screen;
+        refreshRequested = false;
         buttons.Clear(); actions.Clear();
         canvas.Clear();
         ScrollView scroll = new ScrollView(ScrollViewMode.Vertical);
@@ -131,13 +133,23 @@ public sealed class ModernMenuPresenter : MonoBehaviour
         VisualElement actions = Actions();
         actions.Add(Button("01   DESAFIO CPU", "primary", flow.BeginCpuSelection));
         VisualElement difficulty = new VisualElement(); difficulty.AddToClassList("difficulty-row");
-        difficulty.Add(Button("−", "small", () => { flow.ChangeCpuDifficulty(-1); renderedScreen = null; }));
-        Label level = new Label("CPU: " + flow.CurrentCpuDifficulty); level.AddToClassList("difficulty-label"); difficulty.Add(level);
-        difficulty.Add(Button("+", "small", () => { flow.ChangeCpuDifficulty(1); renderedScreen = null; }));
+        difficulty.Add(Button("−", "small", () => { flow.ChangeCpuDifficulty(-1); refreshRequested = true; }));
+        Label level = new Label("CPU: " + CpuDifficultyLabel()); level.AddToClassList("difficulty-label"); difficulty.Add(level);
+        difficulty.Add(Button("+", "small", () => { flow.ChangeCpuDifficulty(1); refreshRequested = true; }));
         actions.Add(difficulty);
         actions.Add(Button("02   VERSUS LOCAL", "secondary", flow.BeginLocalSelection));
         actions.Add(Button("VOLTAR", "ghost", flow.OpenMainMenu));
         page.Add(actions);
+    }
+
+    private string CpuDifficultyLabel()
+    {
+        switch ((int)flow.CurrentCpuDifficulty)
+        {
+            case 0: return "FÁCIL";
+            case 1: return "NORMAL";
+            default: return "DIFÍCIL";
+        }
     }
 
     private void DrawOptions(VisualElement page)
@@ -146,11 +158,11 @@ public sealed class ModernMenuPresenter : MonoBehaviour
         VisualElement actions = Actions();
         Label volume = new Label("VOLUME GERAL  " + Mathf.RoundToInt(flow.MasterVolume * 100f) + "%"); volume.AddToClassList("setting-label"); actions.Add(volume);
         Slider slider = new Slider(0f, 1f) { value = flow.MasterVolume }; slider.AddToClassList("volume-slider"); slider.RegisterValueChangedCallback(evt => { flow.SetMasterVolume(evt.newValue); volume.text = "VOLUME GERAL  " + Mathf.RoundToInt(evt.newValue * 100f) + "%"; }); actions.Add(slider);
-        actions.Add(Button("VOLUME −", "secondary", () => { flow.SetMasterVolume(flow.MasterVolume - .1f); renderedScreen = null; }));
-        actions.Add(Button("VOLUME +", "secondary", () => { flow.SetMasterVolume(flow.MasterVolume + .1f); renderedScreen = null; }));
-        actions.Add(Button(flow.IsFullscreen ? "TELA CHEIA: ATIVA" : "TELA CHEIA: DESATIVADA", "secondary", () => { flow.ToggleFullscreenOption(); renderedScreen = null; }));
+        actions.Add(Button("VOLUME −", "secondary", () => { flow.SetMasterVolume(flow.MasterVolume - .1f); refreshRequested = true; }));
+        actions.Add(Button("VOLUME +", "secondary", () => { flow.SetMasterVolume(flow.MasterVolume + .1f); refreshRequested = true; }));
+        actions.Add(Button(flow.IsFullscreen ? "TELA CHEIA: ATIVA" : "TELA CHEIA: DESATIVADA", "secondary", () => { flow.ToggleFullscreenOption(); refreshRequested = true; }));
         Vector2Int resolution = flow.CurrentResolution;
-        actions.Add(Button("RESOLUCAO: " + resolution.x + " × " + resolution.y, "secondary", () => { flow.CycleResolutionOption(); renderedScreen = null; }));
+        actions.Add(Button("RESOLUCAO: " + resolution.x + " × " + resolution.y, "secondary", () => { flow.CycleResolutionOption(); refreshRequested = true; }));
         actions.Add(Button("VOLTAR", "ghost", flow.OpenMainMenu));
         page.Add(actions);
         page.Add(Footer("CONTROLES COMPARTILHADOS POR TODOS OS LUTADORES\nP1  A/D mover · W saltar · S agachar · F soco · G chute · SHIFT defender\nP2  ←/→ mover · ↑ saltar · ↓ agachar · J soco · K chute · L defender\nP1 também aceita ESPAÇO / CTRL. Controle: A soco · X chute · LB defesa."));

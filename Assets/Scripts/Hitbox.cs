@@ -29,6 +29,8 @@ public class Hitbox : MonoBehaviour
 
     [Tooltip("Quando ativado, vincula a hitbox ao osso do esqueleto do Animator correspondente ao membro.")]
     [SerializeField] private bool followAnimatedBone = true;
+    [Tooltip("Use the real palm/forefoot instead of a legacy fighter-space offset.")]
+    [SerializeField] private bool anchorToBoneContact;
 
     [Header("Debug")]
     [Tooltip("Ativa a visualização da Hitbox na Scene View via Gizmos.")]
@@ -61,6 +63,7 @@ public class Hitbox : MonoBehaviour
     public FighterController Owner { get => owner; set => owner = value; }
     public bool IsActive => isActive;
     public bool FollowAnimatedBone { get => followAnimatedBone; set => followAnimatedBone = value; }
+    public bool AnchorToBoneContact { get => anchorToBoneContact; set => anchorToBoneContact = value; }
     public bool ShowDebugGizmos { get => showDebugGizmos; set => showDebugGizmos = value; }
 
     private void Awake()
@@ -163,6 +166,14 @@ public class Hitbox : MonoBehaviour
     private void ConvertFighterSpaceOffsetToBoneSpace()
     {
         if (owner == null || followBone == null) return;
+
+        if(anchorToBoneContact && owner.Animator!=null && owner.Animator.isHuman)
+        {
+            var bone=limbType switch { HitboxLimb.RightHand=>HumanBodyBones.RightMiddleProximal,HitboxLimb.LeftHand=>HumanBodyBones.LeftMiddleProximal,HitboxLimb.RightFoot=>HumanBodyBones.RightToes,HitboxLimb.LeftFoot=>HumanBodyBones.LeftToes,_=>HumanBodyBones.LastBone };
+            var end=bone==HumanBodyBones.LastBone?null:owner.Animator.GetBoneTransform(bone);
+            Vector3 contact=end!=null?Vector3.Lerp(followBone.position,end.position,.65f):followBone.position;
+            boneLocalOffset=followBone.InverseTransformPoint(contact); hasBoneLocalOffset=true; return;
+        }
 
         Vector3 designWorldPosition = owner.transform.TransformPoint(fighterSpaceOffset);
         boneLocalOffset = followBone.InverseTransformPoint(designWorldPosition);

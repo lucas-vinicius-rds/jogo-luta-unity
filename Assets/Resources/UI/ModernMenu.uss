@@ -18,3 +18,5 @@
 .setting-label { margin: 6px 0 4px; }
 .volume-slider { margin-bottom: 14px; }
 .footer { color: rgb(187,200,212); font-size: 14px; white-space: normal; -unity-text-align: middle-center; margin-top: 16px; max-width: 94%; }
+.button.primary:hover, .button.primary:focus { background-color: rgb(229,73,28); border-color: rgb(255,218,97); color: white; }
+.button.primary:active { background-color: rgb(168,43,22); border-color: rgb(255,218,97); }

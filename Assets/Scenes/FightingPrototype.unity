@@ -286,6 +286,7 @@ MonoBehaviour:
   limbType: 2
   owner: {fileID: 2010430996}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &25406550
 SphereCollider:
@@ -711,6 +712,7 @@ MonoBehaviour:
   limbType: 3
   owner: {fileID: 493737161}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &84962453
 SphereCollider:
@@ -1155,6 +1157,7 @@ MonoBehaviour:
   limbType: 2
   owner: {fileID: 1690419203}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &136616363
 SphereCollider:
@@ -1729,6 +1732,7 @@ MonoBehaviour:
   limbType: 4
   owner: {fileID: 2010430996}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &194589340
 SphereCollider:
@@ -2293,6 +2297,7 @@ MonoBehaviour:
   limbType: 0
   owner: {fileID: 1299729474}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &244321528
 SphereCollider:
@@ -2463,6 +2468,7 @@ MonoBehaviour:
   limbType: 3
   owner: {fileID: 1293666139}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &262188002
 SphereCollider:
@@ -2855,6 +2861,7 @@ MonoBehaviour:
   limbType: 4
   owner: {fileID: 493737161}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &269299678
 SphereCollider:
@@ -3146,6 +3153,7 @@ MonoBehaviour:
   limbType: 0
   owner: {fileID: 2010430996}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &297423696
 SphereCollider:
@@ -4085,6 +4093,7 @@ MonoBehaviour:
   limbType: 4
   owner: {fileID: 1293666139}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &375455619
 SphereCollider:
@@ -4187,6 +4196,7 @@ MonoBehaviour:
   limbType: 0
   owner: {fileID: 1690419203}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &382027113
 SphereCollider:
@@ -4838,6 +4848,7 @@ MonoBehaviour:
   limbType: 1
   owner: {fileID: 1493395357}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &418389919
 SphereCollider:
@@ -5115,6 +5126,7 @@ MonoBehaviour:
   limbType: 0
   owner: {fileID: 1770593910}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &441676963
 SphereCollider:
@@ -5492,6 +5504,7 @@ MonoBehaviour:
   limbType: 3
   owner: {fileID: 731026444}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &485467914
 SphereCollider:
@@ -5744,6 +5757,7 @@ MonoBehaviour:
   limbType: 4
   owner: {fileID: 584346196}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &488196697
 SphereCollider:
@@ -6625,6 +6639,7 @@ MonoBehaviour:
   limbType: 3
   owner: {fileID: 1690419203}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &544291648
 SphereCollider:
@@ -6861,6 +6876,7 @@ MonoBehaviour:
   limbType: 0
   owner: {fileID: 584346196}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &583506382
 SphereCollider:
@@ -7471,6 +7487,7 @@ MonoBehaviour:
   limbType: 0
   owner: {fileID: 493737161}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &608289589
 SphereCollider:
@@ -7575,6 +7592,7 @@ MonoBehaviour:
   limbType: 4
   owner: {fileID: 904760234}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &617677378
 SphereCollider:
@@ -7873,6 +7891,7 @@ MonoBehaviour:
   limbType: 3
   owner: {fileID: 904760234}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &663517230
 SphereCollider:
@@ -8313,6 +8332,7 @@ MonoBehaviour:
   limbType: 4
   owner: {fileID: 508842497}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &708735024
 SphereCollider:
@@ -9292,6 +9312,7 @@ MonoBehaviour:
   limbType: 0
   owner: {fileID: 1293666139}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &768897333
 SphereCollider:
@@ -9395,6 +9416,7 @@ MonoBehaviour:
   limbType: 2
   owner: {fileID: 493737161}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &779310718
 SphereCollider:
@@ -9465,6 +9487,7 @@ MonoBehaviour:
   limbType: 4
   owner: {fileID: 1690419203}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &780883638
 SphereCollider:
@@ -9535,6 +9558,7 @@ MonoBehaviour:
   limbType: 4
   owner: {fileID: 731026444}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &785433922
 SphereCollider:
@@ -9796,6 +9820,7 @@ MonoBehaviour:
   limbType: 2
   owner: {fileID: 1293666139}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &803944055
 SphereCollider:
@@ -10549,6 +10574,7 @@ MonoBehaviour:
   limbType: 0
   owner: {fileID: 508842497}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &851761039
 SphereCollider:
@@ -10842,6 +10868,7 @@ MonoBehaviour:
   limbType: 4
   owner: {fileID: 1299729474}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &890833041
 SphereCollider:
@@ -11705,6 +11732,7 @@ MonoBehaviour:
   limbType: 4
   owner: {fileID: 1770593910}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &962484888
 SphereCollider:
@@ -12086,6 +12114,7 @@ MonoBehaviour:
   limbType: 1
   owner: {fileID: 1293666139}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &1020857824
 SphereCollider:
@@ -12220,6 +12249,7 @@ MonoBehaviour:
   limbType: 2
   owner: {fileID: 904760234}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &1042657066
 SphereCollider:
@@ -12290,6 +12320,7 @@ MonoBehaviour:
   limbType: 3
   owner: {fileID: 584346196}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &1050869295
 SphereCollider:
@@ -12582,6 +12613,7 @@ MonoBehaviour:
   limbType: 1
   owner: {fileID: 262506021}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &1078290898
 SphereCollider:
@@ -13008,6 +13040,7 @@ MonoBehaviour:
   limbType: 3
   owner: {fileID: 1493395357}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &1154855535
 SphereCollider:
@@ -13446,6 +13479,7 @@ MonoBehaviour:
   limbType: 3
   owner: {fileID: 2010430996}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &1217074708
 SphereCollider:
@@ -13614,6 +13648,7 @@ MonoBehaviour:
   limbType: 0
   owner: {fileID: 1493395357}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &1245628707
 SphereCollider:
@@ -13747,6 +13782,7 @@ MonoBehaviour:
   limbType: 0
   owner: {fileID: 904760234}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &1260588582
 SphereCollider:
@@ -13817,6 +13853,7 @@ MonoBehaviour:
   limbType: 4
   owner: {fileID: 262506021}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &1266637978
 SphereCollider:
@@ -14489,6 +14526,7 @@ MonoBehaviour:
   limbType: 4
   owner: {fileID: 1493395357}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &1318289917
 SphereCollider:
@@ -14907,6 +14945,7 @@ MonoBehaviour:
   limbType: 1
   owner: {fileID: 1770593910}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &1360137985
 SphereCollider:
@@ -15354,6 +15393,7 @@ MonoBehaviour:
   limbType: 1
   owner: {fileID: 2010430996}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &1400219226
 SphereCollider:
@@ -16029,6 +16069,7 @@ MonoBehaviour:
   limbType: 2
   owner: {fileID: 508842497}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &1472535915
 SphereCollider:
@@ -16350,6 +16391,7 @@ MonoBehaviour:
   limbType: 2
   owner: {fileID: 1493395357}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &1510839546
 SphereCollider:
@@ -16581,6 +16623,7 @@ MonoBehaviour:
   limbType: 1
   owner: {fileID: 731026444}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &1531506683
 SphereCollider:
@@ -16772,6 +16815,7 @@ MonoBehaviour:
   limbType: 1
   owner: {fileID: 493737161}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &1573614747
 SphereCollider:
@@ -17502,6 +17546,7 @@ MonoBehaviour:
   limbType: 1
   owner: {fileID: 1690419203}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &1645183334
 SphereCollider:
@@ -17828,6 +17873,7 @@ MonoBehaviour:
   limbType: 2
   owner: {fileID: 262506021}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &1676836629
 SphereCollider:
@@ -18118,6 +18164,7 @@ MonoBehaviour:
   limbType: 2
   owner: {fileID: 731026444}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &1690637745
 SphereCollider:
@@ -18525,6 +18572,7 @@ MonoBehaviour:
   limbType: 3
   owner: {fileID: 1770593910}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &1717207420
 SphereCollider:
@@ -18683,6 +18731,7 @@ MonoBehaviour:
   limbType: 1
   owner: {fileID: 904760234}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &1733088145
 SphereCollider:
@@ -19260,6 +19309,7 @@ MonoBehaviour:
   limbType: 1
   owner: {fileID: 508842497}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &1797416393
 SphereCollider:
@@ -19330,6 +19380,7 @@ MonoBehaviour:
   limbType: 3
   owner: {fileID: 262506021}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &1806397762
 SphereCollider:
@@ -19400,6 +19451,7 @@ MonoBehaviour:
   limbType: 3
   owner: {fileID: 1299729474}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &1807128490
 SphereCollider:
@@ -19757,6 +19809,7 @@ MonoBehaviour:
   limbType: 2
   owner: {fileID: 1770593910}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &1892271150
 SphereCollider:
@@ -19827,6 +19880,7 @@ MonoBehaviour:
   limbType: 0
   owner: {fileID: 262506021}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &1903130334
 SphereCollider:
@@ -20025,6 +20079,7 @@ MonoBehaviour:
   limbType: 0
   owner: {fileID: 731026444}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &1931135767
 SphereCollider:
@@ -20095,6 +20150,7 @@ MonoBehaviour:
   limbType: 1
   owner: {fileID: 1299729474}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &1932541809
 SphereCollider:
@@ -20294,6 +20350,7 @@ MonoBehaviour:
   limbType: 2
   owner: {fileID: 584346196}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &1952210163
 SphereCollider:
@@ -20428,6 +20485,7 @@ MonoBehaviour:
   limbType: 1
   owner: {fileID: 584346196}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &1977298644
 SphereCollider:
@@ -21008,6 +21066,7 @@ MonoBehaviour:
   limbType: 3
   owner: {fileID: 508842497}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &2049150593
 SphereCollider:
@@ -21387,6 +21446,7 @@ MonoBehaviour:
   limbType: 2
   owner: {fileID: 1299729474}
   followAnimatedBone: 1
+  anchorToBoneContact: 0
   showDebugGizmos: 1
 --- !u!135 &2082830057
 SphereCollider:

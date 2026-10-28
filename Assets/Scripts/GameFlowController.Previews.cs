@@ -171,7 +171,7 @@ public sealed partial class GameFlowController
         for (int i = 0; i < overrides.Count; i++)
         {
             AnimationClip source = overrides[i].Key;
-            if (source != null && (source.name.Contains("Bouncing Fight Idle") || source.name == "Fighter_Idle"))
+            if (source != null && (source.name.Contains("Bouncing Fight Idle") || source.name == "Fighter_Idle" || source.name == "Guard"))
                 overrides[i] = new KeyValuePair<AnimationClip, AnimationClip>(source, clip);
         }
         overrideController.ApplyOverrides(overrides);

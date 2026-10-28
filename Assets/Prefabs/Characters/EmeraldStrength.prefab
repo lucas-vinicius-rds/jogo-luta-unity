@@ -139,6 +139,7 @@ MonoBehaviour:
   limbType: 2
   owner: {fileID: 1346530334033861592}
   followAnimatedBone: 1
+  anchorToBoneContact: 1
   showDebugGizmos: 1
 --- !u!1 &5195486417488564954
 GameObject:
@@ -209,6 +210,7 @@ MonoBehaviour:
   limbType: 3
   owner: {fileID: 1346530334033861592}
   followAnimatedBone: 1
+  anchorToBoneContact: 1
   showDebugGizmos: 1
 --- !u!1 &6668345226145255534
 GameObject:
@@ -279,6 +281,7 @@ MonoBehaviour:
   limbType: 0
   owner: {fileID: 1346530334033861592}
   followAnimatedBone: 1
+  anchorToBoneContact: 1
   showDebugGizmos: 1
 --- !u!1 &6744483204684571608
 GameObject:
@@ -349,6 +352,7 @@ MonoBehaviour:
   limbType: 4
   owner: {fileID: 1346530334033861592}
   followAnimatedBone: 1
+  anchorToBoneContact: 1
   showDebugGizmos: 1
 --- !u!1 &7017346729678001696
 GameObject:
@@ -419,6 +423,7 @@ MonoBehaviour:
   limbType: 1
   owner: {fileID: 1346530334033861592}
   followAnimatedBone: 1
+  anchorToBoneContact: 1
   showDebugGizmos: 1
 --- !u!1 &8160613871406468271
 GameObject:
@@ -547,10 +552,10 @@ MonoBehaviour:
   arenaHalfWidth: 9
   gravity: -20
   groundedGravity: -2
-  jumpHeight: 1.45
+  jumpHeight: 2.2
   laneZ: 0
   laneDepth: 0.35
-  airControl: 0.62
+  airControl: 0.9
   crouchSpeedMultiplier: 0.58
   impulseDrag: 9
   maxAttackRootMotionSpeed: 8
